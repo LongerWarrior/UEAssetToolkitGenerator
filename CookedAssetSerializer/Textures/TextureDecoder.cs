@@ -14,18 +14,18 @@ using System.Linq;
 namespace Textures {
     public static class TextureDecoder {
         public static SKBitmap Decode(this Texture2DExport texture, FTexture2DMipMap mip, int slices, out string hash,
-            bool srgb, bool iscube = false) {
+            bool srgb, bool isCube = false) {
             hash = "";
-            if (!texture.IsVirtual && mip != null) {
-                byte[] data;
-                SKColorType colorType;
+            if (texture.IsVirtual || mip == null) return null;
 
-                DecodeTexture(mip, texture.Format, texture.isNormalMap, out data, out colorType, srgb);
+            DecodeTexture(mip, texture.Format, texture.isNormalMap, out var data, out var colorType, srgb);
 
-                if (colorType == SKColorType.Rgba8888 || colorType == SKColorType.Rgb888x) {
+            switch (colorType) {
+                case SKColorType.Rgba8888:
+                case SKColorType.Rgb888x: {
                     for (var i = 0; i < data.Length / 4; i++) {
                         (data[i * 4], data[i * 4 + 2]) = (data[i * 4 + 2], data[i * 4]);
-                        if (iscube) data[i * 4 + 3] = 255;
+                        if (isCube) data[i * 4 + 3] = 255;
                         if (texture.isNormalMap) data[i * 4] = 0;
                     }
 
@@ -35,54 +35,53 @@ namespace Textures {
 
                     for (var i = 0; i < data.Length / 4; i++)
                         (data[i * 4], data[i * 4 + 2]) = (data[i * 4 + 2], data[i * 4]);
+                    break;
                 }
-
-                if (colorType == SKColorType.Bgra8888) {
+                case SKColorType.Bgra8888: {
                     for (var i = 0; i < data.Length / 4; i++) {
-                        if (iscube) data[i * 4 + 3] = 255;
+                        if (isCube) data[i * 4 + 3] = 255;
                         if (texture.isNormalMap) data[i * 4] = 0;
                     }
 
                     var md5 = MD5.Create();
                     hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 4).Select(x => x.ToString("x2"))
                         .Aggregate((a, b) => a + b);
+                    break;
                 }
-
-                if (colorType == SKColorType.Rgb565) {
+                case SKColorType.Rgb565: {
                     var md5 = MD5.Create();
                     hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 2).Select(x => x.ToString("x2"))
                         .Aggregate((a, b) => a + b);
+                    break;
                 }
-
-                if (colorType == SKColorType.Gray8) {
+                case SKColorType.Gray8: {
                     var md5 = MD5.Create();
                     hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY).Select(x => x.ToString("x2"))
                         .Aggregate((a, b) => a + b);
+                    break;
                 }
-
-                var width = mip.SizeX;
-                var height = mip.SizeY;
-                //if (!iscube) {
-                //    height *= slices;
-                //}
-
-                var info = new SKImageInfo(width, height, colorType, SKAlphaType.Unpremul);
-                var bitmap = new SKBitmap(info);
-
-                unsafe {
-                    fixed (byte* p = data) {
-                        bitmap.SetPixels(new IntPtr(p));
-                    }
-                }
-
-                if (!texture.bRenderNearestNeighbor) return bitmap;
-
-                var resized = bitmap.Resize(new SKImageInfo(width, height), SKFilterQuality.None);
-                bitmap.Dispose();
-                return resized;
             }
 
-            return null;
+            var width = mip.SizeX;
+            var height = mip.SizeY;
+            //if (!isCube) {
+            //    height *= slices;
+            //}
+
+            var info = new SKImageInfo(width, height, colorType, SKAlphaType.Unpremul);
+            var bitmap = new SKBitmap(info);
+
+            unsafe {
+                fixed (byte* p = data) {
+                    bitmap.SetPixels(new IntPtr(p));
+                }
+            }
+
+            if (!texture.bRenderNearestNeighbor) return bitmap;
+
+            var resized = bitmap.Resize(new SKImageInfo(width, height), SKFilterQuality.None);
+            bitmap.Dispose();
+            return resized;
         }
 
         public static void DecodeTexture(FTexture2DMipMap mip, EPixelFormat format, bool isNormalMap, out byte[] data,

@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UAssetAPI;
@@ -9,50 +7,39 @@ using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeDataTable() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeDataTable() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			DataTableExport dataTable = Exports[Asset.mainExport - 1] as DataTableExport;
+            if (Exports[Asset.mainExport - 1] is not DataTableExport dataTable) return;
+            ja.Add("AssetClass", "DataTable");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject();
 
-			if (dataTable != null) {
+            ja.Add("AssetSerializedData", asData);
+            //asData.Add(SerializePropertyData(dataTable.Data[0]));
+            asData.Add(SerializaListOfProperties(dataTable.Data).Properties());
+            asData.Add(SerializeDataTable(dataTable.Table));
+            asData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-				ja.Add("AssetClass", "DataTable");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
 
-				ja.Add("AssetSerializedData", asdata);
-				//asdata.Add(SerializePropertyData(dataTable.Data[0]));
-				asdata.Add(SerializaListOfProperties(dataTable.Data).Properties());
-				asdata.Add(SerializeDataTable(dataTable.Table));
-				asdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+        private static JProperty SerializeDataTable(UDataTable table) {
+            var jData = new JProperty("RowData");
 
-				ja.Add(ObjectHierarchy(Asset));
-				File.WriteAllText(path1, ja.ToString());
+            if (table.Data.Count > 0) {
+                var jDataValue = new JObject();
+                foreach (PropertyData property in table.Data) jDataValue.Add(SerializePropertyData(property));
+                jData.Value = jDataValue;
+            } else {
+                jData.Value = -1;
+            }
 
-			}
-		}
-
-		public static JProperty SerializeDataTable(UDataTable table) {
-
-			JProperty jdata = new JProperty("RowData");
-
-			if (table.Data.Count > 0) {
-				JObject jdatavalue = new JObject();
-				foreach (PropertyData property in table.Data) {
-					jdatavalue.Add(SerializePropertyData(property));
-				}
-				jdata.Value = jdatavalue;
-			} else {
-				jdata.Value = -1;
-
-			}
-			return jdata;
-		}
-	}
-
-
+            return jData;
+        }
+    }
 }

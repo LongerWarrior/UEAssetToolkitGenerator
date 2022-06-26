@@ -1,37 +1,27 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeFileMediaSource() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeFileMediaSource() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			FileMediaSourceExport mediasource = Exports[Asset.mainExport - 1] as FileMediaSourceExport;
+            if (Exports[Asset.mainExport - 1] is not FileMediaSourceExport mediaSource) return;
+            ja.Add("AssetClass", mediaSource.ClassIndex.ToImport(Asset).ObjectName.ToName());
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject {
+                { "AssetObjectData", SerializaListOfProperties(mediaSource.Data) },
+                { "PlayerName", mediaSource.PlayerName.ToName() }
+            };
+            ja.Add("AssetSerializedData", asData);
 
-			if (mediasource != null) {
-
-				ja.Add("AssetClass", mediasource.ClassIndex.ToImport(Asset).ObjectName.ToName());
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				asdata.Add("AssetObjectData", SerializaListOfProperties(mediasource.Data));
-				asdata.Add("PlayerName", mediasource.PlayerName.ToName());
-				ja.Add("AssetSerializedData", asdata);
-
-				ja.Add(ObjectHierarchy(Asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-	}
-
-
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
+    }
 }

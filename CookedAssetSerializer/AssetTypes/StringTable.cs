@@ -1,49 +1,35 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeStringTable() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeStringTable() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			StringTableExport stringTable = Exports[Asset.mainExport - 1] as StringTableExport;
+            if (Exports[Asset.mainExport - 1] is not StringTableExport stringTable) return;
+            ja.Add("AssetClass", "StringTable");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
 
-			if (stringTable != null) {
+            var asData = new JObject();
 
-				ja.Add("AssetClass", "StringTable");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
+            ja.Add("AssetSerializedData", asData);
+            asData.Add("TableNamespace", stringTable.Table.TableNamespace == null ? "" : stringTable.Table.TableNamespace.ToString());
+            var strings = new JObject();
+            foreach (var key in stringTable.Table.Keys) {
+                stringTable.Table.TryGetValue(key, out var value);
+                strings.Add(key.ToString(), value.ToString());
+            }
 
+            asData.Add("SourceStrings", strings);
+            asData.Add("MetaData", new JObject());
 
-				ja.Add("AssetSerializedData", asdata);
-				if (stringTable.Table.TableNamespace == null) {
-					asdata.Add("TableNamespace", "");
-				} else {
-					asdata.Add("TableNamespace", stringTable.Table.TableNamespace.ToString());
-				}
-				JObject strings = new JObject();
-				foreach (FString key in stringTable.Table.Keys) {
-					stringTable.Table.TryGetValue(key, out FString value);
-					strings.Add(key.ToString(), value.ToString());
-				}
-				asdata.Add("SourceStrings", strings);
-				asdata.Add("MetaData", new JObject());
-
-				ja.Add(ObjectHierarchy(Asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-	}
-
-
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
+    }
 }

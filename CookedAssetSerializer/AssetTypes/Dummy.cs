@@ -1,77 +1,57 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
-using UAssetAPI.PropertyTypes;
-using UAssetAPI.StructTypes;
 using System;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeDummy() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeDummy() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			Export simple = Exports[Asset.mainExport - 1] as Export;
+            if (Exports[Asset.mainExport - 1] is not { } simple) return;
+            ja.Add("AssetClass", "SimpleAsset");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject {
+                { "AssetClass", GetFullName(simple.ClassIndex.Index) },
+                { "AssetObjectData", new JObject(new JProperty("$ReferencedObjects", new JArray())) }
+            };
 
-			if (simple != null) {
+            ja.Add("AssetSerializedData", asData);
+            ja.Add(new JProperty("ObjectHierarchy", new JArray()));
+            File.WriteAllText(path1, ja.ToString());
+        }
 
-				ja.Add("AssetClass", "SimpleAsset");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				asdata.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
+        public static List<string> WaveProps = new();
 
-				asdata.Add("AssetObjectData", new JObject(new JProperty("$ReferencedObjects", new JArray())));
-				ja.Add("AssetSerializedData", asdata);
-				ja.Add(new JProperty("ObjectHierarchy", new JArray()));
-				File.WriteAllText(path1, ja.ToString());
+        public static void SerializeDummy(bool withProperties) {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-			}
-		}
+            if (Exports[Asset.mainExport - 1] is NormalExport simple) {
+                ja.Add("AssetClass", "SimpleAsset");
+                ja.Add("AssetPackage", gamePath);
+                ja.Add("AssetName", name);
+                var asData = new JObject { { "AssetClass", GetFullName(simple.ClassIndex.Index) } };
+                var jData = SerializaListOfProperties(simple.Data);
 
-		public static List<string> waveprops = new();
-		public static void SerializeDummy(bool withproperties) {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			NormalExport simple = Exports[Asset.mainExport - 1] as NormalExport;
-
-			if (simple != null) {
-
-				ja.Add("AssetClass", "SimpleAsset");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				asdata.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
-				JObject jdata = SerializaListOfProperties(simple.Data);
-
-				foreach (JProperty prop in jdata.Properties()) {
-					if (!waveprops.Contains(prop.Name)) {
-						waveprops.Add(prop.Name);
-                    }
+                foreach (var prop in jData.Properties()) if (!WaveProps.Contains(prop.Name)) WaveProps.Add(prop.Name);
+                jData.Add("$ReferencedObjects", new JArray());
+                asData.Add("AssetObjectData", jData);
+                ja.Add("AssetSerializedData", asData);
+                if (RefObjects.Count > 0) {
+                    Console.WriteLine(Asset.FilePath);
+                    ja.Add(ObjectHierarchy(Asset));
+                } else {
+                    ja.Add(new JProperty("ObjectHierarchy", new JArray()));
                 }
 
-
-				jdata.Add("$ReferencedObjects", new JArray());
-				asdata.Add("AssetObjectData", jdata);
-				ja.Add("AssetSerializedData", asdata);
-				if (RefObjects.Count > 0) {
-					Console.WriteLine(Asset.FilePath);
-					ja.Add(ObjectHierarchy(Asset));
-				} else {
-					ja.Add(new JProperty("ObjectHierarchy", new JArray()));
-				}
-				
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-
-	}
-
-
+                File.WriteAllText(path1, ja.ToString());
+            }
+        }
+    }
 }

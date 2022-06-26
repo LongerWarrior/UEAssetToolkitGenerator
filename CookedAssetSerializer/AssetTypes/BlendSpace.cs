@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,27 +36,21 @@ namespace CookedAssetSerializer {
         }
 
         private static void PopulateBlendParameters(ref List<PropertyData> data, int v = 3) {
-            var fullentries = Enumerable.Range(0, v).ToList();
-            var entries = new List<int>();
-            for (var i = 0; i < data.Count; i++)
-                if (data[i].Name.ToName() == "BlendParameters")
-                    entries.Add(data[i].DuplicationIndex);
+            var fullEntries = Enumerable.Range(0, v).ToList();
+            var entries = (from t in data where t.Name.ToName() == "BlendParameters" select t.DuplicationIndex).ToList();
 
-            if (entries.Count > 0) {
-                var missing = fullentries.Except(entries).ToList();
-                foreach (var missed in missing)
-                    data.Add(new StructPropertyData(new FName("BlendParameters"), new FName("BlendParameter"), missed) {
-                        Value = new List<PropertyData> {
-                            new StrPropertyData(new FName("DisplayName")) { Value = new FString("None") },
-                            new FloatPropertyData(new FName("Max")) { Value = 100.0f }
-                        }
-                    });
-                data.Sort((x, y) => {
-                    var ret = x.Name.ToName().CompareTo(y.Name.ToName());
-                    if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
-                    return ret;
-                });
-            }
+            if (entries.Count <= 0) return;
+            var missing = fullEntries.Except(entries).ToList();
+            data.AddRange(missing.Select(missed => new StructPropertyData(new FName("BlendParameters"),
+                new FName("BlendParameter"), missed)
+                { Value = new List<PropertyData> { new StrPropertyData(new FName("DisplayName"))
+                { Value = new FString("None") }, new FloatPropertyData(new FName("Max"))
+                { Value = 100.0f } } }));
+            data.Sort((x, y) => {
+                var ret = string.Compare(x.Name.ToName(), y.Name.ToName(), StringComparison.Ordinal);
+                if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+                return ret;
+            });
         }
     }
 }

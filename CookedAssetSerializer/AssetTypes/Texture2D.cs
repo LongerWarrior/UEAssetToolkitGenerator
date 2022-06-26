@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,7 +9,6 @@ using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 using Textures;
 using SkiaSharp;
-using System.Security.Cryptography;
 using System.Threading;
 
 namespace CookedAssetSerializer {
