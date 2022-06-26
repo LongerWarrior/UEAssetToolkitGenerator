@@ -47,8 +47,14 @@ namespace CookedAssetSerializer {
                 if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "TextureCube") {
                     NumSlices = 6;
                     iscube = true;
-                } else if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "Texture2DArray") {
+                    texture.Mips[0].SizeY *= NumSlices;
+                    texture.Mips[0].SizeZ = 1;
+                }
+                if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "Texture2DArray") {
                     NumSlices = texture.Mips[0].SizeZ;
+                    texture.Mips[0].SizeY *= NumSlices;
+                    texture.Mips[0].SizeZ = 1;
+
                 } 
 
                 asdata.Add("NumSlices", NumSlices);

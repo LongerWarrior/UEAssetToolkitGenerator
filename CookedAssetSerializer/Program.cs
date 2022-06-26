@@ -18,7 +18,7 @@ namespace CookedAssetSerializer {
         public static List<EAssetType> skipserialization = new List<EAssetType> {
              //EAssetType.Blueprint,
              //EAssetType.WidgetBlueprint,
-             EAssetType.AnimBlueprint,
+             //EAssetType.AnimBlueprint,
              EAssetType.BlendSpaceBase,
              EAssetType.AnimSequence,
              EAssetType.SkeletalMesh,
@@ -48,7 +48,9 @@ namespace CookedAssetSerializer {
 
             //ScanAssetTypes(@"C:\Games\DRGNEW\FSD\Content", globalUE);
             //MoveAssets(@"C:\Games\DRGNEW\FSD\Content", @"C:\Games\DRGNEW\FSD\Cooked",typestocopy,globalUE);
-            SerializeAssets(@"C:\Games\DRGNEW\FSD\Content");
+            SerializeAssets(@"C:\Games\DRGNEW\FSD\Content\Test");
+
+
 
         }
 
