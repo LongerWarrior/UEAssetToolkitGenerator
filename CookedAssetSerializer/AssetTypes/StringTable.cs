@@ -14,7 +14,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeStringTable() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			StringTableExport stringTable = exports[asset.mainExport - 1] as StringTableExport;
+			StringTableExport stringTable = Exports[Asset.mainExport - 1] as StringTableExport;
 
 			if (stringTable != null) {
 
@@ -38,7 +38,7 @@ namespace CookedAssetSerializer {
 				asdata.Add("SourceStrings", strings);
 				asdata.Add("MetaData", new JObject());
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

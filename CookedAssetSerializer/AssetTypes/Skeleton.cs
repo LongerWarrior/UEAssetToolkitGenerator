@@ -16,7 +16,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeSkeleton() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			SkeletonExport mainobject = exports[asset.mainExport - 1] as SkeletonExport;
+			SkeletonExport mainobject = Exports[Asset.mainExport - 1] as SkeletonExport;
 
 			if (mainobject != null) {
 				ja.Add("AssetClass", "Skeleton");
@@ -67,13 +67,13 @@ namespace CookedAssetSerializer {
 
 				//jdatavalue.Add("SmartNames", new JObject());
 				//jdatavalue.Add("AssetUserData", new JArray());
-				jdatavalue.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+				jdatavalue.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 				jdata.Value = jdatavalue;
 
 
 				asdata.Add(jdata);
 				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

@@ -1,58 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UAssetAPI;
-using static CookedAssetSerializer.Serializers;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.Globals;
 
 
 namespace CookedAssetSerializer {
-
     public static class Globals {
+        public const string CONTENT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
+        public const string JSON_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
+        public const string OUTPUT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
+        public const UE4Version GLOBAL_UE = UE4Version.VER_UE4_27;
+        public const bool REFRESH_ASSETS = true;
 
-        public static string ContentDir = @"C:\Games\DRGNEW\FSD\Content";
-        public static string JsonDir = @"C:\Games\DRGNEW\FSD\Json";
-        public static UE4Version globalUE = UE4Version.VER_UE4_27;
-        public static bool refreshassets = true;
-
-        public static List<EAssetType> skipserialization = new List<EAssetType> {
-             //EAssetType.Blueprint,
-             //EAssetType.WidgetBlueprint,
-             EAssetType.AnimBlueprint,
-             EAssetType.BlendSpaceBase,
-             EAssetType.AnimSequence,
-             EAssetType.SkeletalMesh,
-             EAssetType.Skeleton,
-             EAssetType.AnimMontage,
-             EAssetType.FileMediaSource,
+        public static readonly List<EAssetType> SKIP_SERIALIZATION = new() {
+            EAssetType.BlendSpaceBase,
+            EAssetType.AnimSequence,
+            EAssetType.SkeletalMesh,
+            EAssetType.Skeleton,
+            EAssetType.AnimMontage,
+            EAssetType.FileMediaSource,
+            EAssetType.StaticMesh,
+            EAssetType.Texture2D,
         };
 
-        public static List<string> circulardependency = new List<string> {
+        public static readonly List<string> CIRCULAR_DEPENDENCY = new() {
             "/Script/Engine.SoundClass",
             "/Script/Engine.SoundSubmix",
-            "/Script/Engine.EndpointSubmix",
+            "/Script/Engine.EndpointSubmix"
         };
 
-        public static List<string> simpleassets = new List<string> {
-            //"/Script/FSD.ResourceData",
+        public static readonly List<string> SIMPLE_ASSETS = new() {
+            "/Script/Engine.SoundClass",
+            "/Script/Engine.TextureRenderTarget2D",
+            "/Script/Engine.MaterialFunction",
+            "/Script/Engine.SoundMix",
+            "/Script/Engine.SoundConcurrency",
+            "/Script/Engine.ForceFeedbackEffect",
+            "/Script/Engine.SoundAttenuation",
+            "/Script/Foliage.FoliageType_InstancedStaticMesh",
         };
 
-        public static List<string> typestocopy = new List<string> {
-            //"/Script/FSD.ResourceData",
+        public static List<string> TypesToCopy = new() {
+            "/Script/Engine.ParticleSystem",
+            "/Script/Engine.StaticMesh",
+            "/Script/Engine.SoundWave",
+            "/Script/Engine.SkeletalMesh",
+            "/Script/Engine.Skeleton",
+            "/Script/Engine.AnimSequence",
+            "/Script/Engine.BlendSpace1D",
+            "/Script/Engine.PhysicsAsset",
+            "/Script/Engine.VectorFieldStatic",
+            "/Script/Engine.SubUVAnimation",
+            "/Script/Engine.AimOffsetBlendSpace",
         };
     }
 
-    class Program  {
-
-		static void Main(string[] args) {
-
-            //ScanAssetTypes(@"C:\Games\DRGNEW\FSD\Content", globalUE);
-            //MoveAssets(@"C:\Games\DRGNEW\FSD\Content", @"C:\Games\DRGNEW\FSD\Cooked",typestocopy,globalUE);
-            SerializeAssets(@"C:\Games\DRGNEW\FSD\Content");
-
+    internal static class Program {
+        [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
+        private static void Main(string[] args) {
+            //ScanAssetTypes(CONTENT_DIR, GLOBAL_UE);
+            //MoveAssets(CONTENT_DIR, OUTPUT_DIR, TypesToCopy, GLOBAL_UE);
+            SerializeAssets(CONTENT_DIR);
         }
-
-
     }
 }
-

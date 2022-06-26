@@ -19,7 +19,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeMaterial() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
+			NormalExport material = Exports[Asset.mainExport - 1] as NormalExport;
 
 			DisableGeneration.Add("Metallic");
 			DisableGeneration.Add("Specular");
@@ -48,13 +48,13 @@ namespace CookedAssetSerializer {
 				SerializeReferencedFunctions(material.Data, out JProperty[] functions);
 
 				JObject aodata = SerializaListOfProperties(material.Data);
-				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-				refobjects = new List<int>();
+				aodata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+				RefObjects = new List<int>();
 				asdata.Add("AssetObjectData", aodata);
 				asdata.Add(functions);
 				ja.Add("AssetSerializedData", asdata);
 				
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}
@@ -103,7 +103,7 @@ namespace CookedAssetSerializer {
 
         private static void PopulateCachedExpressionDataEntries(ref List<PropertyData> data, int v=5) {
 			var entriesname = "Entries";
-			if (asset.EngineVersion >= UE4Version.VER_UE4_26) {
+			if (Asset.EngineVersion >= UE4Version.VER_UE4_26) {
 				entriesname = "RuntimeEntries";
 			}
 

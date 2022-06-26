@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UAssetAPI;
 using UAssetAPI.FieldTypes;
 using UAssetAPI.PropertyTypes;
@@ -10,506 +11,424 @@ using static CookedAssetSerializer.Globals;
 using static CookedAssetSerializer.Serializers;
 
 namespace CookedAssetSerializer {
-	public static class Utils {
+    public static class Utils {
+        public static UAsset Asset;
+        public static List<Export> Exports => Asset.Exports;
+        public static List<string> ImportVariables = new();
+        public static Dictionary<int, int> Dict = new();
+        public static List<int> RefObjects = new();
+        public static List<string> GeneratedVariables = new();
+        public static List<string> DisableGeneration = new();
 
+        public static bool SetupSerialization(out string name, out string gamePath, out string path1) {
+            Dict = new Dictionary<int, int>();
+            DisableGeneration = new List<string>();
+            GeneratedVariables = new List<string>();
+            RefObjects = new List<int>();
 
-		public static UAsset asset;
-		public static List<Export> exports => asset.Exports;
-		public static List<string> importvariables = new List<string>();
-		public static Dictionary<int, int> dict = new Dictionary<int, int>();
-		public static List<int> refobjects = new List<int>();
-		public static List<string> GeneratedVariables = new List<string>();
-		public static List<string> DisableGeneration = new List<string>();
+            var fullPath = Asset.FilePath;
+            name = Path.GetFileNameWithoutExtension(fullPath);
+            var directory = Path.GetDirectoryName(fullPath);
+            var relativePath = Path.GetRelativePath(CONTENT_DIR, directory);
+            if (relativePath.StartsWith(".")) relativePath = "\\";
+            gamePath = Path.Join("\\Game", relativePath, name).Replace("\\", "/");
+            path1 = Path.Join(JSON_DIR, gamePath) + ".json";
 
-		public static bool SetupSerialization(out string name, out string gamepath, out string path1) {
-			dict = new();
-			DisableGeneration = new();
-			GeneratedVariables = new();
-			refobjects = new();
-
-			string fullpath = asset.FilePath;
-			name = Path.GetFileNameWithoutExtension(fullpath);
-			var directory = Path.GetDirectoryName(fullpath);
-			var relativepath = Path.GetRelativePath(ContentDir, directory);
-			if (relativepath.StartsWith(".")) {
-				relativepath = "\\";
-			}
-			gamepath = Path.Join("\\Game", relativepath, name).Replace("\\", "/");
-			path1 = Path.Join(JsonDir, gamepath) + ".json";
-
-			Directory.CreateDirectory(Path.GetDirectoryName(path1));
-			if (!refreshassets && File.Exists(path1)) return false;
-
-			asset = new UAsset(fullpath, globalUE, false);
-
-			FixIndexes();
-
-			return true;
-
-		}
-
-		public static bool FindExternalProperty(UAsset asset, FName propname, out FProperty property) {
-			ClassExport export = asset.GetClassExport();
-			if (export != null) {
-				foreach (FProperty prop in export.LoadedProperties) {
-					if (prop.Name == propname) {
-						property = prop;
-						return true;
-					}
-				}
-				property = new FObjectProperty();
-				Console.WriteLine("No " + propname.ToName() + "in ClassExport");
-				return false;
-
-			} else {
-				property = new FObjectProperty();
-				Console.WriteLine("No ClassExport");
-				return false;
-			}
-
-		}
-
-		public static bool FindPropertyData(FPackageIndex export, string propname, out PropertyData prop) {
-
-			prop = null;
-			if (export.IsExport() && export.ToExport(asset) is NormalExport exp) {
-				foreach (PropertyData property in exp.Data) {
-					if (property.Name.ToName() == propname) {
-						prop = property;
-						return true;
-                    }
-                }
-            }
-
-			return false;
+            Directory.CreateDirectory(Path.GetDirectoryName(path1) ?? string.Empty);
+            Asset = new UAsset(fullPath, GLOBAL_UE, false);
+            FixIndexes();
+            return true;
         }
 
-		public static bool FindPropertyData(Export export, string propname, out PropertyData prop) {
+        public static bool FindExternalProperty(UAsset asset, FName propname, out FProperty property) {
+            var export = asset.GetClassExport();
+            if (export != null) {
+                foreach (var prop in export.LoadedProperties) {
+                    if (prop.Name != propname) continue;
+                    property = prop;
+                    return true;
+                }
 
-			prop = null;
-			if (export is NormalExport exp) {
-				foreach (PropertyData property in exp.Data) {
-					if (property.Name.ToName() == propname) {
-						prop = property;
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-		public static bool FindPropertyData(List<PropertyData> list, string propname, out PropertyData prop) {
-
-			prop = null;
-			foreach (PropertyData property in list) {
-				if (property.Name.ToName() == propname) {
-					prop = property;
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		public static bool FindPropertyData(List<PropertyData> list, string propname, out PropertyData[] props) {
-
-			props = null;
-			List<PropertyData> temp = new();
-			foreach (PropertyData property in list) {
-				if (property.Name.ToName() == propname) {
-					temp.Add(property);
-				}
-			}
-			if (temp.Count > 0) {
-				props = temp.ToArray();
-				return true;
+                property = new FObjectProperty();
+                Console.WriteLine("No " + propname.ToName() + "in ClassExport");
+                return false;
             }
-			return false;
-		}
 
-		public static void FixIndexes() {
-			int index = 0;
-			dict.Add(0, -1);
+            property = new FObjectProperty();
+            Console.WriteLine("No ClassExport");
+            return false;
+        }
 
-			for (int i = 1; i <= asset.Imports.Count; i++) {
-				//string importname = asset.Imports[i - 1].ObjectName.Value.Value;
-				dict.Add(-i, index);
-				index++;
-			}
+        public static bool FindPropertyData(FPackageIndex export, string propName, out PropertyData prop) {
+            prop = null;
+            if (!export.IsExport() || export.ToExport(Asset) is not NormalExport exp) return false;
+            foreach (var property in exp.Data.Where(property => property.Name.ToName() == propName)) {
+                prop = property;
+                return true;
+            }
 
-			for (int i = 1; i <= asset.Exports.Count; i++) {
-				if (asset.Exports[i - 1] is FunctionExport) {
-					/*if (asset.Exports[i - 1].ObjectName.ToName().StartsWith("ExecuteUbergraph_")) {
+            return false;
+        }
+
+        public static bool FindPropertyData(Export export, string propName, out PropertyData prop) {
+            prop = null;
+            if (export is not NormalExport exp) return false;
+            foreach (var property in exp.Data.Where(property => property.Name.ToName() == propName)) {
+                prop = property;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool FindPropertyData(List<PropertyData> list, string propName, out PropertyData prop) {
+            prop = null;
+            foreach (var property in list.Where(property => property.Name.ToName() == propName)) {
+                prop = property;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool FindPropertyData(List<PropertyData> list, string propName, out PropertyData[] props) {
+            props = null;
+            List<PropertyData> temp = list.Where(property => property.Name.ToName() == propName).ToList();
+            if (temp.Count <= 0) return false;
+            props = temp.ToArray();
+            return true;
+
+        }
+
+        public static void FixIndexes() {
+            var index = 0;
+            Dict.Add(0, -1);
+
+            for (var i = 1; i <= Asset.Imports.Count; i++) {
+                //string importname = asset.Imports[i - 1].ObjectName.Value.Value;
+                Dict.Add(-i, index);
+                index++;
+            }
+
+            for (var i = 1; i <= Asset.Exports.Count; i++)
+                if (Asset.Exports[i - 1] is FunctionExport) {
+                    /*if (asset.Exports[i - 1].ObjectName.ToName().StartsWith("ExecuteUbergraph_")) {
 						dict.Add(i, index);
 						index++;
 					}*/
-				} else {
-					dict.Add(i, index);
-					index++;
-				}
-			}
-		}
+                } else {
+                    Dict.Add(i, index);
+                    index++;
+                }
+        }
 
-		public static int GetClassIndex() {
-			for (int i = 1; i <= asset.Exports.Count; i++) {
-				if (asset.Exports[i - 1] is ClassExport) {
-					return i;
-				}
-			}
-			return 0;
-		}
+        public static int GetClassIndex() {
+            for (var i = 1; i <= Asset.Exports.Count; i++)
+                if (Asset.Exports[i - 1] is ClassExport) return i;
+            return 0;
+        }
 
-		public static int Index(int index) {
-			if (dict.TryGetValue(index, out int validindex)) {
-				return validindex;
-			} else {
-				//Console.WriteLine("Non valid Import index : "+index);
-				return -1;
-			}
-		}
+        public static int Index(int index) {
+            if (Dict.TryGetValue(index, out var validIndex)) return validIndex;
+            return -1;
+        }
 
 
-		public static string GetName(int index) {
-			if (index > 0) {
-				return asset.Exports[index - 1].ObjectName.ToName();
-			} else if (index < 0) {
-				return asset.Imports[-index - 1].ObjectName.ToName();
-			} else {
-				return "";
-			}
-		}
+        public static string GetName(int index) {
+            if (index > 0) return Asset.Exports[index - 1].ObjectName.ToName();
+            return index < 0 ? Asset.Imports[-index - 1].ObjectName.ToName() : "";
+        }
 
-		public static string GetFullName(int index, bool alt = false) {
+        public static string GetFullName(int index, bool alt = false) {
+            switch (index) {
+                case > 0 when Asset.Exports[index - 1].OuterIndex.Index != 0: {
+                    var parent = GetFullName(Asset.Exports[index - 1].OuterIndex.Index);
+                    return parent + "." + Asset.Exports[index - 1].ObjectName.ToName();
+                }
+                case > 0:
+                    return Asset.Exports[index - 1].ObjectName.ToName();
+                case < 0 when Asset.Imports[-index - 1].OuterIndex.Index != 0: {
+                    var parent = GetFullName(Asset.Imports[-index - 1].OuterIndex.Index);
+                    return parent + "." + Asset.Imports[-index - 1].ObjectName.ToName();
+                }
+                case < 0:
+                    return Asset.Imports[-index - 1].ObjectName.ToName();
+                default:
+                    return "";
+            }
+        }
 
-			if (index > 0) {
-				if (asset.Exports[index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Exports[index - 1].OuterIndex.Index);
-					return parent + "." + asset.Exports[index - 1].ObjectName.ToName();
-				} else {
-					return asset.Exports[index - 1].ObjectName.ToName();
-				}
+        public static string GetParentName(int index) {
+            switch (index) {
+                case > 0 when Asset.Exports[index - 1].OuterIndex.Index != 0: {
+                    var parent = GetFullName(Asset.Exports[index - 1].OuterIndex.Index);
+                    return parent;
+                }
+                case > 0:
+                    return "";
+                case < 0 when Asset.Imports[-index - 1].OuterIndex.Index != 0: {
+                    var parent = GetFullName(Asset.Imports[-index - 1].OuterIndex.Index);
+                    return parent;
+                }
+                case < 0:
+                    return "";
+                default:
+                    return "";
+            }
+        }
 
-			} else if (index < 0) {
+        public static bool FindProperty(int index, FName propname, out FProperty property) {
+            if (index < 0) {
+                //Console.WriteLine(index+" , "+GetFullName(index) + " , " + propname.ToName());
 
-				if (asset.Imports[-index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Imports[-index - 1].OuterIndex.Index);
-					return parent + "." + asset.Imports[-index - 1].ObjectName.ToName();
-				} else {
-					return asset.Imports[-index - 1].ObjectName.ToName();
-				}
-
-			} else {
-				return "";
-			}
-		}
-
-		public static string GetParentName(int index) {
-			if (index > 0) {
-				if (asset.Exports[index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Exports[index - 1].OuterIndex.Index);
-					return parent;
-				} else {
-					return "";
-				}
-
-			} else if (index < 0) {
-
-				if (asset.Imports[-index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Imports[-index - 1].OuterIndex.Index);
-					return parent;
-				} else {
-					return "";
-				}
-
-			} else {
-				return "";
-			}
-		}
-
-		public static bool FindProperty(int index, FName propname, out FProperty property) {
-			if (index < 0) {
-
-				//Console.WriteLine(index+" , "+GetFullName(index) + " , " + propname.ToName());
-
-				string klass = asset.Imports[-index - 1].ClassName.ToName();
-				string owner = GetName(index);
-				string parent = GetParentName(index);
-				/*if (parent.StartsWith("/Game")) {
-					string path = ContentDir + parent.Substring(5).Replace("/","\\")+".uasset";
-					if (File.Exists(path)) {
-						UAsset assetcheck = new UAsset(path, UE4Version.VER_UE4_26);
-						//altasset = assetcheck;
-						if (FindExternalProperty(assetcheck, propname, out FProperty prop)) {
-							property = prop;
-							return true;
-						} else {
-							property = new FObjectProperty();
-							return false;
-						}
+                var klass = Asset.Imports[-index - 1].ClassName.ToName();
+                var owner = GetName(index);
+                var parent = GetParentName(index);
+                /*if (parent.StartsWith("/Game")) {
+                    string path = ContentDir + parent.Substring(5).Replace("/","\\")+".uasset";
+                    if (File.Exists(path)) {
+                        UAsset assetcheck = new UAsset(path, UE4Version.VER_UE4_26);
+                        //altasset = assetcheck;
+                        if (FindExternalProperty(assetcheck, propname, out FProperty prop)) {
+                            property = prop;
+                            return true;
+                        } else {
+                            property = new FObjectProperty();
+                            return false;
+                        }
 
                     } else {
-						Console.WriteLine("No such file on disk "+"Class "+klass+ " Path " +path);
+                        Console.WriteLine("No such file on disk "+"Class "+klass+ " Path " +path);
                     }
-				}*/
+                }*/
 
 
-				importvariables.Add(asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " + propname.ToName());
+                ImportVariables.Add(Asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " +
+                                    propname.ToName());
 
-				property = new FObjectProperty();
-				return false;
-
-			}
-			Export export = asset.Exports[index - 1];
-			if (export is StructExport) {
-				foreach (FProperty prop in (export as StructExport).LoadedProperties) {
-					if (prop.Name == propname) {
-						property = prop;
-						return true;
-					}
-				}
-			}
-			property = new FObjectProperty();
-			return false;
-		}
-
-		public static bool CheckDuplications(ref List<PropertyData> Data) {
-
-			for (int i = 0; i < Data.Count; i++) {
-				if (i != 0) {
-					if (Data[i].DuplicationIndex > 0) {
-
-						if (Data[i].DuplicationIndex != Data[i - 1].DuplicationIndex + 1 && Data[i].Name.ToName() == Data[i - 1].Name.ToName()) {
-
-							Console.WriteLine("Missing property with lower duplication index  Name : " + Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() + " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
-							
-							return false;
-						}
-					} else {
-						continue;
-					}
-				} else {
-					if (Data[i].DuplicationIndex > 0) {
-						Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " + Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() + " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
-						return false;
-					}
-				}
-
-			}
-			return true;
-		}
-
-
-		public static void ScanAssetTypes(string directory, UE4Version version, string typetofind = "") {
-			
-			Dictionary<string, List<string>> types = new();
-			List<string> alltypes = new();
-
-			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
-
-			foreach (string file in files) {
-
-				string type = GetAssetType(file, version);
-				var path = "/" + Path.GetRelativePath(ContentDir, file).Replace("\\", "/");
-
-				if (types.ContainsKey(type)) {
-					types[type].Add(path); 
-				} else {
-					types[type] = new List<string> { path };
-				}
-
-				if (type == typetofind) {
-					Console.WriteLine(type + " : " + path);
-				}
-
-			}
-			Console.WriteLine("Find all files " + files.Length);
-			JObject jtypes = new JObject(); 
-			foreach (KeyValuePair<string, List<string>> entry in types) {
-				Console.WriteLine(entry.Key + " : " + entry.Value.Count);
-				jtypes.Add(entry.Key, JArray.FromObject(entry.Value));
-                alltypes.Add("\""+entry.Key+ "\",");
+                property = new FObjectProperty();
+                return false;
             }
-            File.WriteAllText(JsonDir+"\\AssetTypes.json", jtypes.ToString());
-			File.WriteAllText(JsonDir+"\\AllTypes.txt", String.Join("\n",alltypes));
 
-		}
-
-		public static void SerializeAssets(string directory) {
-
-			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
-			foreach (string file in files) {
-
-				asset = new UAsset(file, globalUE, true);
-
-				if (skipserialization.Contains(asset.assetType)) continue;
-
-				if (asset.assetType != EAssetType.Uncategorized) {
-					switch (asset.assetType) {
-
-						case EAssetType.Blueprint:
-						case EAssetType.WidgetBlueprint:
-						case EAssetType.AnimBlueprint:
-							SerializeBPAsset(false);
-							break;
-						case EAssetType.DataTable:
-							SerializeDataTable();
-							break;
-						case EAssetType.StringTable:
-							SerializeStringTable();
-							break;
-						case EAssetType.UserDefinedStruct:
-							SerializeUserDefinedStruct();
-							break;
-						case EAssetType.BlendSpaceBase:
-							SerializeBlendSpace();
-							break;
-
-						case EAssetType.AnimMontage:
-						case EAssetType.CameraAnim:
-						case EAssetType.LandscapeGrassType:
-						case EAssetType.MediaPlayer:
-						case EAssetType.MediaTexture:
-						case EAssetType.SubsurfaceProfile:
-							SerializeSimpleAsset(false);
-							break;
-						case EAssetType.Skeleton:
-							SerializeSkeleton();
-							break;
-						case EAssetType.MaterialParameterCollection:
-							SerializeMaterialParameterCollection();
-							break;
-						case EAssetType.PhycialMaterial:
-							SerializePhysicalMaterial();
-							break;
-						case EAssetType.Material:
-							SerializeMaterial();
-							break;
-						case EAssetType.MaterialInstanceConstant:
-							SerializeMaterialInstanceConstant();
-							break;
-						case EAssetType.UserDefinedEnum:
-							SerializeUserDefinedEnum();
-							break;
-						case EAssetType.SoundCue:
-							SerializeSoundCue();
-							break;
-						case EAssetType.Font:
-							SerializeFont();
-							break;
-						case EAssetType.FontFace:
-							SerializeFontFace();
-							break;
-						case EAssetType.CurveBase:
-							SerializeCurveBase();
-							break;
-						case EAssetType.Texture2D:
-							SerializeTexture();
-							break;
-						case EAssetType.SkeletalMesh:
-							break;
-						case EAssetType.FileMediaSource:
-							SerializeFileMediaSource();
-							break;
-						case EAssetType.StaticMesh:
-							SerializeStaticMesh();
-							break;
-						default:
-							break;
-					}
-				} else {
-					var atype = GetFullName(exports[asset.mainExport - 1].ClassIndex.Index);
-					if (simpleassets.Contains(atype)) {
-						SerializeSimpleAsset(true);
-					}
-				}
-			}
-
-		}
-
-		public static void MoveAssets(string dirfrom, string dirto, List<string> types, UE4Version version, bool copy = true) {
-
-			string[] files = Directory.GetFiles(dirfrom, "*.uasset", SearchOption.AllDirectories);
-
-			foreach (string file in files) {
-				var uexpfile = Path.ChangeExtension(file, "uexp");
-				var ubulkfile = Path.ChangeExtension(file, "ubulk");
-				string type = GetAssetType(file, version);
-				if (types.Contains(type)) {
-					var relativepath = Path.GetRelativePath(dirfrom, file);
-					var newpath = Path.Combine(dirto, relativepath);
-					
-					Directory.CreateDirectory(Path.GetDirectoryName(newpath));
-					if (copy) {
-						File.Copy(file, newpath, true);
-					} else {
-						File.Move(file, newpath, true);
-					}
-					if (File.Exists(uexpfile)) {
-						if (copy) {
-							File.Copy(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
-						} else {
-							File.Move(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
-						}
+            var export = Asset.Exports[index - 1];
+            if (export is StructExport structExport)
+                foreach (var prop in structExport.LoadedProperties)
+                    if (prop.Name == propname) {
+                        property = prop;
+                        return true;
                     }
-					if (File.Exists(ubulkfile)) {
-						if (copy) {
-							File.Copy(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
-						} else {
-							File.Move(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
-						}
-					}
-					
-				}
 
-			}
-		}
+            property = new FObjectProperty();
+            return false;
+        }
 
-		public static string GetAssetType(string file, UE4Version version) {
-			string name = Path.GetFileNameWithoutExtension(file).ToLower();
-			asset = new UAsset(file, version, true);
-			if (asset.Exports.Count == 1) {
-				return GetFullName(asset.Exports[0].ClassIndex.Index);
-			} else {
-				List<Export> exportnames = new();
-				List<Export> isasset = new();
-				foreach (Export exp in asset.Exports) {
-					if (exp.ObjectName.ToName().ToLower() == name + "_c") {
-						exportnames.Add(exp);
-					}
-					if (exp.bIsAsset) {
-						isasset.Add(exp);
+        public static bool CheckDuplications(ref List<PropertyData> data) {
+            for (var i = 0; i < data.Count; i++)
+                if (i != 0) {
+                    if (data[i].DuplicationIndex <= 0) continue;
+                    if (data[i].DuplicationIndex == data[i - 1].DuplicationIndex + 1 ||
+                        data[i].Name.ToName() != data[i - 1].Name.ToName()) continue;
+                    Console.WriteLine("Missing property with lower duplication index  Name : " +
+                                      data[i].Name.ToName() + " Type : " + data[i].PropertyType.ToName() +
+                                      " StructType : " + (data[i] as StructPropertyData)?.StructType.ToName());
+
+                    return false;
+                } else {
+                    if (data[i].DuplicationIndex <= 0) continue;
+                    Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " +
+                                      data[i].Name.ToName() + " Type : " + data[i].PropertyType.ToName() +
+                                      " StructType : " + (data[i] as StructPropertyData)?.StructType.ToName());
+                    return false;
+                }
+
+            return true;
+        }
+
+
+        public static void ScanAssetTypes(string directory, UE4Version version, string typeToFind = "") {
+            Dictionary<string, List<string>> types = new();
+            List<string> allTypes = new();
+
+            var files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+
+            foreach (var file in files) {
+                var type = GetAssetType(file, version);
+                var path = "/" + Path.GetRelativePath(CONTENT_DIR, file).Replace("\\", "/");
+                Console.WriteLine(path);
+
+                if (types.ContainsKey(type))
+                    types[type].Add(path);
+                else
+                    types[type] = new List<string> { path };
+
+                if (type == typeToFind) Console.WriteLine(type + " : " + path);
+            }
+
+            Console.WriteLine("Find all files " + files.Length);
+            var jTypes = new JObject();
+            foreach (var entry in types) {
+                Console.WriteLine(entry.Key + " : " + entry.Value.Count);
+                jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
+                allTypes.Add("\"" + entry.Key + "\",");
+            }
+
+            File.WriteAllText(JSON_DIR + "\\AssetTypes.json", jTypes.ToString());
+            File.WriteAllText(JSON_DIR + "\\AllTypes.txt", string.Join("\n", allTypes));
+        }
+
+        public static void SerializeAssets(string directory) {
+            var files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+            foreach (var file in files) {
+                Asset = new UAsset(file, GLOBAL_UE, true);
+
+                Console.WriteLine(file);
+
+                if (SKIP_SERIALIZATION.Contains(Asset.assetType)) continue;
+
+                if (Asset.assetType != EAssetType.Uncategorized) {
+                    switch (Asset.assetType) {
+                        case EAssetType.Blueprint:
+                        case EAssetType.WidgetBlueprint:
+                        case EAssetType.AnimBlueprint:
+                            SerializeBPAsset(false);
+                            break;
+                        case EAssetType.DataTable:
+                            SerializeDataTable();
+                            break;
+                        case EAssetType.StringTable:
+                            SerializeStringTable();
+                            break;
+                        case EAssetType.UserDefinedStruct:
+                            SerializeUserDefinedStruct();
+                            break;
+                        case EAssetType.BlendSpaceBase:
+                            SerializeBlendSpace();
+                            break;
+
+                        case EAssetType.AnimMontage:
+                        case EAssetType.CameraAnim:
+                        case EAssetType.LandscapeGrassType:
+                        case EAssetType.MediaPlayer:
+                        case EAssetType.MediaTexture:
+                        case EAssetType.SubsurfaceProfile:
+                            SerializeSimpleAsset(false);
+                            break;
+                        case EAssetType.Skeleton:
+                            SerializeSkeleton();
+                            break;
+                        case EAssetType.MaterialParameterCollection:
+                            SerializeMaterialParameterCollection();
+                            break;
+                        case EAssetType.PhycialMaterial:
+                            SerializePhysicalMaterial();
+                            break;
+                        case EAssetType.Material:
+                            SerializeMaterial();
+                            break;
+                        case EAssetType.MaterialInstanceConstant:
+                            SerializeMaterialInstanceConstant();
+                            break;
+                        case EAssetType.UserDefinedEnum:
+                            SerializeUserDefinedEnum();
+                            break;
+                        case EAssetType.SoundCue:
+                            SerializeSoundCue();
+                            break;
+                        case EAssetType.Font:
+                            SerializeFont();
+                            break;
+                        case EAssetType.FontFace:
+                            SerializeFontFace();
+                            break;
+                        case EAssetType.CurveBase:
+                            SerializeCurveBase();
+                            break;
+                        case EAssetType.Texture2D:
+                            try {
+                                SerializeTexture();
+                            } catch (Exception e) {
+                                Console.WriteLine("Could not serialise file; " + e);
+                            }
+                            break;
+                        case EAssetType.SkeletalMesh:
+                            break;
+                        case EAssetType.FileMediaSource:
+                            SerializeFileMediaSource();
+                            break;
+                        case EAssetType.StaticMesh:
+                            SerializeStaticMesh();
+                            break;
                     }
-				}
-				if (exportnames.Count == 0) {
-					foreach (Export exp in asset.Exports) {
-						if (exp.ObjectName.ToName().ToLower() == name) {
-							exportnames.Add(exp);
-						}
-					}
-				}
+                } else {
+                    var aType = GetFullName(Exports[Asset.mainExport - 1].ClassIndex.Index);
+                    if (SIMPLE_ASSETS.Contains(aType)) SerializeSimpleAsset();
+                }
+            }
+        }
 
-				if (exportnames.Count == 1) {
-					return GetFullName(exportnames[0].ClassIndex.Index);
-				} else {
-					if (isasset.Count == 1) {
-						return GetFullName(isasset[0].ClassIndex.Index);
-					} else {
-						Console.WriteLine("Couldn't identify asset type : " + file);
-						return "null";
-					}
-				}
-			}
-		}
+        public static void MoveAssets(string dirForm, string dirTo, List<string> types, UE4Version version,
+            bool copy = true) {
+            var files = Directory.GetFiles(dirForm, "*.uasset", SearchOption.AllDirectories);
 
-		public static JObject GuidToJson(Guid Value) {
-			JObject res = new JObject();
-			uint[] guid = Value.ToUnsignedInts();
-			res.Add(new JProperty("A", (int)guid[0]));
-			res.Add(new JProperty("B", (int)guid[1]));
-			res.Add(new JProperty("C", (int)guid[2]));
-			res.Add(new JProperty("D", (int)guid[3]));
-			return res;
-		}
+            foreach (var file in files) {
+                var uexpFile = Path.ChangeExtension(file, "uexp");
+                var ubulkFile = Path.ChangeExtension(file, "ubulk");
+                var type = GetAssetType(file, version);
+                if (!types.Contains(type)) continue;
+                var relativePath = Path.GetRelativePath(dirForm, file);
+                var newPath = Path.Combine(dirTo, relativePath);
 
-	}
+                Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
+                if (File.Exists(uexpFile)) {
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                }
+
+                if (!File.Exists(ubulkFile)) continue;
+                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+            }
+        }
+
+        public static string GetAssetType(string file, UE4Version version) {
+            var name = Path.GetFileNameWithoutExtension(file).ToLower();
+            Asset = new UAsset(file, version, true);
+            if (Asset.Exports.Count == 1) {
+                return GetFullName(Asset.Exports[0].ClassIndex.Index);
+            }
+
+            List<Export> exportNames = new();
+            List<Export> isAsset = new();
+            foreach (var exp in Asset.Exports) {
+                if (exp.ObjectName.ToName().ToLower() == name + "_c") exportNames.Add(exp);
+                if (exp.bIsAsset) isAsset.Add(exp);
+            }
+
+            if (exportNames.Count == 0)
+                exportNames.AddRange(Asset.Exports.Where(exp => exp.ObjectName.ToName().ToLower() == name));
+
+            if (exportNames.Count == 1) {
+                return GetFullName(exportNames[0].ClassIndex.Index);
+            }
+
+            if (isAsset.Count == 1) {
+                return GetFullName(isAsset[0].ClassIndex.Index);
+            }
+
+            Console.WriteLine("Couldn't identify asset type : " + file);
+            return "null";
+        }
+
+        public static JObject GuidToJson(Guid value) {
+            var res = new JObject();
+            var guid = value.ToUnsignedInts();
+            res.Add(new JProperty("A", (int)guid[0]));
+            res.Add(new JProperty("B", (int)guid[1]));
+            res.Add(new JProperty("C", (int)guid[2]));
+            res.Add(new JProperty("D", (int)guid[3]));
+            return res;
+        }
+    }
 }
