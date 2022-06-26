@@ -11,31 +11,27 @@ using UAssetAPI.StructTypes;
 namespace CookedAssetSerializer {
     public partial class Serializers {
         public static void SerializeBlendSpace() {
-            if (!SetupSerialization(out var name, out var gamepath, out var path1)) return;
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
 
             var ja = new JObject();
-            var blendSpace = Exports[Asset.mainExport - 1] as BlendSpaceBaseExport;
+            if (Exports[Asset.mainExport - 1] is not BlendSpaceBaseExport blendSpace) return;
+            ja.Add("AssetClass", blendSpace.ClassIndex.ToImport(Asset).ObjectName.ToName());
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject();
 
-            if (blendSpace != null) {
-                ja.Add("AssetClass", blendSpace.ClassIndex.ToImport(Asset).ObjectName.ToName());
-                ja.Add("AssetPackage", gamepath);
-                ja.Add("AssetName", name);
-                var asdata = new JObject();
+            PopulateBlendParameters(ref blendSpace.Data);
 
+            var jData = SerializaListOfProperties(blendSpace.Data);
+            asData.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
 
-                PopulateBlendParameters(ref blendSpace.Data);
+            jData.Add("SkeletonGuid", GuidToJson(blendSpace.SkeletonGuid));
+            jData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-                var jdata = SerializaListOfProperties(blendSpace.Data);
-                asdata.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
-
-                jdata.Add("SkeletonGuid", GuidToJson(blendSpace.SkeletonGuid));
-                jdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
-
-                asdata.Add("AssetObjectData", jdata);
-                ja.Add("AssetSerializedData", asdata);
-                ja.Add(ObjectHierarchy(Asset));
-                File.WriteAllText(path1, ja.ToString());
-            }
+            asData.Add("AssetObjectData", jData);
+            ja.Add("AssetSerializedData", asData);
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
         }
 
         private static void PopulateBlendParameters(ref List<PropertyData> data, int v = 3) {

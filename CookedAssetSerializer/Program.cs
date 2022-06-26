@@ -21,7 +21,6 @@ namespace CookedAssetSerializer {
             EAssetType.AnimMontage,
             EAssetType.FileMediaSource,
             EAssetType.StaticMesh,
-            EAssetType.Texture2D,
         };
 
         public static readonly List<string> CIRCULAR_DEPENDENCY = new() {

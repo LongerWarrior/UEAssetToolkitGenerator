@@ -304,7 +304,6 @@ namespace CookedAssetSerializer {
                         case EAssetType.BlendSpaceBase:
                             SerializeBlendSpace();
                             break;
-
                         case EAssetType.AnimMontage:
                         case EAssetType.CameraAnim:
                         case EAssetType.LandscapeGrassType:
@@ -344,11 +343,7 @@ namespace CookedAssetSerializer {
                             SerializeCurveBase();
                             break;
                         case EAssetType.Texture2D:
-                            try {
-                                SerializeTexture();
-                            } catch (Exception e) {
-                                Console.WriteLine("Could not serialise file; " + e);
-                            }
+                            SerializeTexture();
                             break;
                         case EAssetType.SkeletalMesh:
                             break;

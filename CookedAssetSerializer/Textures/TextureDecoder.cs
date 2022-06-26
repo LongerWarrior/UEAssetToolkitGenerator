@@ -19,9 +19,6 @@ namespace Textures {
             if (!texture.IsVirtual && mip != null) {
                 byte[] data;
                 SKColorType colorType;
-                //if (iscube) {
-                mip.SizeY *= slices;
-                //}
 
                 DecodeTexture(mip, texture.Format, texture.isNormalMap, out data, out colorType, srgb);
 

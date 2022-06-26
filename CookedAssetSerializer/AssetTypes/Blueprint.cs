@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using UAssetAPI;
@@ -13,6 +14,7 @@ using UAssetAPI.StructTypes;
 
 namespace CookedAssetSerializer {
     public partial class Serializers {
+        [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
         public static void SerializeBPAsset(bool dummy) {
             if (!SetupSerialization(out var name, out var gamepath, out var path1)) return;
 
