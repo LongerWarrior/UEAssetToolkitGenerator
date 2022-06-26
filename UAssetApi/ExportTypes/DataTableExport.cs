@@ -71,7 +71,7 @@ namespace UAssetAPI
                 {
                     StructType = decidedStructType
                 };
-                nextStruct.Read(reader, false, 1);
+                nextStruct.Read(reader, false, -1);
                 Table.Data.Add(nextStruct);
             }
         }

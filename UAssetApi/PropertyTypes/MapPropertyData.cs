@@ -80,7 +80,7 @@ namespace UAssetAPI.PropertyTypes
 
                     StructPropertyData data = new StructPropertyData(name, strucType);
                     data.Offset = reader.BaseStream.Position;
-                    data.Read(reader, false, 1);
+                    data.Read(reader, false, -1);
                     return data;
                 default:
                     var res = MainSerializer.TypeToClass(type, name, reader.Asset, null, leng);

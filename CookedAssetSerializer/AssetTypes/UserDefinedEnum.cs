@@ -13,7 +13,7 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeUserDefinedEnum() {
-			SetupSerialization(out string name, out string gamepath, out string path1);
+			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
 			EnumExport uenum = exports[asset.mainExport - 1] as EnumExport;
 

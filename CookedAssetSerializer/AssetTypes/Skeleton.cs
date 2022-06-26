@@ -14,7 +14,7 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeSkeleton() {
-			SetupSerialization(out string name, out string gamepath, out string path1);
+			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
 			SkeletonExport mainobject = exports[asset.mainExport - 1] as SkeletonExport;
 
@@ -65,10 +65,9 @@ namespace CookedAssetSerializer {
 				if (!hasVB) { asdata.Add("VirtualBones", new JArray()); } else { jdatavalue.Remove("VirtualBones"); }
 				if (!hasBP) { jdatavalue.Add("BlendProfiles", new JArray()); }
 
-				jdatavalue.Add("SmartNames", new JObject());
-				jdatavalue.Add("AssetUserData", new JArray());
+				//jdatavalue.Add("SmartNames", new JObject());
+				//jdatavalue.Add("AssetUserData", new JArray());
 				jdatavalue.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-				refobjects = new List<int>();
 				jdata.Value = jdatavalue;
 
 

@@ -6,6 +6,7 @@ using UAssetAPI;
 using UAssetAPI.FieldTypes;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
+using static CookedAssetSerializer.Globals;
 using static CookedAssetSerializer.Serializers;
 
 namespace CookedAssetSerializer {
@@ -20,25 +21,31 @@ namespace CookedAssetSerializer {
 		public static List<string> GeneratedVariables = new List<string>();
 		public static List<string> DisableGeneration = new List<string>();
 
-		public static string ContentDir = @"C:\Games\DRGNEW\FSD\Content";
-		public static string JsonDir = @"C:\Games\DRGNEW\FSD\Json";
-
-		public static void SetupSerialization(out string name, out string gamepath, out string path1) {
+		public static bool SetupSerialization(out string name, out string gamepath, out string path1) {
 			dict = new();
 			DisableGeneration = new();
 			GeneratedVariables = new();
 			refobjects = new();
 
-			FixIndexes();
-
 			string fullpath = asset.FilePath;
 			name = Path.GetFileNameWithoutExtension(fullpath);
 			var directory = Path.GetDirectoryName(fullpath);
 			var relativepath = Path.GetRelativePath(ContentDir, directory);
+			if (relativepath.StartsWith(".")) {
+				relativepath = "\\";
+			}
 			gamepath = Path.Join("\\Game", relativepath, name).Replace("\\", "/");
 			path1 = Path.Join(JsonDir, gamepath) + ".json";
 
 			Directory.CreateDirectory(Path.GetDirectoryName(path1));
+			if (!refreshassets && File.Exists(path1)) return false;
+
+			asset = new UAsset(fullpath, globalUE, false);
+
+			FixIndexes();
+
+			return true;
+
 		}
 
 		public static bool FindExternalProperty(UAsset asset, FName propname, out FProperty property) {
@@ -101,6 +108,22 @@ namespace CookedAssetSerializer {
 				}
 			}
 
+			return false;
+		}
+
+		public static bool FindPropertyData(List<PropertyData> list, string propname, out PropertyData[] props) {
+
+			props = null;
+			List<PropertyData> temp = new();
+			foreach (PropertyData property in list) {
+				if (property.Name.ToName() == propname) {
+					temp.Add(property);
+				}
+			}
+			if (temp.Count > 0) {
+				props = temp.ToArray();
+				return true;
+            }
 			return false;
 		}
 
@@ -258,6 +281,7 @@ namespace CookedAssetSerializer {
 						if (Data[i].DuplicationIndex != Data[i - 1].DuplicationIndex + 1 && Data[i].Name.ToName() == Data[i - 1].Name.ToName()) {
 
 							Console.WriteLine("Missing property with lower duplication index  Name : " + Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() + " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
+							
 							return false;
 						}
 					} else {
@@ -265,11 +289,7 @@ namespace CookedAssetSerializer {
 					}
 				} else {
 					if (Data[i].DuplicationIndex > 0) {
-
-
 						Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " + Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() + " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
-						Data.Insert(0, new StructPropertyData(Data[i].Name, (Data[i] as StructPropertyData).StructType, 0));
-						(Data[0] as StructPropertyData).Value = new List<PropertyData> { new MovieSceneFloatChannelPropertyData() };
 						return false;
 					}
 				}
@@ -279,9 +299,12 @@ namespace CookedAssetSerializer {
 		}
 
 
-		public static void ScanAssetTypes(string[] files, UE4Version version, string typetofind = "") {
+		public static void ScanAssetTypes(string directory, UE4Version version, string typetofind = "") {
 			
 			Dictionary<string, List<string>> types = new();
+			List<string> alltypes = new();
+
+			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
 
 			foreach (string file in files) {
 
@@ -303,10 +326,106 @@ namespace CookedAssetSerializer {
 			JObject jtypes = new JObject(); 
 			foreach (KeyValuePair<string, List<string>> entry in types) {
 				Console.WriteLine(entry.Key + " : " + entry.Value.Count);
-				jtypes.Add(entry.Key, JArray.FromObject(entry.Value)); 
-			}
-			File.WriteAllText(ContentDir+"\\AssetTypes.json", jtypes.ToString());
+				jtypes.Add(entry.Key, JArray.FromObject(entry.Value));
+                alltypes.Add("\""+entry.Key+ "\",");
+            }
+            File.WriteAllText(JsonDir+"\\AssetTypes.json", jtypes.ToString());
+			File.WriteAllText(JsonDir+"\\AllTypes.txt", String.Join("\n",alltypes));
+
 		}
+
+		public static void SerializeAssets(string directory) {
+
+			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+			foreach (string file in files) {
+
+				asset = new UAsset(file, globalUE, true);
+
+				if (skipserialization.Contains(asset.assetType)) continue;
+
+				if (asset.assetType != EAssetType.Uncategorized) {
+					switch (asset.assetType) {
+
+						case EAssetType.Blueprint:
+						case EAssetType.WidgetBlueprint:
+						case EAssetType.AnimBlueprint:
+							SerializeBPAsset(false);
+							break;
+						case EAssetType.DataTable:
+							SerializeDataTable();
+							break;
+						case EAssetType.StringTable:
+							SerializeStringTable();
+							break;
+						case EAssetType.UserDefinedStruct:
+							SerializeUserDefinedStruct();
+							break;
+						case EAssetType.BlendSpaceBase:
+							SerializeBlendSpace();
+							break;
+
+						case EAssetType.AnimMontage:
+						case EAssetType.CameraAnim:
+						case EAssetType.LandscapeGrassType:
+						case EAssetType.MediaPlayer:
+						case EAssetType.MediaTexture:
+						case EAssetType.SubsurfaceProfile:
+							SerializeSimpleAsset(false);
+							break;
+						case EAssetType.Skeleton:
+							SerializeSkeleton();
+							break;
+						case EAssetType.MaterialParameterCollection:
+							SerializeMaterialParameterCollection();
+							break;
+						case EAssetType.PhycialMaterial:
+							SerializePhysicalMaterial();
+							break;
+						case EAssetType.Material:
+							SerializeMaterial();
+							break;
+						case EAssetType.MaterialInstanceConstant:
+							SerializeMaterialInstanceConstant();
+							break;
+						case EAssetType.UserDefinedEnum:
+							SerializeUserDefinedEnum();
+							break;
+						case EAssetType.SoundCue:
+							SerializeSoundCue();
+							break;
+						case EAssetType.Font:
+							SerializeFont();
+							break;
+						case EAssetType.FontFace:
+							SerializeFontFace();
+							break;
+						case EAssetType.CurveBase:
+							SerializeCurveBase();
+							break;
+						case EAssetType.Texture2D:
+							SerializeTexture();
+							break;
+						case EAssetType.SkeletalMesh:
+							break;
+						case EAssetType.FileMediaSource:
+							SerializeFileMediaSource();
+							break;
+						case EAssetType.StaticMesh:
+							SerializeStaticMesh();
+							break;
+						default:
+							break;
+					}
+				} else {
+					var atype = GetFullName(exports[asset.mainExport - 1].ClassIndex.Index);
+					if (simpleassets.Contains(atype)) {
+						SerializeSimpleAsset(true);
+					}
+				}
+			}
+
+		}
+
 		public static void MoveAssets(string dirfrom, string dirto, List<string> types, UE4Version version, bool copy = true) {
 
 			string[] files = Directory.GetFiles(dirfrom, "*.uasset", SearchOption.AllDirectories);
@@ -318,16 +437,28 @@ namespace CookedAssetSerializer {
 				if (types.Contains(type)) {
 					var relativepath = Path.GetRelativePath(dirfrom, file);
 					var newpath = Path.Combine(dirto, relativepath);
+					
+					Directory.CreateDirectory(Path.GetDirectoryName(newpath));
 					if (copy) {
-						Directory.CreateDirectory(Path.GetDirectoryName(newpath));
-						File.Copy(file, newpath,true);
-						if (File.Exists(uexpfile)) {
+						File.Copy(file, newpath, true);
+					} else {
+						File.Move(file, newpath, true);
+					}
+					if (File.Exists(uexpfile)) {
+						if (copy) {
 							File.Copy(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
-                        }
-						if (File.Exists(ubulkfile)) {
+						} else {
+							File.Move(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
+						}
+                    }
+					if (File.Exists(ubulkfile)) {
+						if (copy) {
 							File.Copy(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
+						} else {
+							File.Move(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
 						}
 					}
+					
 				}
 
 			}

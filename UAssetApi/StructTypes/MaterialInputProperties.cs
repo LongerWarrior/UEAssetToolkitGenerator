@@ -6,11 +6,19 @@ namespace UAssetAPI.StructTypes
     public abstract class MaterialInputPropertyData<T> : PropertyData<T>
     {
         [JsonProperty]
-        public byte[] Extras;
+        public int Mask;
+        [JsonProperty]
+        public int MaskR;
+        [JsonProperty]
+        public int MaskG;
+        [JsonProperty]
+        public int MaskB;
+        [JsonProperty]
+        public int MaskA;
         [JsonProperty]
         public int OutputIndex;
         [JsonProperty]
-        public FName InputName;
+        public FString InputName;
         [JsonProperty]
         public FName ExpressionName;
 
@@ -26,28 +34,55 @@ namespace UAssetAPI.StructTypes
 
         protected void ReadExpressionInput(AssetBinaryReader reader, bool includeHeader, long leng)
         {
-            OutputIndex = reader.ReadInt32();
-            InputName = reader.ReadFName();
-            Extras = reader.ReadBytes(20); // always 0s
-            ExpressionName = reader.ReadFName();
-            return;
+            if (reader.Asset.GetCustomVersion<FCoreObjectVersion>() >= FCoreObjectVersion.MaterialInputNativeSerialize) {
+                OutputIndex = reader.ReadInt32();
+                if (reader.Asset.GetCustomVersion<FFrameworkObjectVersion>() >= FFrameworkObjectVersion.PinsStoreFName) {
+                    InputName = reader.ReadFName().Value;
+                } else {
+                    InputName = reader.ReadFString();
+                }
+                Mask = reader.ReadInt32();
+                MaskR = reader.ReadInt32();
+                MaskG = reader.ReadInt32();
+                MaskB = reader.ReadInt32();
+                MaskA = reader.ReadInt32();
+                ExpressionName = reader.ReadFName();
+            }
         }
 
         protected int WriteExpressionInput(AssetBinaryWriter writer, bool includeHeader)
         {
-            writer.Write(OutputIndex);
-            writer.Write(InputName);
-            writer.Write(Extras); // always 0s
-            writer.Write(ExpressionName);
-            return (sizeof(int) * 2) * 2 + sizeof(int) + 20;
+            int totalSize = 0;
+            if (writer.Asset.GetCustomVersion<FCoreObjectVersion>() >= FCoreObjectVersion.MaterialInputNativeSerialize) {
+                writer.Write(OutputIndex); totalSize += sizeof(int);
+                if (writer.Asset.GetCustomVersion<FFrameworkObjectVersion>() >= FFrameworkObjectVersion.PinsStoreFName) {
+                    writer.Write(new FName(InputName)); totalSize += sizeof(int) * 2;
+                } else {
+                    totalSize += writer.Write(InputName);
+                }
+                writer.Write(Mask);
+                writer.Write(MaskR);
+                writer.Write(MaskG);
+                writer.Write(MaskB);
+                writer.Write(MaskA);
+                totalSize += 20;
+                writer.Write(ExpressionName); totalSize += sizeof(int) * 2;
+            }
+            return totalSize;
+
         }
 
         protected override void HandleCloned(PropertyData res)
         {
             MaterialInputPropertyData<T> cloningProperty = (MaterialInputPropertyData<T>)res;
-            cloningProperty.InputName = (FName)this.InputName.Clone();
-            cloningProperty.InputName = (FName)this.ExpressionName.Clone();
-            cloningProperty.Extras = (byte[])this.Extras.Clone();
+            cloningProperty.InputName = (FString)this.InputName.Clone();
+            cloningProperty.ExpressionName = (FName)this.ExpressionName.Clone();
+            cloningProperty.Mask = this.Mask;
+            cloningProperty.MaskR = this.MaskR;
+            cloningProperty.MaskG = this.MaskG;
+            cloningProperty.MaskB = this.MaskB;
+            cloningProperty.MaskA = this.MaskA;
+
         }
     }
 
@@ -69,8 +104,7 @@ namespace UAssetAPI.StructTypes
 
         public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
         {
-            if (includeHeader)
-            {
+            if (includeHeader) {
                 PropertyGuid = reader.ReadPropertyGuid();
             }
 

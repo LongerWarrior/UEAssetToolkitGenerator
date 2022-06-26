@@ -17,7 +17,9 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeTexture() {
-            SetupSerialization(out string name, out string gamepath, out string path1);
+            if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+            DisableGeneration.Add("LightingGuid");
+            DisableGeneration.Add("ImportedSize");
             string path2 = Path.ChangeExtension(path1, "png");
             JObject ja = new JObject();
             Texture2DExport texture = exports[asset.mainExport - 1] as Texture2DExport;
@@ -31,51 +33,52 @@ namespace CookedAssetSerializer {
                 JObject asdata = new JObject();
 
                 ja.Add("AssetSerializedData", asdata);
-                if (texture.Data.Count > 0) {
-                    foreach (PropertyData property in texture.Data) {
-                        asdata.Add(SerializePropertyData(property));
-                    }
-                }
+
+                JObject aodata = SerializaListOfProperties(texture.Data);
+                aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+                refobjects = new List<int>();
+                asdata.Add("AssetObjectData", aodata);
 
                 asdata.Add("TextureWidth", texture.Mips[0].SizeX);
                 asdata.Add("TextureHeight", texture.Mips[0].SizeY);
                 asdata.Add("TextureDepth", texture.Mips[0].SizeZ);
+                bool iscube = false;
+                int NumSlices = 1;
                 if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "TextureCube") {
-                    asdata.Add("NumSlices", 6);
+                    NumSlices = 6;
+                    iscube = true;
                 } else if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "Texture2DArray") {
-                    asdata.Add("NumSlices", texture.Mips[0].SizeZ);
-                } else {
-                    asdata.Add("NumSlices", 1);
-                }
+                    NumSlices = texture.Mips[0].SizeZ;
+                } 
 
+                asdata.Add("NumSlices", NumSlices);
                 asdata.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
 
                 Thread.Sleep(50);
 
-                var bitmap = TextureDecoder.Decode(texture, texture.Mips[0]);
+                bool srgb = true;
+                if (FindPropertyData(texture,"SRGB",out PropertyData prop)) {
+                    srgb = ((BoolPropertyData)prop).Value;
+                }
+                if (FindPropertyData(texture, "CompressionSettings", out PropertyData _compression)) {
+                    BytePropertyData compression = (BytePropertyData)_compression;
+                    if (compression.ByteType == BytePropertyType.Long) {
+                        if (asset.GetNameReference(compression.Value).ToString().Contains("TC_Normalmap")) {
+                            texture.isNormalMap = true;
+                        }
+                    }
+                }
+                var bitmap = TextureDecoder.Decode(texture, texture.Mips[0],NumSlices,out string hash,srgb,iscube);
+                var hashend = bitmap.Bytes.Length.ToString("x2");
                 using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
                 using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
                 using var stream = data.AsStream();
                 stream.CopyTo(fs);
                 fs.Close();
-
                 Thread.Sleep(50);
-                using (var md5 = MD5.Create()) {
-                    using (var stream1 = File.OpenRead(path2)) {
-                        string hash = md5.ComputeHash(stream1).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
-                        asdata.Add("SourceImageHash", hash);
-                    }
-                }
 
-                /*FString UTexture2DGenerator::ComputeTextureHash(UTexture2D * Texture) {
-                    TArray64<uint8> OutSourceMipMapData;
-                    check(Texture->Source.GetMipData(OutSourceMipMapData, 0));
-
-                    FString TextureHash = FMD5::HashBytes(OutSourceMipMapData.GetData(), OutSourceMipMapData.Num() * sizeof(uint8));
-                    TextureHash.Append(FString::Printf(TEXT("%llx"), OutSourceMipMapData.Num()));
-                    return TextureHash;
-                }*/
-
+                hash += hashend;
+                asdata.Add("SourceImageHash", hash);
 
                 ja.Add(ObjectHierarchy(asset));
                 File.WriteAllText(path1, ja.ToString());

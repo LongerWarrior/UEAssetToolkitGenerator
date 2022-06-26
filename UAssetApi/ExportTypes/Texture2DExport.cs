@@ -314,7 +314,7 @@ namespace UAssetAPI
         public FVirtualTextureBuiltData? VTData { get; private set; }
         public bool IsVirtual => VTData != null;
         public bool bRenderNearestNeighbor { get; private set; }
-        public bool isNormalMap { get; private set; }
+        public bool isNormalMap = false;
 
 
 

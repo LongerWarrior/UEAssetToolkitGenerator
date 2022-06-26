@@ -124,6 +124,7 @@ namespace UAssetAPI
         //TextureCube
         
         //MaterialFunction
+        SoundCue,
     }
     public class UAsset {
         public EAssetType assetType = EAssetType.Uncategorized; 
@@ -162,22 +163,24 @@ namespace UAssetAPI
                     case "CurveLinearColor":
                     case "CurveVector": return EAssetType.CurveBase;
                     
-                    //case "AnimSequence": return EAssetType.AnimSequence;
+                    case "AnimSequence": return EAssetType.AnimSequence;
                     //case "SkeletalMesh": return EAssetType.SkeletalMesh;
-                    //case "Skeleton": return EAssetType.Skeleton;
-                    //case "StaticMesh": return EAssetType.StaticMesh;
-                    //case "AnimMontage": return EAssetType.AnimMontage;
-                    //case "CameraAnim": return EAssetType.CameraAnim;
-                    //case "LandscapeGrassType": return EAssetType.LandscapeGrassType;
+                    case "Skeleton": return EAssetType.Skeleton;
+                    case "StaticMesh": return EAssetType.StaticMesh;
+                    case "AnimMontage": return EAssetType.AnimMontage;
+                    case "CameraAnim": return EAssetType.CameraAnim;
+                    case "LandscapeGrassType": return EAssetType.LandscapeGrassType;
                     case "MaterialInstanceConstant": return EAssetType.MaterialInstanceConstant;
                     case "MaterialParameterCollection": return EAssetType.MaterialParameterCollection;
-                    //case "MediaPlayer": return EAssetType.MediaPlayer;
-                    //case "MediaTexture": return EAssetType.MediaTexture;
-                    //case "FileMediaSource": return EAssetType.FileMediaSource;
+                    case "MediaPlayer": return EAssetType.MediaPlayer;
+                    case "MediaTexture": return EAssetType.MediaTexture;
+                    case "FileMediaSource": return EAssetType.FileMediaSource;
                     case "PhycialMaterial": return EAssetType.PhycialMaterial;
-                    //case "SubsurfaceProfile": return EAssetType.SubsurfaceProfile;
+                    case "SubsurfaceProfile": return EAssetType.SubsurfaceProfile;
 
+                    case "SoundCue": return EAssetType.SoundCue;
                     //case "MaterialFunction": return EAssetType.MaterialFunction;
+
 
                     default: return EAssetType.Uncategorized;
                 }
@@ -255,7 +258,7 @@ namespace UAssetAPI
             f.Seek(0, SeekOrigin.Begin);
 
             if (f.Length != newDataStream.Length) {
-                Console.WriteLine(f.Length + " - "+ newDataStream.Length);
+                Debug.WriteLine(f.Length + " - "+ newDataStream.Length);
                 //return false;
 
             }
@@ -271,7 +274,7 @@ namespace UAssetAPI
                 int lastRead2 = newDataStream.Read(buffer2, 0, buffer2.Length);
                 if (lastRead1 != lastRead2) {
 
-                    //Console.WriteLine("Pos1: " + lastRead1 +" Length 1"+ buffer.Length+ "Pos2: " + lastRead2 + " Length 2" + buffer2.Length);
+                    Debug.WriteLine("Pos1: " + lastRead1 +" Length 1"+ buffer.Length+ "Pos2: " + lastRead2 + " Length 2" + buffer2.Length);
                     return false;
                 }
 
@@ -279,7 +282,7 @@ namespace UAssetAPI
                     
                     for (int k = 0; k < buffer.Length; k++) {
                         if (buffer[k] != buffer2[k]) {
-                            //Console.WriteLine("WrongByte - Pos: " + (leng - buffer.Length + k) + " Original: " + buffer[k] + " New: " + buffer2[k]);
+                            Debug.WriteLine("WrongByte - Pos: " + (leng - buffer.Length + k) + " Original: " + buffer[k] + " New: " + buffer2[k]);
                             notbroken = false;
                             break;
                             
@@ -780,7 +783,9 @@ namespace UAssetAPI
             { "SubSequences", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
             { "Hierarchy", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
             { "TrackSignatureToTrackIdentifier", new Tuple<FName, FName>(new FName("Guid"),new FName("MovieSceneTrackIdentifier"))},
-
+            { "ItemsToRefund", new Tuple<FName, FName>(new FName("Guid"), null) },
+            //{ "Resources", new Tuple<FName, FName>(new FName("Guid"), null) },
+            { "PlayerCharacterIDMap", new Tuple<FName, FName>(new FName("Guid"), null) },
         };
 
         [JsonIgnore]
@@ -1311,6 +1316,14 @@ namespace UAssetAPI
                                     Exports[i] = Exports[i].ConvertToChildExport<Texture2DExport>();
                                     Exports[i].Read(reader, (int)nextStarting);
                                     break;
+                                case "Skeleton":
+                                        Exports[i] = Exports[i].ConvertToChildExport<SkeletonExport>();
+                                        Exports[i].Read(reader, (int)nextStarting);
+                                    break;
+                                case "StaticMesh":
+                                    Exports[i] = Exports[i].ConvertToChildExport<StaticMeshExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                    break;
                                 default:
                                     if (exportClassType.EndsWith("DataTable")) {
                                         Exports[i] = Exports[i].ConvertToChildExport<DataTableExport>();
@@ -1322,9 +1335,6 @@ namespace UAssetAPI
 
                                     /*else if (exportClassType == "PhysicsAsset") {
                                         Exports[i] = Exports[i].ConvertToChildExport<PhysicsAssetExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    } else if (exportClassType == "Skeleton") {
-                                        Exports[i] = Exports[i].ConvertToChildExport<SkeletonExport>();
                                         Exports[i].Read(reader, (int)nextStarting);
                                     } else if (exportClassType == "SkeletalMesh") {
                                         Exports[i] = Exports[i].ConvertToChildExport<SkeletalMeshExport>();
@@ -1961,7 +1971,15 @@ namespace UAssetAPI
 
             Read(PathToReader(path));
         }
-
+        /// <summary>
+        /// Reads an asset from disk and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+        /// </summary>
+        /// <param name="path">The path of the asset file on disk that this instance will read from.</param>
+        /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
+        /// <param name="onlyheader">True if u want to parse only header file.</param>
+        /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
+        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
         public UAsset(string path, UE4Version engineVersion = UE4Version.UNKNOWN, bool onlyheader=false, List<CustomVersion> defaultCustomVersionContainer = null) {
             this.FilePath = path;
             EngineVersion = engineVersion;

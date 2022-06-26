@@ -228,12 +228,17 @@ namespace UAssetGUI
             if (me == null) return;
             switch (me.PropertyType.Value.Value)
             {
+
                 case "StructProperty":
                     var struc = (StructPropertyData)me;
 
                     string decidedName = struc.Name.Value.Value;
                     if (ourNode.Pointer is PropertyData && ((PropertyData)ourNode.Pointer).Name.Equals(decidedName)) decidedName = struc.StructType.Value.Value;
 
+                    if (struc.Value.Count == 1 && struc.Value[0] is RawStructPropertyData raw) {
+                        ourNode.Nodes.Add(new PointingTreeNode("raw " + decidedName + " (" + raw.Value.Length + ")", raw.Value));
+                        break;
+                    }
                     var structNode = new PointingTreeNode(decidedName + " (" + struc.Value.Count + ")", struc);
                     ourNode.Nodes.Add(structNode);
                     for (int j = 0; j < struc.Value.Count; j++)
@@ -1393,10 +1398,21 @@ namespace UAssetGUI
                                 }
                                 standardRendering = false;
                                 break;
+                            //case RawStructPropertyData raw:
+                            //    Control currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
+                            //    dataGridView1.Visible = false;
+                            //    byteView1.SetBytes(new byte[] { });
+                            //    byteView1.SetBytes(raw.Value);
+                            //    byteView1.Visible = true;
+                            //    currentlyFocusedControl.Focus();
+                            //    origForm.ForceResize();
+                            //    standardRendering = false;
+                            //    break;
                             case PropertyData[] usRealArr:
                                 renderingArr = usRealArr;
                                 dataGridView1.AllowUserToAddRows = false;
                                 break;
+
                             case byte[] bytes:
                                 Control currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;

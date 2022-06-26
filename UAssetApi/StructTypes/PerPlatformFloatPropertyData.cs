@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UAssetAPI.PropertyTypes;
@@ -8,8 +9,9 @@ namespace UAssetAPI.StructTypes
     /// <summary>
     /// <see cref="FloatPropertyData"/> (<see cref="float"/>) property with per-platform overrides.
     /// </summary>
-    public class PerPlatformFloatPropertyData : PropertyData<float[]>
+    public class PerPlatformFloatPropertyData : PropertyData<float>
     {
+        public bool bCooked;
         public PerPlatformFloatPropertyData(FName name) : base(name)
         {
 
@@ -31,12 +33,8 @@ namespace UAssetAPI.StructTypes
                 PropertyGuid = reader.ReadPropertyGuid();
             }
 
-            int numEntries = reader.ReadInt32();
-            Value = new float[numEntries];
-            for (int i = 0; i < numEntries; i++)
-            {
-                Value[i] = reader.ReadSingle();
-            }
+            bCooked = reader.ReadInt32() != 0;
+            Value = reader.ReadSingle();
         }
 
         public override int Write(AssetBinaryWriter writer, bool includeHeader)
@@ -46,32 +44,16 @@ namespace UAssetAPI.StructTypes
                 writer.WritePropertyGuid(PropertyGuid);
             }
 
-            writer.Write(Value.Length);
-            for (int i = 0; i < Value.Length; i++)
-            {
-                writer.Write(Value[i]);
-            }
-            return sizeof(int) + sizeof(float) * Value.Length;
+            writer.Write(bCooked ? 1 : 0);
+            writer.Write(Value);
+
+            return sizeof(int) + sizeof(float);
         }
 
-        public override void FromString(string[] d, UAsset asset)
-        {
-            var valueList = new List<float>();
-            if (float.TryParse(d[0], out float res1)) valueList.Add(res1);
-            if (float.TryParse(d[1], out float res2)) valueList.Add(res2);
-            if (float.TryParse(d[2], out float res3)) valueList.Add(res3);
-            if (float.TryParse(d[3], out float res4)) valueList.Add(res4);
-            Value = valueList.ToArray();
-        }
-
-        public override string ToString()
-        {
-            string oup = "(";
-            for (int i = 0; i < Value.Length; i++)
-            {
-                oup += Convert.ToString(Value[i]) + ", ";
-            }
-            return oup.Remove(oup.Length - 2) + ")";
+        public override JToken ToJson() {
+            JObject res = new JObject();
+            res.Add("Default", Value);
+            return res;
         }
     }
 }

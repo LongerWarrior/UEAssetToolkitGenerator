@@ -14,6 +14,9 @@ namespace UAssetAPI.StructTypes
         public bool SerializeNone = true;
         [JsonProperty]
         public Guid StructGUID = Guid.Empty; // usually set to 0
+        private long structstart;
+        private long size;
+        private RawStructPropertyData TempValue;
 
         public StructPropertyData(FName name) : base(name)
         {
@@ -49,15 +52,32 @@ namespace UAssetAPI.StructTypes
             Value = new List<PropertyData> { data };
         }
 
+        private void ReadRawStruct(AssetBinaryReader reader, long offset, long size) {
+            reader.BaseStream.Position = structstart;
+            var data = new RawStructPropertyData(Name);
+            if (data == null) return;
+            data.Offset = offset;
+            data.Read(reader, false, size);
+            Value = new List<PropertyData> { data } ;
+        }
+
         private void ReadNTPL(AssetBinaryReader reader)
         {
             List<PropertyData> resultingList = new List<PropertyData>();
             PropertyData data = null;
             while ((data = MainSerializer.Read(reader, true)) != null)
             {
+                if (data is UnknownPropertyData && size > 0) {
+                    ReadRawStruct(reader, structstart, size);
+                    return;
+                }
                 resultingList.Add(data);
             }
 
+            if (reader.BaseStream.Position > structstart + size && size > 0) {
+                ReadRawStruct(reader, structstart, size);
+                return;
+            }
             Value = resultingList;
         }
 
@@ -82,12 +102,12 @@ namespace UAssetAPI.StructTypes
                 return;
             }
 
-            if (targetEntry != null && hasCustomStructSerialization)
-            {
+            structstart = reader.BaseStream.Position;
+            size = leng1;
+            
+            if (targetEntry != null && hasCustomStructSerialization) {
                 ReadOnce(reader, targetEntry.PropertyType, reader.BaseStream.Position);
-            }
-            else
-            {
+            } else {
                 ReadNTPL(reader);
             }
         }
@@ -99,13 +119,14 @@ namespace UAssetAPI.StructTypes
             return Value[0].Write(writer, false);
         }
 
-        private int WriteNTPL(AssetBinaryWriter writer)
-        {
+        private int WriteNTPL(AssetBinaryWriter writer) {
             int here = (int)writer.BaseStream.Position;
-            if (Value != null)
-            {
-                foreach (var t in Value)
-                {
+            if (Value != null) {
+                if (Value.Count ==1 && Value[0] is RawStructPropertyData rawstruct) {
+                    return rawstruct.Write(writer, false);
+                }
+
+                foreach (var t in Value) {
                     MainSerializer.Write(t, writer, true);
                 }
             }
@@ -126,6 +147,7 @@ namespace UAssetAPI.StructTypes
             bool hasCustomStructSerialization = targetEntry != null && targetEntry.HasCustomStructSerialization;
 
             if (StructType.Value.Value == "RichCurveKey" && writer.Asset.EngineVersion < UE4Version.VER_UE4_SERIALIZE_RICH_CURVE_KEY) hasCustomStructSerialization = false;
+
 
             if (targetEntry != null && hasCustomStructSerialization) return WriteOnce(writer);
             if (Value.Count == 0 && !SerializeNone) return 0;

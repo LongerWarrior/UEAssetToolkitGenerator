@@ -60,7 +60,7 @@ namespace Textures.BC
 
         private static void PrepareDllFile()
         {
-            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CUE4Parse_Conversion.Resources.Detex.dll");
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CookedAssetSerializer.Textures.Resources.Detex.dll");
             if (stream == null)
                 throw new MissingManifestResourceException("Couldn't find Detex.dll in Embedded Resources");
             var ba = new byte[(int)stream.Length];

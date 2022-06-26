@@ -207,7 +207,9 @@ namespace UAssetAPI
             int leng = reader.ReadInt32();
             int duplicationIndex = reader.ReadInt32();
             PropertyData result = TypeToClass(type, name, reader.Asset, reader, leng, duplicationIndex, includeHeader);
-            result.Offset = startingOffset;
+            if (result != null) {
+                result.Offset = startingOffset;
+            }
             return result;
         }
 
@@ -299,6 +301,7 @@ namespace UAssetAPI
             if (property == null) return 0;
 
             property.Offset = writer.BaseStream.Position;
+
             writer.Write(property.Name);
             if (property is UnknownPropertyData unknownProp)
             {

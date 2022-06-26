@@ -17,7 +17,7 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeMaterial() {
-			SetupSerialization(out string name, out string gamepath, out string path1);
+			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
 			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
 

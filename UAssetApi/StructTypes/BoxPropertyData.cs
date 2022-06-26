@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using UAssetAPI.PropertyTypes;
 
@@ -82,6 +83,16 @@ namespace UAssetAPI.StructTypes
                 newData[i] = (VectorPropertyData)this.Value[i].Clone();
             }
             cloningProperty.Value = newData;
+        }
+
+        public override JToken ToJson() {
+            JObject res = new JObject();
+
+            res.Add("Min", Value[0].ToJson());
+            res.Add("Max", Value[1].ToJson());
+            res.Add("IsValid", IsValid);
+
+            return res;
         }
     }
 }

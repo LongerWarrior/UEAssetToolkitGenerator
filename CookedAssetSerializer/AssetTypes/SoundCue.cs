@@ -1,39 +1,47 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
+using static UAssetAPI.Kismet.KismetSerializer;
+using UAssetAPI.PropertyTypes;
+using UAssetAPI.StructTypes;
+using System;
 
 namespace CookedAssetSerializer {
 
     public partial class Serializers {
 
-		public static void SerializeCurveBase() {
+		public static void SerializeSoundCue() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+			DisableGeneration.Add("FirstNode");
+			SoundGraphData = new();
 			JObject ja = new JObject();
-			CurveBaseExport blendSpace = exports[asset.mainExport - 1] as CurveBaseExport;
+			SoundCueExport soundcue = exports[Utils.asset.mainExport - 1] as SoundCueExport;
 
-			if (blendSpace != null) {
+			if (soundcue != null) {
 
-				ja.Add("AssetClass", blendSpace.ClassIndex.ToImport(asset).ObjectName.ToName());
+				ja.Add("AssetClass", "SoundCue");
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
+				asdata.Add("SoundCueGraph", String.Join(Environment.NewLine, soundcue.GetCueGraph()));
 
-				asdata.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
-				JObject jdata = SerializaListOfProperties(blendSpace.Data);
+				JObject jdata = SerializaListOfProperties(soundcue.Data);
+
 				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+
 				asdata.Add("AssetObjectData", jdata);
 				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Utils.asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}
 		}
-	}
+
+    }
 
 
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 using UAssetAPI.PropertyTypes;
 
@@ -66,6 +67,12 @@ namespace UAssetAPI.StructTypes
         {
             TimespanPropertyData cloningProperty = (TimespanPropertyData)res;
             cloningProperty.Value = new TimeSpan(cloningProperty.Value.Ticks);
+        }
+
+        public override JToken ToJson() {
+            JObject res = new JObject();
+            res.Add(new JProperty("Ticks", Value.Ticks));
+            return res;
         }
     }
 }

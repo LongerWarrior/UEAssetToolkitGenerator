@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UAssetAPI.PropertyTypes;
@@ -8,8 +9,9 @@ namespace UAssetAPI.StructTypes
     /// <summary>
     /// <see cref="IntPropertyData"/> (<see cref="int"/>) property with per-platform overrides.
     /// </summary>
-    public class PerPlatformIntPropertyData : PropertyData<int[]>
+    public class PerPlatformIntPropertyData : PropertyData<int>
     {
+        public bool bCooked;
         public PerPlatformIntPropertyData(FName name) : base(name)
         {
 
@@ -31,12 +33,8 @@ namespace UAssetAPI.StructTypes
                 PropertyGuid = reader.ReadPropertyGuid();
             }
 
-            int numEntries = reader.ReadInt32();
-            Value = new int[numEntries];
-            for (int i = 0; i < numEntries; i++)
-            {
-                Value[i] = reader.ReadInt32();
-            }
+            bCooked = reader.ReadInt32() != 0;
+            Value = reader.ReadInt32();
         }
 
         public override int Write(AssetBinaryWriter writer, bool includeHeader)
@@ -46,32 +44,14 @@ namespace UAssetAPI.StructTypes
                 writer.WritePropertyGuid(PropertyGuid);
             }
 
-            writer.Write(Value.Length);
-            for (int i = 0; i < Value.Length; i++)
-            {
-                writer.Write(Value[i]);
-            }
-            return sizeof(int) + sizeof(int) * Value.Length;
+            writer.Write(bCooked ? 1 : 0);
+            writer.Write(Value);
+            return sizeof(int)*2;
         }
-
-        public override void FromString(string[] d, UAsset asset)
-        {
-            var valueList = new List<int>();
-            if (int.TryParse(d[0], out int res1)) valueList.Add(res1);
-            if (int.TryParse(d[1], out int res2)) valueList.Add(res2);
-            if (int.TryParse(d[2], out int res3)) valueList.Add(res3);
-            if (int.TryParse(d[3], out int res4)) valueList.Add(res4);
-            Value = valueList.ToArray();
-        }
-
-        public override string ToString()
-        {
-            string oup = "(";
-            for (int i = 0; i < Value.Length; i++)
-            {
-                oup += Convert.ToString(Value[i]) + ", ";
-            }
-            return oup.Remove(oup.Length - 2) + ")";
+        public override JToken ToJson() {
+            JObject res = new JObject();
+            res.Add("Default", Value);
+            return res;
         }
     }
 }

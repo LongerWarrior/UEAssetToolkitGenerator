@@ -14,7 +14,7 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeMaterialInstanceConstant() {
-			SetupSerialization(out string name, out string gamepath, out string path1);
+			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
 			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
 			DisableGeneration.Add("MaterialLayersParameters");
@@ -28,6 +28,12 @@ namespace CookedAssetSerializer {
 
 
 				JObject aodata = SerializaListOfProperties(material.Data);
+				if (!FindPropertyData(material, "StaticParameters", out PropertyData prop)) {
+					aodata.Add("StaticParameters", new JObject());
+				}
+				if (!FindPropertyData(material, "AssetUserData", out prop)) {
+					aodata.Add("AssetUserData", new JArray());
+				}
 				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
 				refobjects = new List<int>();
 				asdata.Add("AssetObjectData", aodata);

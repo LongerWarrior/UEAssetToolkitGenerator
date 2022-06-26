@@ -171,5 +171,6 @@ namespace UAssetAPI
         {
             return this.XFERPTR(val);
         }
+
     }
 }

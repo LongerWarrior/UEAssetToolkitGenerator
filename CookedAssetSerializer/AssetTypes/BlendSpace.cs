@@ -13,7 +13,8 @@ namespace CookedAssetSerializer {
     public partial class Serializers {
 
 		public static void SerializeBlendSpace() {
-			SetupSerialization(out string name, out string gamepath, out string path1);
+			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+
 			JObject ja = new JObject();
 			BlendSpaceBaseExport blendSpace = exports[asset.mainExport - 1] as BlendSpaceBaseExport;
 
@@ -57,7 +58,7 @@ namespace CookedAssetSerializer {
 
 					data.Add(new StructPropertyData(new FName("BlendParameters"), new FName("BlendParameter"), missed) {
 						Value = new List<PropertyData> {
-							new StrPropertyData(new FName("DisplayName"){ Value = new FString("None")}),
+							new StrPropertyData(new FName("DisplayName")){ Value = new FString("None")},
 							new FloatPropertyData(new FName("Max")){ Value = 100.0f}
 						}
 					});
