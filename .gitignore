@@ -1,8 +1,14 @@
 .vs
 CookedAssetSerializer/bin
 CookedAssetSerializer/obj
+CookedAssetSerializerGUI/bin
+CookedAssetSerializerGUI/obj
 UAssetAPI/bin
 UAssetAPI/obj
 UAssetGUI/bin
 UAssetGUI/obj
 .idea/
+
+UpgradeLog.htm
+
+Backup/

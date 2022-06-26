@@ -35,7 +35,7 @@ namespace CookedAssetSerializer {
             path1 = Path.Join(JSON_DIR, gamePath) + ".json";
 
             Directory.CreateDirectory(Path.GetDirectoryName(path1) ?? string.Empty);
-            Asset = new UAsset(fullPath, GLOBAL_UE, false);
+            Asset = new UAsset(fullPath, GLOBAL_UE_VERSION, false);
             FixIndexes();
             return true;
         }
@@ -245,21 +245,19 @@ namespace CookedAssetSerializer {
         }
 
 
-        public static void ScanAssetTypes(string directory, UE4Version version, string typeToFind = "") {
+        public static void ScanAssetTypes(string typeToFind = "") {
             Dictionary<string, List<string>> types = new();
             List<string> allTypes = new();
 
-            var files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
             foreach (var file in files) {
-                var type = GetAssetType(file, version);
+                var type = GetAssetType(file, GLOBAL_UE_VERSION);
                 var path = "/" + Path.GetRelativePath(CONTENT_DIR, file).Replace("\\", "/");
                 Console.WriteLine(path);
 
-                if (types.ContainsKey(type))
-                    types[type].Add(path);
-                else
-                    types[type] = new List<string> { path };
+                if (types.ContainsKey(type)) types[type].Add(path);
+                else types[type] = new List<string> { path };
 
                 if (type == typeToFind) Console.WriteLine(type + " : " + path);
             }
@@ -276,10 +274,10 @@ namespace CookedAssetSerializer {
             File.WriteAllText(JSON_DIR + "\\AllTypes.txt", string.Join("\n", allTypes));
         }
 
-        public static void SerializeAssets(string directory) {
-            var files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+        public static void SerializeAssets() {
+            var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
             foreach (var file in files) {
-                Asset = new UAsset(file, GLOBAL_UE, true);
+                Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
 
                 Console.WriteLine(file);
 
@@ -361,17 +359,16 @@ namespace CookedAssetSerializer {
             }
         }
 
-        public static void MoveAssets(string dirForm, string dirTo, List<string> types, UE4Version version,
-            bool copy = true) {
-            var files = Directory.GetFiles(dirForm, "*.uasset", SearchOption.AllDirectories);
+        public static void MoveAssets(bool copy = true) {
+            var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
             foreach (var file in files) {
                 var uexpFile = Path.ChangeExtension(file, "uexp");
                 var ubulkFile = Path.ChangeExtension(file, "ubulk");
-                var type = GetAssetType(file, version);
-                if (!types.Contains(type)) continue;
-                var relativePath = Path.GetRelativePath(dirForm, file);
-                var newPath = Path.Combine(dirTo, relativePath);
+                var type = GetAssetType(file, GLOBAL_UE_VERSION);
+                if (!TYPES_TO_COPY.Contains(type)) continue;
+                var relativePath = Path.GetRelativePath(CONTENT_DIR, file);
+                var newPath = Path.Combine(OUTPUT_DIR, relativePath);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
                 if (copy) File.Copy(file, newPath, true);

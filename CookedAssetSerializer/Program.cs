@@ -7,13 +7,13 @@ using static CookedAssetSerializer.Globals;
 
 namespace CookedAssetSerializer {
     public static class Globals {
-        public const string CONTENT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
-        public const string JSON_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
-        public const string OUTPUT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
-        public const UE4Version GLOBAL_UE = UE4Version.VER_UE4_27;
-        public const bool REFRESH_ASSETS = true;
+        public static string CONTENT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
+        public static string JSON_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
+        public static string OUTPUT_DIR = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
+        public static UE4Version GLOBAL_UE_VERSION = UE4Version.VER_UE4_27;
+        public static bool REFRESH_ASSETS = true;
 
-        public static readonly List<EAssetType> SKIP_SERIALIZATION = new() {
+        public static List<EAssetType> SKIP_SERIALIZATION = new() {
             EAssetType.BlendSpaceBase,
             EAssetType.AnimSequence,
             EAssetType.SkeletalMesh,
@@ -23,13 +23,13 @@ namespace CookedAssetSerializer {
             EAssetType.StaticMesh,
         };
 
-        public static readonly List<string> CIRCULAR_DEPENDENCY = new() {
+        public static List<string> CIRCULAR_DEPENDENCY = new() {
             "/Script/Engine.SoundClass",
             "/Script/Engine.SoundSubmix",
             "/Script/Engine.EndpointSubmix"
         };
 
-        public static readonly List<string> SIMPLE_ASSETS = new() {
+        public static List<string> SIMPLE_ASSETS = new() {
             "/Script/Engine.SoundClass",
             "/Script/Engine.TextureRenderTarget2D",
             "/Script/Engine.MaterialFunction",
@@ -40,7 +40,7 @@ namespace CookedAssetSerializer {
             "/Script/Foliage.FoliageType_InstancedStaticMesh",
         };
 
-        public static List<string> TypesToCopy = new() {
+        public static List<string> TYPES_TO_COPY = new() {
             "/Script/Engine.ParticleSystem",
             "/Script/Engine.StaticMesh",
             "/Script/Engine.SoundWave",
@@ -58,9 +58,9 @@ namespace CookedAssetSerializer {
     internal static class Program {
         [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
         private static void Main(string[] args) {
-            //ScanAssetTypes(CONTENT_DIR, GLOBAL_UE);
-            //MoveAssets(CONTENT_DIR, OUTPUT_DIR, TypesToCopy, GLOBAL_UE);
-            SerializeAssets(CONTENT_DIR);
+            ScanAssetTypes();
+            MoveAssets();
+            SerializeAssets();
         }
     }
 }
