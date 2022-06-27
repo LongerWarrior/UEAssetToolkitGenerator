@@ -225,11 +225,19 @@ public partial class Form1 : Form {
     private void btnScanAssets_Click(object sender, EventArgs e) {
         setupGlobals();
 
-        disableButtons();
-        ScanAssetTypes(); // TODO: Might need to put this on a separate thread?
-        enableButtons();
+        Task.Run(() => {
+            disableButtons();
+            try {
+                ScanAssetTypes();
+            } catch (Exception exception) {
+                // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
+                rtxtOutput.Text += Environment.NewLine + exception;
+                return;
+            }
+            enableButtons();
 
-        outputText("Scanned assets!");
+            outputText("Scanned assets!");
+        });
     }
 
     private void btnMoveCookedAssets_Click(object sender, EventArgs e) {
@@ -240,7 +248,6 @@ public partial class Form1 : Form {
             try {
                 MoveAssets();
             } catch (Exception exception) {
-                // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
                 rtxtOutput.Text += Environment.NewLine + exception;
                 return;
             }
