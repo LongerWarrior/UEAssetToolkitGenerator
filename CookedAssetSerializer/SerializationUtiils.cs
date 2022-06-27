@@ -93,7 +93,7 @@ namespace CookedAssetSerializer {
                         if (FindPropertyData(binding.Value, "ObjectName", out PropertyData _objname))
                             GeneratedVariables.Add(((StrPropertyData)_objname).Value.ToString());
                     }
-                    //Console.WriteLine("bindings "+asset.FilePath);
+                    //PrintOutput("bindings "+asset.FilePath);
                 }
 
                 //if (FindPropertyData(mainobject, "NamedSlots", out PropertyData _namedslots)) {
@@ -101,7 +101,7 @@ namespace CookedAssetSerializer {
                 //	foreach (NamePropertyData nameslot in namedslots.Value) {
                 //		GeneratedVariables.Add(nameslot.Value.ToName());
                 //	}
-                //	//Console.WriteLine("namedslots " + asset.FilePath);
+                //	//PrintOutput("namedslots " + asset.FilePath);
                 //}
 
                 ////Also append animations, they always have backing variables too
@@ -441,7 +441,7 @@ namespace CookedAssetSerializer {
                             jProp.Value = func.ObjectName.ToName();
                             res.Add(jProp);
                         } else {
-                            Console.WriteLine("Non valid object index" + prop.Value.Index);
+                            PrintOutput("Non valid object index" + prop.Value.Index);
                         }
                     } else {
                         jProp.Value = index;
@@ -623,13 +623,13 @@ namespace CookedAssetSerializer {
                         break;
                     }
 
-                    if (prop.Value.Length > 1) Console.WriteLine("FieldPathPropertyData Values array has more than one name");
+                    if (prop.Value.Length > 1) PrintOutput("FieldPathPropertyData Values array has more than one name");
                     jProp.Value = GetFullName(prop.ResolvedOwner.Index) + ":" + prop.Value[0].ToName();
                     res.Add(jProp);
                     break;
                 }
                 default: {
-                    Console.WriteLine(property.PropertyType.ToName());
+                    PrintOutput(property.PropertyType.ToName());
                     jProp.Value = "##NOT SERIALIZED##";
                     res.Add(jProp);
                     break;
@@ -650,7 +650,7 @@ namespace CookedAssetSerializer {
                 //case ViewTargetBlendParamsPropertyData prop: { break; }
                 //case WeightedRandomSamplerPropertyData prop: { break; }
                 //case DelegatePropertyData prop: {
-                //	Console.WriteLine(prop.Name.ToName());
+                //	PrintOutput(prop.Name.ToName());
                 //	break; }
             }
 

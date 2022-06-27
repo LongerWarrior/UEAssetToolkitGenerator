@@ -20,6 +20,13 @@ namespace CookedAssetSerializer {
         public static List<string> GeneratedVariables = new();
         public static List<string> DisableGeneration = new();
 
+        public static void PrintOutput(string output, string type = "debug") {
+            Console.WriteLine(output);
+            var filename = type == "debug" ? "debug" : "output";
+            using StreamWriter sw = File.AppendText(Path.Combine(JSON_DIR, filename + "_log.txt"));
+            sw.WriteLine($"[{type}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {output}");
+        }
+
         public static bool SetupSerialization(out string name, out string gamePath, out string path1) {
             Dict = new Dictionary<int, int>();
             DisableGeneration = new List<string>();
@@ -50,12 +57,12 @@ namespace CookedAssetSerializer {
                 }
 
                 property = new FObjectProperty();
-                Console.WriteLine("No " + propname.ToName() + "in ClassExport");
+                PrintOutput("No " + propname.ToName() + "in ClassExport");
                 return false;
             }
 
             property = new FObjectProperty();
-            Console.WriteLine("No ClassExport");
+            PrintOutput("No ClassExport");
             return false;
         }
 
@@ -179,7 +186,7 @@ namespace CookedAssetSerializer {
 
         public static bool FindProperty(int index, FName propname, out FProperty property) {
             if (index < 0) {
-                //Console.WriteLine(index+" , "+GetFullName(index) + " , " + propname.ToName());
+                //PrintOutput(index+" , "+GetFullName(index) + " , " + propname.ToName());
 
                 var klass = Asset.Imports[-index - 1].ClassName.ToName();
                 var owner = GetName(index);
@@ -198,7 +205,7 @@ namespace CookedAssetSerializer {
                         }
 
                     } else {
-                        Console.WriteLine("No such file on disk "+"Class "+klass+ " Path " +path);
+                        PrintOutput("No such file on disk "+"Class "+klass+ " Path " +path);
                     }
                 }*/
 
@@ -228,14 +235,14 @@ namespace CookedAssetSerializer {
                     if (data[i].DuplicationIndex <= 0) continue;
                     if (data[i].DuplicationIndex == data[i - 1].DuplicationIndex + 1 ||
                         data[i].Name.ToName() != data[i - 1].Name.ToName()) continue;
-                    Console.WriteLine("Missing property with lower duplication index  Name : " +
+                    PrintOutput("Missing property with lower duplication index  Name : " +
                                       data[i].Name.ToName() + " Type : " + data[i].PropertyType.ToName() +
                                       " StructType : " + (data[i] as StructPropertyData)?.StructType.ToName());
 
                     return false;
                 } else {
                     if (data[i].DuplicationIndex <= 0) continue;
-                    Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " +
+                    PrintOutput(" i=0  Missing property with lower duplication index  Name : " +
                                       data[i].Name.ToName() + " Type : " + data[i].PropertyType.ToName() +
                                       " StructType : " + (data[i] as StructPropertyData)?.StructType.ToName());
                     return false;
@@ -254,18 +261,18 @@ namespace CookedAssetSerializer {
             foreach (var file in files) {
                 var type = GetAssetType(file, GLOBAL_UE_VERSION);
                 var path = "/" + Path.GetRelativePath(CONTENT_DIR, file).Replace("\\", "/");
-                Console.WriteLine(path);
+                PrintOutput(path, "scan");
 
                 if (types.ContainsKey(type)) types[type].Add(path);
                 else types[type] = new List<string> { path };
 
-                if (type == typeToFind) Console.WriteLine(type + " : " + path);
+                if (type == typeToFind) PrintOutput(type + " : " + path, "scan");
             }
 
-            Console.WriteLine("Find all files " + files.Length);
+            PrintOutput("Find all files " + files.Length, "scan");
             var jTypes = new JObject();
             foreach (var entry in types) {
-                Console.WriteLine(entry.Key + " : " + entry.Value.Count);
+                PrintOutput(entry.Key + " : " + entry.Value.Count, "scan");
                 jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
                 allTypes.Add("\"" + entry.Key + "\",");
             }
@@ -279,7 +286,7 @@ namespace CookedAssetSerializer {
             foreach (var file in files) {
                 Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
 
-                Console.WriteLine(file);
+                PrintOutput("Serialized: " + file, "serialize");
 
                 if (SKIP_SERIALIZATION.Contains(Asset.assetType)) continue;
 
@@ -371,16 +378,32 @@ namespace CookedAssetSerializer {
                 var newPath = Path.Combine(OUTPUT_DIR, relativePath);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
-                if (copy) File.Copy(file, newPath, true);
-                else File.Move(file, newPath, true);
+                if (copy) {
+                    File.Copy(file, newPath, true);
+                    PrintOutput("Copied " + file + "to: " + newPath, " copy");
+                } else {
+                    File.Move(file, newPath, true);
+                    PrintOutput("Moved " + file + "to: " + newPath, " move");
+                }
+
                 if (File.Exists(uexpFile)) {
-                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    if (copy) {
+                        File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                        PrintOutput("Copied " + uexpFile + "to: " + newPath, "copy");
+                    } else {
+                        File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                        PrintOutput("Moved " + uexpFile + "to: " + newPath, "move");
+                    }
                 }
 
                 if (!File.Exists(ubulkFile)) continue;
-                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                if (copy) {
+                    File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                    PrintOutput("Copied " + ubulkFile + "to: " + ubulkFile, "copy");
+                } else {
+                    File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                    PrintOutput("Moved " + ubulkFile + "to: " + ubulkFile, "move");
+                }
             }
         }
 
@@ -409,7 +432,7 @@ namespace CookedAssetSerializer {
                 return GetFullName(isAsset[0].ClassIndex.Index);
             }
 
-            Console.WriteLine("Couldn't identify asset type : " + file);
+            PrintOutput("Couldn't identify asset type : " + file);
             return "null";
         }
 

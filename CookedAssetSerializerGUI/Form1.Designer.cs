@@ -52,6 +52,8 @@ partial class Form1 {
             this.label7 = new System.Windows.Forms.Label();
             this.btnOpenAssetTypes = new System.Windows.Forms.Button();
             this.btnOpenAllTypes = new System.Windows.Forms.Button();
+            this.btnOpenLogs = new System.Windows.Forms.Button();
+            this.btnClearLogs = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSelectContentDir
@@ -169,7 +171,7 @@ partial class Form1 {
             this.rbRefreshAssets.AutoSize = true;
             this.rbRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rbRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rbRefreshAssets.Location = new System.Drawing.Point(44, 884);
+            this.rbRefreshAssets.Location = new System.Drawing.Point(35, 880);
             this.rbRefreshAssets.Name = "rbRefreshAssets";
             this.rbRefreshAssets.Size = new System.Drawing.Size(171, 32);
             this.rbRefreshAssets.TabIndex = 8;
@@ -395,12 +397,44 @@ partial class Form1 {
             this.btnOpenAllTypes.UseVisualStyleBackColor = true;
             this.btnOpenAllTypes.Click += new System.EventHandler(this.btnOpenAllTypes_Click);
             // 
+            // btnOpenLogs
+            // 
+            this.btnOpenLogs.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnOpenLogs.FlatAppearance.BorderSize = 2;
+            this.btnOpenLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenLogs.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnOpenLogs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnOpenLogs.Location = new System.Drawing.Point(1247, 880);
+            this.btnOpenLogs.Name = "btnOpenLogs";
+            this.btnOpenLogs.Size = new System.Drawing.Size(138, 40);
+            this.btnOpenLogs.TabIndex = 26;
+            this.btnOpenLogs.Text = "Open Logs";
+            this.btnOpenLogs.UseVisualStyleBackColor = true;
+            this.btnOpenLogs.Click += new System.EventHandler(this.btnOpenLogs_Click);
+            // 
+            // btnClearLogs
+            // 
+            this.btnClearLogs.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnClearLogs.FlatAppearance.BorderSize = 2;
+            this.btnClearLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnClearLogs.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnClearLogs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnClearLogs.Location = new System.Drawing.Point(1078, 880);
+            this.btnClearLogs.Name = "btnClearLogs";
+            this.btnClearLogs.Size = new System.Drawing.Size(138, 40);
+            this.btnClearLogs.TabIndex = 28;
+            this.btnClearLogs.Text = "Clear Logs";
+            this.btnClearLogs.UseVisualStyleBackColor = true;
+            this.btnClearLogs.Click += new System.EventHandler(this.btnClearLogs_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
             this.ClientSize = new System.Drawing.Size(1425, 941);
+            this.Controls.Add(this.btnClearLogs);
+            this.Controls.Add(this.btnOpenLogs);
             this.Controls.Add(this.btnOpenAllTypes);
             this.Controls.Add(this.btnOpenAssetTypes);
             this.Controls.Add(this.rtxtOutput);
@@ -463,4 +497,6 @@ partial class Form1 {
     private Label label7;
     private Button btnOpenAssetTypes;
     private Button btnOpenAllTypes;
+    private Button btnOpenLogs;
+    private Button btnClearLogs;
 }

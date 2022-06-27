@@ -119,6 +119,20 @@ public partial class Form1 : Form {
         }
     }
 
+    private void emptyLogFiles() {
+        string[] files = {
+            "debug_log.txt",
+            "output_log.txt"
+        };
+        foreach (string file in files) {
+            string path = rtxtJSONDir.Text + "\\" + file;
+            if (File.Exists(path)) {
+                File.Delete(path);
+                outputText("Cleared log file: " + path);
+            }
+        }
+    }
+
     private string[] sanitiseInputs(string[] lines) {
         for (int i = 0; i < lines.Length; i++) {
             if (!lines[i].Contains("/Script/")) {
@@ -166,12 +180,12 @@ public partial class Form1 : Form {
 
     private void outputText(string text) {
         if (rtxtOutput.TextLength == 0) rtxtOutput.Text += text;
-        else rtxtOutput.Text += "\n" + text;
+        else rtxtOutput.Text += Environment.NewLine + text;
     }
 
-    private void openFile(string path) {
+    private void openFile(string path, bool bIsLog = false) {
         if (!File.Exists(path)) {
-            outputText("You need to scan the assets first!");
+            if (!bIsLog) outputText("You need to scan the assets first!");
             return;
         }
         Process.Start("notepad.exe", path);
@@ -214,7 +228,7 @@ public partial class Form1 : Form {
                 MoveAssets();
             } catch (Exception exception) {
                 // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
-                rtxtOutput.Text += "\n" + exception;
+                rtxtOutput.Text += Environment.NewLine + exception;
                 return;
             }
             enableButtons();
@@ -231,8 +245,7 @@ public partial class Form1 : Form {
             try {
                 SerializeAssets();
             } catch (Exception exception) {
-                // We can't call outputText() here because it's called into another thread
-                rtxtOutput.Text += "\n" + exception;
+                rtxtOutput.Text += Environment.NewLine + exception;
                 return;
             }
             enableButtons();
@@ -247,5 +260,13 @@ public partial class Form1 : Form {
 
     private void btnOpenAssetTypes_Click(object sender, EventArgs e) {
         openFile(JSON_DIR + "\\AssetTypes.json");
+    }
+
+    private void btnOpenLogs_Click(object sender, EventArgs e) {
+        openFile(JSON_DIR + "\\output_log.txt", true);
+    }
+
+    private void btnClearLogs_Click(object sender, EventArgs e) {
+        emptyLogFiles();
     }
 }
