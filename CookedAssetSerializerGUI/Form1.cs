@@ -96,13 +96,18 @@ public partial class Form1 : Form {
     #endregion
 
     private void setupForm() {
+        // Temporary until saving/loading exists
+        // rtxtContentDir.Text = Directory.GetCurrentDirectory();
+        // rtxtJSONDir.Text = Directory.GetCurrentDirectory();
+        // rtxtOutputDir.Text = Directory.GetCurrentDirectory();
+
         // Temporary inputs
         rtxtContentDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
         rtxtJSONDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
         rtxtOutputDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
-        cbUEVersion.SelectedIndex = 28;
+        cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
 
         List<EAssetType> defaultAssets = new() {
             EAssetType.BlendSpaceBase,
@@ -117,6 +122,9 @@ public partial class Form1 : Form {
         foreach (var asset in defaultAssets) {
             lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
         }
+        // For some stupid reason, the first item in the lb is always enabled, which in this case, is the Blueprint,
+        // which is the absolute worst time for this """feature""" to happen
+        lbAssetsToSkipSerialization.SetSelected(0, false);
     }
 
     private void emptyLogFiles() {
@@ -139,6 +147,8 @@ public partial class Form1 : Form {
                 lines[i] = lines[i].Insert(0, "/Script/");
             }
 
+            // This garbage allows us to copy and paste text from the text files
+            // and not have to muck about deleting them manually
             lines[i] = lines[i].Replace('"'.ToString(), "");
             lines[i] = lines[i].Replace(','.ToString(), "");
         }
@@ -188,32 +198,35 @@ public partial class Form1 : Form {
             if (!bIsLog) outputText("You need to scan the assets first!");
             return;
         }
+
+        // I don't know why, I don't know how, but doing just Process.Start(path) doesn't fucking work,
+        // even though that's the preferred option since it opens whatever editor is associated with the file extension
         Process.Start("notepad.exe", path);
     }
 
-    private void btnSelectContentDir_Click(object sender, EventArgs e) {
+    private string openFileDialog() {
         FolderBrowserDialog fbd = new FolderBrowserDialog();
         fbd.ShowDialog();
-        rtxtContentDir.Text = fbd.SelectedPath;
+        return fbd.SelectedPath;
+    }
+
+    private void btnSelectContentDir_Click(object sender, EventArgs e) {
+        rtxtContentDir.Text = openFileDialog();
     }
 
     private void btnSelectJSONDir_Click(object sender, EventArgs e) {
-        FolderBrowserDialog fbd = new FolderBrowserDialog();
-        fbd.ShowDialog();
-        rtxtJSONDir.Text = fbd.SelectedPath;
+        rtxtJSONDir.Text = openFileDialog();
     }
 
     private void btnSelectOutputDir_Click(object sender, EventArgs e) {
-        FolderBrowserDialog fbd = new FolderBrowserDialog();
-        fbd.ShowDialog();
-        rtxtOutputDir.Text = fbd.SelectedPath;
+        rtxtOutputDir.Text = openFileDialog();
     }
 
     private void btnScanAssets_Click(object sender, EventArgs e) {
         setupGlobals();
 
         disableButtons();
-        ScanAssetTypes();
+        ScanAssetTypes(); // TODO: Might need to put this on a separate thread?
         enableButtons();
 
         outputText("Scanned assets!");
