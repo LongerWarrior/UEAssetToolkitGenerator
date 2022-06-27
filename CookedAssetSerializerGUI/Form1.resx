@@ -58,26 +58,26 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtxtCookedAssets.Text" xml:space="preserve">
-    <value>/Script/Engine.ParticleSystem
-/Script/Engine.StaticMesh
-/Script/Engine.SoundWave
-/Script/Engine.SkeletalMesh
-/Script/Engine.Skeleton
-/Script/Engine.AnimSequence
-/Script/Engine.BlendSpace1D
-/Script/Engine.PhysicsAsset
-/Script/Engine.VectorFieldStatic
-/Script/Engine.SubUVAnimation
-/Script/Engine.AimOffsetBlendSpace</value>
+    <value>"/Script/Engine.ParticleSystem",
+"/Script/Engine.StaticMesh",
+"/Script/Engine.SoundWave",
+"/Script/Engine.SkeletalMesh",
+"/Script/Engine.Skeleton",
+"/Script/Engine.AnimSequence",
+"/Script/Engine.BlendSpace1D",
+"/Script/Engine.PhysicsAsset",
+"/Script/Engine.VectorFieldStatic",
+"/Script/Engine.SubUVAnimation",
+"/Script/Engine.AimOffsetBlendSpace",</value>
   </data>
   <data name="rtxtSimpleAssets.Text" xml:space="preserve">
-    <value>/Script/Engine.SoundClass
-/Script/Engine.TextureRenderTarget2D
-/Script/Engine.MaterialFunction
-/Script/Engine.SoundMix
-/Script/Engine.SoundConcurrency
-/Script/Engine.ForceFeedbackEffect
-/Script/Engine.SoundAttenuation
-/Script/Foliage.FoliageType_InstancedStaticMesh</value>
+    <value>"/Script/Engine.SoundClass",
+"/Script/Engine.TextureRenderTarget2D",
+"/Script/Engine.MaterialFunction",
+"/Script/Engine.SoundMix",
+"/Script/Engine.SoundConcurrency",
+"/Script/Engine.ForceFeedbackEffect",
+"/Script/Engine.SoundAttenuation",
+"/Script/Foliage.FoliageType_InstancedStaticMesh",</value>
   </data>
 </root>

@@ -1,8 +1,8 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
+using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.Globals;
-using UAssetAPI;
 
 namespace CookedAssetSerializerGUI;
 
@@ -29,15 +29,80 @@ public partial class Form1 : Form {
     }
     #endregion
 
+    #region Vars
+    private object[] versionOptionsKeys = {
+        "Unknown version",
+        "4.0",
+        "4.1",
+        "4.2",
+        "4.3",
+        "4.4",
+        "4.5",
+        "4.6",
+        "4.7",
+        "4.8",
+        "4.9",
+        "4.10",
+        "4.11",
+        "4.12",
+        "4.13",
+        "4.14",
+        "4.15",
+        "4.16",
+        "4.17",
+        "4.18",
+        "4.19",
+        "4.20",
+        "4.21",
+        "4.22",
+        "4.23",
+        "4.24",
+        "4.25",
+        "4.26",
+        "4.27"
+    };
+
+    private UE4Version[] versionOptionsValues = {
+        UE4Version.UNKNOWN,
+        UE4Version.VER_UE4_0,
+        UE4Version.VER_UE4_1,
+        UE4Version.VER_UE4_2,
+        UE4Version.VER_UE4_3,
+        UE4Version.VER_UE4_4,
+        UE4Version.VER_UE4_5,
+        UE4Version.VER_UE4_6,
+        UE4Version.VER_UE4_7,
+        UE4Version.VER_UE4_8,
+        UE4Version.VER_UE4_9,
+        UE4Version.VER_UE4_10,
+        UE4Version.VER_UE4_11,
+        UE4Version.VER_UE4_12,
+        UE4Version.VER_UE4_13,
+        UE4Version.VER_UE4_14,
+        UE4Version.VER_UE4_15,
+        UE4Version.VER_UE4_16,
+        UE4Version.VER_UE4_17,
+        UE4Version.VER_UE4_18,
+        UE4Version.VER_UE4_19,
+        UE4Version.VER_UE4_20,
+        UE4Version.VER_UE4_21,
+        UE4Version.VER_UE4_22,
+        UE4Version.VER_UE4_23,
+        UE4Version.VER_UE4_24,
+        UE4Version.VER_UE4_25,
+        UE4Version.VER_UE4_26,
+        UE4Version.VER_UE4_27,
+    };
+    #endregion
+
     private void setupForm() {
         // Temporary inputs
         rtxtContentDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
         rtxtJSONDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
         rtxtOutputDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
 
-        for (int i = 0; i < 27; i++) {
-            cbUEVersion.Items.Add(UE4Version.VER_UE4_0 + i);
-        }
+        cbUEVersion.Items.AddRange(versionOptionsKeys);
+        cbUEVersion.SelectedIndex = 28;
 
         List<EAssetType> defaultAssets = new() {
             EAssetType.BlendSpaceBase,
@@ -48,30 +113,42 @@ public partial class Form1 : Form {
             EAssetType.FileMediaSource,
             EAssetType.StaticMesh,
         };
-        foreach (var asset in Enum.GetValues(typeof(EAssetType))) {
-            lbAssetsToSkipSerialization.Items.Add(asset);
-        }
+        lbAssetsToSkipSerialization.DataSource = Enum.GetValues(typeof(EAssetType));
         foreach (var asset in defaultAssets) {
             lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
         }
     }
 
+    private string[] sanitiseInputs(string[] lines) {
+        for (int i = 0; i < lines.Length; i++) {
+            if (!lines[i].Contains("/Script/")) {
+                lines[i] = lines[i].Insert(0, "/Script/");
+            }
+
+            lines[i] = lines[i].Replace('"'.ToString(), "");
+            lines[i] = lines[i].Replace(','.ToString(), "");
+        }
+
+        return lines;
+    }
+
     private void setupGlobals() {
         List<string> typesToCopy = new List<string>();
-        typesToCopy.AddRange(rtxtCookedAssets.Lines);
+        typesToCopy.AddRange(sanitiseInputs(rtxtCookedAssets.Lines));
         List<string> simpleAssets = new List<string>();
-        simpleAssets.AddRange(rtxtSimpleAssets.Lines);
+        simpleAssets.AddRange(sanitiseInputs(rtxtSimpleAssets.Lines));
         List<EAssetType> assetsToSkip = new List<EAssetType>();
         assetsToSkip.AddRange(lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>());
         List<string> circularDependencies = new List<string>();
-        circularDependencies.AddRange(rtxtCircularDependancy.Lines);
+        circularDependencies.AddRange(sanitiseInputs(rtxtCircularDependancy.Lines));
+
         CONTENT_DIR = rtxtContentDir.Text;
         OUTPUT_DIR = rtxtOutputDir.Text;
         TYPES_TO_COPY = typesToCopy;
         SIMPLE_ASSETS = simpleAssets;
         SKIP_SERIALIZATION = assetsToSkip;
         CIRCULAR_DEPENDENCY = circularDependencies;
-        GLOBAL_UE_VERSION = (UE4Version)(cbUEVersion.SelectedItem ?? UE4Version.VER_UE4_27);
+        GLOBAL_UE_VERSION = versionOptionsValues[cbUEVersion.SelectedIndex];
         REFRESH_ASSETS = rbRefreshAssets.Checked; // This may not be required
     }
 
@@ -85,6 +162,19 @@ public partial class Form1 : Form {
         btnScanAssets.Enabled = true;
         btnMoveCookedAssets.Enabled = true;
         btnSerializeAssets.Enabled = true;
+    }
+
+    private void outputText(string text) {
+        if (rtxtOutput.TextLength == 0) rtxtOutput.Text += text;
+        else rtxtOutput.Text += "\n" + text;
+    }
+
+    private void openFile(string path) {
+        if (!File.Exists(path)) {
+            outputText("You need to scan the assets first!");
+            return;
+        }
+        Process.Start("notepad.exe", path);
     }
 
     private void btnSelectContentDir_Click(object sender, EventArgs e) {
@@ -112,7 +202,7 @@ public partial class Form1 : Form {
         ScanAssetTypes();
         enableButtons();
 
-        rtxtOutput.Text += "\nScanned assets!";
+        outputText("Scanned assets!");
     }
 
     private void btnMoveCookedAssets_Click(object sender, EventArgs e) {
@@ -123,11 +213,13 @@ public partial class Form1 : Form {
             try {
                 MoveAssets();
             } catch (Exception exception) {
+                // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
                 rtxtOutput.Text += "\n" + exception;
+                return;
             }
             enableButtons();
 
-            rtxtOutput.Text += "\nMoved assets!";
+            outputText("Moved assets!");
         });
     }
 
@@ -139,12 +231,21 @@ public partial class Form1 : Form {
             try {
                 SerializeAssets();
             } catch (Exception exception) {
+                // We can't call outputText() here because it's called into another thread
                 rtxtOutput.Text += "\n" + exception;
-                throw;
+                return;
             }
             enableButtons();
 
-            rtxtOutput.Text += "\nSerialized assets!";
+            outputText("Serialized assets!");
         });
+    }
+
+    private void btnOpenAllTypes_Click(object sender, EventArgs e) {
+        openFile(JSON_DIR + "\\AllTypes.txt");
+    }
+
+    private void btnOpenAssetTypes_Click(object sender, EventArgs e) {
+        openFile(JSON_DIR + "\\AssetTypes.json");
     }
 }

@@ -50,6 +50,8 @@ partial class Form1 {
             this.label8 = new System.Windows.Forms.Label();
             this.rtxtOutput = new System.Windows.Forms.RichTextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.btnOpenAssetTypes = new System.Windows.Forms.Button();
+            this.btnOpenAllTypes = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSelectContentDir
@@ -167,7 +169,7 @@ partial class Form1 {
             this.rbRefreshAssets.AutoSize = true;
             this.rbRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rbRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rbRefreshAssets.Location = new System.Drawing.Point(35, 619);
+            this.rbRefreshAssets.Location = new System.Drawing.Point(44, 884);
             this.rbRefreshAssets.Name = "rbRefreshAssets";
             this.rbRefreshAssets.Size = new System.Drawing.Size(171, 32);
             this.rbRefreshAssets.TabIndex = 8;
@@ -228,9 +230,9 @@ partial class Form1 {
             this.rtxtCookedAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rtxtCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtCookedAssets.Location = new System.Drawing.Point(875, 262);
+            this.rtxtCookedAssets.Location = new System.Drawing.Point(864, 262);
             this.rtxtCookedAssets.Name = "rtxtCookedAssets";
-            this.rtxtCookedAssets.Size = new System.Drawing.Size(494, 166);
+            this.rtxtCookedAssets.Size = new System.Drawing.Size(521, 166);
             this.rtxtCookedAssets.TabIndex = 13;
             this.rtxtCookedAssets.Text = resources.GetString("rtxtCookedAssets.Text");
             // 
@@ -240,9 +242,9 @@ partial class Form1 {
             this.rtxtSimpleAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtSimpleAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rtxtSimpleAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtSimpleAssets.Location = new System.Drawing.Point(875, 77);
+            this.rtxtSimpleAssets.Location = new System.Drawing.Point(864, 77);
             this.rtxtSimpleAssets.Name = "rtxtSimpleAssets";
-            this.rtxtSimpleAssets.Size = new System.Drawing.Size(494, 122);
+            this.rtxtSimpleAssets.Size = new System.Drawing.Size(521, 122);
             this.rtxtSimpleAssets.TabIndex = 15;
             this.rtxtSimpleAssets.Text = resources.GetString("rtxtSimpleAssets.Text");
             this.rtxtSimpleAssets.WordWrap = false;
@@ -265,7 +267,7 @@ partial class Form1 {
             this.btnScanAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnScanAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnScanAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnScanAssets.Location = new System.Drawing.Point(580, 388);
+            this.btnScanAssets.Location = new System.Drawing.Point(572, 388);
             this.btnScanAssets.Name = "btnScanAssets";
             this.btnScanAssets.Size = new System.Drawing.Size(226, 40);
             this.btnScanAssets.TabIndex = 16;
@@ -280,7 +282,7 @@ partial class Form1 {
             this.btnMoveCookedAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMoveCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnMoveCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnMoveCookedAssets.Location = new System.Drawing.Point(580, 464);
+            this.btnMoveCookedAssets.Location = new System.Drawing.Point(572, 466);
             this.btnMoveCookedAssets.Name = "btnMoveCookedAssets";
             this.btnMoveCookedAssets.Size = new System.Drawing.Size(226, 40);
             this.btnMoveCookedAssets.TabIndex = 17;
@@ -295,7 +297,7 @@ partial class Form1 {
             this.btnSerializeAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSerializeAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSerializeAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSerializeAssets.Location = new System.Drawing.Point(580, 541);
+            this.btnSerializeAssets.Location = new System.Drawing.Point(572, 542);
             this.btnSerializeAssets.Name = "btnSerializeAssets";
             this.btnSerializeAssets.Size = new System.Drawing.Size(226, 40);
             this.btnSerializeAssets.TabIndex = 18;
@@ -309,9 +311,9 @@ partial class Form1 {
             this.rtxtCircularDependancy.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtCircularDependancy.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rtxtCircularDependancy.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtCircularDependancy.Location = new System.Drawing.Point(875, 500);
+            this.rtxtCircularDependancy.Location = new System.Drawing.Point(864, 500);
             this.rtxtCircularDependancy.Name = "rtxtCircularDependancy";
-            this.rtxtCircularDependancy.Size = new System.Drawing.Size(494, 151);
+            this.rtxtCircularDependancy.Size = new System.Drawing.Size(521, 151);
             this.rtxtCircularDependancy.TabIndex = 20;
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
@@ -344,10 +346,10 @@ partial class Form1 {
             this.rtxtOutput.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtOutput.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rtxtOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtOutput.Location = new System.Drawing.Point(35, 675);
+            this.rtxtOutput.Location = new System.Drawing.Point(32, 675);
             this.rtxtOutput.Name = "rtxtOutput";
             this.rtxtOutput.ReadOnly = true;
-            this.rtxtOutput.Size = new System.Drawing.Size(1334, 190);
+            this.rtxtOutput.Size = new System.Drawing.Size(1353, 190);
             this.rtxtOutput.TabIndex = 23;
             this.rtxtOutput.Text = "";
             this.rtxtOutput.WordWrap = false;
@@ -357,11 +359,41 @@ partial class Form1 {
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label7.Location = new System.Drawing.Point(657, 318);
+            this.label7.Location = new System.Drawing.Point(648, 318);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(69, 38);
             this.label7.TabIndex = 21;
             this.label7.Text = "Run";
+            // 
+            // btnOpenAssetTypes
+            // 
+            this.btnOpenAssetTypes.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnOpenAssetTypes.FlatAppearance.BorderSize = 2;
+            this.btnOpenAssetTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenAssetTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnOpenAssetTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnOpenAssetTypes.Location = new System.Drawing.Point(312, 615);
+            this.btnOpenAssetTypes.Name = "btnOpenAssetTypes";
+            this.btnOpenAssetTypes.Size = new System.Drawing.Size(202, 40);
+            this.btnOpenAssetTypes.TabIndex = 24;
+            this.btnOpenAssetTypes.Text = "Open AssetTypes";
+            this.btnOpenAssetTypes.UseVisualStyleBackColor = true;
+            this.btnOpenAssetTypes.Click += new System.EventHandler(this.btnOpenAssetTypes_Click);
+            // 
+            // btnOpenAllTypes
+            // 
+            this.btnOpenAllTypes.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnOpenAllTypes.FlatAppearance.BorderSize = 2;
+            this.btnOpenAllTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnOpenAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnOpenAllTypes.Location = new System.Drawing.Point(32, 615);
+            this.btnOpenAllTypes.Name = "btnOpenAllTypes";
+            this.btnOpenAllTypes.Size = new System.Drawing.Size(183, 40);
+            this.btnOpenAllTypes.TabIndex = 25;
+            this.btnOpenAllTypes.Text = "Open AllTypes";
+            this.btnOpenAllTypes.UseVisualStyleBackColor = true;
+            this.btnOpenAllTypes.Click += new System.EventHandler(this.btnOpenAllTypes_Click);
             // 
             // Form1
             // 
@@ -369,6 +401,8 @@ partial class Form1 {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
             this.ClientSize = new System.Drawing.Size(1425, 941);
+            this.Controls.Add(this.btnOpenAllTypes);
+            this.Controls.Add(this.btnOpenAssetTypes);
             this.Controls.Add(this.rtxtOutput);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -427,4 +461,6 @@ partial class Form1 {
     private Label label8;
     private RichTextBox rtxtOutput;
     private Label label7;
+    private Button btnOpenAssetTypes;
+    private Button btnOpenAllTypes;
 }
