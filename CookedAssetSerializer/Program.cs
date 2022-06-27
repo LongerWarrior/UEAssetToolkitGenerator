@@ -58,8 +58,8 @@ namespace CookedAssetSerializer {
     internal static class Program {
         [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
         private static void Main(string[] args) {
-            ScanAssetTypes();
-            MoveAssets();
+            // ScanAssetTypes();
+            // MoveAssets();
             SerializeAssets();
         }
     }

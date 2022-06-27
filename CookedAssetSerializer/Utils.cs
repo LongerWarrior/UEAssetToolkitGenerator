@@ -33,7 +33,7 @@ namespace CookedAssetSerializer {
             GeneratedVariables = new List<string>();
             RefObjects = new List<int>();
 
-            var fullPath = Asset.FilePath;
+            string fullPath = Asset.FilePath;
             name = Path.GetFileNameWithoutExtension(fullPath);
             var directory = Path.GetDirectoryName(fullPath);
             var relativePath = Path.GetRelativePath(CONTENT_DIR, directory);
@@ -41,9 +41,11 @@ namespace CookedAssetSerializer {
             gamePath = Path.Join("\\Game", relativePath, name).Replace("\\", "/");
             path1 = Path.Join(JSON_DIR, gamePath) + ".json";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(path1) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(path1));
+            if (!REFRESH_ASSETS && File.Exists(path1)) return false;
             Asset = new UAsset(fullPath, GLOBAL_UE_VERSION, false);
             FixIndexes();
+
             return true;
         }
 

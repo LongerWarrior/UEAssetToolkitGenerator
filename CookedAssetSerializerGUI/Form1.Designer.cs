@@ -163,7 +163,7 @@ partial class Form1 {
             this.cbUEVersion.FormattingEnabled = true;
             this.cbUEVersion.Location = new System.Drawing.Point(191, 262);
             this.cbUEVersion.Name = "cbUEVersion";
-            this.cbUEVersion.Size = new System.Drawing.Size(630, 36);
+            this.cbUEVersion.Size = new System.Drawing.Size(323, 36);
             this.cbUEVersion.TabIndex = 7;
             // 
             // rbRefreshAssets
@@ -171,7 +171,7 @@ partial class Form1 {
             this.rbRefreshAssets.AutoSize = true;
             this.rbRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.rbRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rbRefreshAssets.Location = new System.Drawing.Point(35, 880);
+            this.rbRefreshAssets.Location = new System.Drawing.Point(600, 266);
             this.rbRefreshAssets.Name = "rbRefreshAssets";
             this.rbRefreshAssets.Size = new System.Drawing.Size(171, 32);
             this.rbRefreshAssets.TabIndex = 8;
@@ -212,7 +212,7 @@ partial class Form1 {
             this.lbAssetsToSkipSerialization.Location = new System.Drawing.Point(32, 373);
             this.lbAssetsToSkipSerialization.Name = "lbAssetsToSkipSerialization";
             this.lbAssetsToSkipSerialization.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(482, 224);
+            this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(482, 280);
             this.lbAssetsToSkipSerialization.TabIndex = 11;
             // 
             // label4
@@ -374,7 +374,7 @@ partial class Form1 {
             this.btnOpenAssetTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenAssetTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnOpenAssetTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnOpenAssetTypes.Location = new System.Drawing.Point(312, 615);
+            this.btnOpenAssetTypes.Location = new System.Drawing.Point(252, 880);
             this.btnOpenAssetTypes.Name = "btnOpenAssetTypes";
             this.btnOpenAssetTypes.Size = new System.Drawing.Size(202, 40);
             this.btnOpenAssetTypes.TabIndex = 24;
@@ -389,7 +389,7 @@ partial class Form1 {
             this.btnOpenAllTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnOpenAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnOpenAllTypes.Location = new System.Drawing.Point(32, 615);
+            this.btnOpenAllTypes.Location = new System.Drawing.Point(35, 880);
             this.btnOpenAllTypes.Name = "btnOpenAllTypes";
             this.btnOpenAllTypes.Size = new System.Drawing.Size(183, 40);
             this.btnOpenAllTypes.TabIndex = 25;

@@ -173,7 +173,7 @@ public partial class Form1 : Form {
         SKIP_SERIALIZATION = assetsToSkip;
         CIRCULAR_DEPENDENCY = circularDependencies;
         GLOBAL_UE_VERSION = versionOptionsValues[cbUEVersion.SelectedIndex];
-        REFRESH_ASSETS = rbRefreshAssets.Checked; // This may not be required
+        REFRESH_ASSETS = rbRefreshAssets.Checked;
     }
 
     private void disableButtons() {
