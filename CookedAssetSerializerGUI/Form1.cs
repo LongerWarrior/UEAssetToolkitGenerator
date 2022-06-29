@@ -11,12 +11,13 @@ public partial class Form1 : Form {
         InitializeComponent();
         setupForm();
         setupGlobals();
+        isSetupFinished = true;
     }
 
     #region Vars
     private Globals settings;
 
-    private bool[] isSaved = {
+    private readonly bool[] isSaved = {
         true,
         true,
         true,
@@ -28,6 +29,8 @@ public partial class Form1 : Form {
         true,
         true
     };
+
+    private readonly bool isSetupFinished;
 
     private readonly object[] versionOptionsKeys = {
         "Unknown version",
@@ -112,16 +115,11 @@ public partial class Form1 : Form {
     #endregion
 
     private void OnClosed(object sender, FormClosedEventArgs e) {
-        foreach (var status in isSaved) {
-            if (!status) {
-                if (MessageBox.Show(@"Your changes have not been saved! Do you want to save?", @"Holup!",
-                        MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-                setupGlobals();
-                saveSettings();
-                break;
-            }
-        }
-
+        if (isSaved.All(status => status)) return;
+        if (MessageBox.Show(@"Your changes have not been saved! Do you want to save?", @"Holup!",
+                MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+        setupGlobals();
+        saveSettings();
     }
 
     private void setupAssetsToSkipSerialization(List<EAssetType> assets) {
@@ -415,6 +413,7 @@ public partial class Form1 : Form {
     }
 
     private void cbUEVersion_SelectedIndexChanged(object sender, EventArgs e) {
+        if (!isSetupFinished) return;
         if (cbUEVersion.SelectedIndex != settings.GetSelectedIndex()) isSaved[9] = false;
         else isSaved[9] = true;
     }
