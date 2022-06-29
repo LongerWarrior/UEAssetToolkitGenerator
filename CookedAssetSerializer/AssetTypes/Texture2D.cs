@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,7 +56,8 @@ namespace CookedAssetSerializer {
                 asData.Add("NumSlices", numSlices);
                 asData.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
 
-                Thread.Sleep(50);
+                GC.Collect();
+                //Thread.Sleep(50);
 
                 var srgb = true;
                 if (FindPropertyData(texture, "SRGB", out var prop)) srgb = ((BoolPropertyData)prop).Value;
@@ -66,14 +68,15 @@ namespace CookedAssetSerializer {
                             texture.isNormalMap = true;
                 }
 
-                var bitmap = TextureDecoder.Decode(texture, texture.Mips[0], numSlices, out var hash, srgb, isCube);
+                var bitmap = texture.Decode(texture.Mips[0], numSlices, out var hash, srgb, isCube);
                 var hashEnd = bitmap.Bytes.Length.ToString("x2");
                 using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
                 using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
                 using var stream = data.AsStream();
                 stream.CopyTo(fs);
                 fs.Close();
-                Thread.Sleep(50);
+                //Thread.Sleep(50);
+                GC.Collect();
 
                 hash += hashEnd;
                 asData.Add("SourceImageHash", hash);

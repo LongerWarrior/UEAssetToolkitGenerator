@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using CookedAssetSerializer;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.Globals;
 
 namespace CookedAssetSerializerGUI;
@@ -11,6 +11,8 @@ public partial class Form1 : Form {
         InitializeComponent();
         setupForm();
     }
+
+    private Globals settings;
 
     #region CustomFormSetup
     private const int HT_CAPTION = 0x2;
@@ -102,9 +104,9 @@ public partial class Form1 : Form {
         // rtxtOutputDir.Text = Directory.GetCurrentDirectory();
 
         // Temporary inputs
-        rtxtContentDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\cyubeVR-WindowsNoEditor\cyubeVR\Content";
-        rtxtJSONDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON";
-        rtxtOutputDir.Text = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Output";
+        rtxtContentDir.Text = @"F:\DRG Modding\DRGPacker\_unpacked\FSD\Content";
+        rtxtJSONDir.Text = @"F:\DRG Modding\DRGPacker\JSON";
+        rtxtOutputDir.Text = @"F:\DRG Modding\DRGPacker\JSON\Output";
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
@@ -133,11 +135,12 @@ public partial class Form1 : Form {
             "output_log.txt"
         };
         foreach (string file in files) {
-            string path = rtxtJSONDir.Text + "\\" + file;
-            if (File.Exists(path)) {
-                File.Delete(path);
-                outputText("Cleared log file: " + path);
-            }
+            string path;
+            if (rtxtJSONDir.Text.EndsWith("\\")) path = rtxtJSONDir.Text + file;
+            else path = rtxtJSONDir.Text + "\\" + file;
+            if (!File.Exists(path)) continue;
+            File.Delete(path);
+            outputText("Cleared log file: " + path);
         }
     }
 
@@ -166,14 +169,9 @@ public partial class Form1 : Form {
         List<string> circularDependencies = new List<string>();
         circularDependencies.AddRange(sanitiseInputs(rtxtCircularDependancy.Lines));
 
-        CONTENT_DIR = rtxtContentDir.Text;
-        OUTPUT_DIR = rtxtOutputDir.Text;
-        TYPES_TO_COPY = typesToCopy;
-        SIMPLE_ASSETS = simpleAssets;
-        SKIP_SERIALIZATION = assetsToSkip;
-        CIRCULAR_DEPENDENCY = circularDependencies;
-        GLOBAL_UE_VERSION = versionOptionsValues[cbUEVersion.SelectedIndex];
-        REFRESH_ASSETS = rbRefreshAssets.Checked;
+        settings = new Globals(rtxtContentDir.Text, rtxtJSONDir.Text, rtxtOutputDir.Text,
+            versionOptionsValues[cbUEVersion.SelectedIndex],
+            rbRefreshAssets.Checked, assetsToSkip, circularDependencies, simpleAssets, typesToCopy);
     }
 
     private void disableButtons() {
@@ -228,7 +226,7 @@ public partial class Form1 : Form {
         Task.Run(() => {
             disableButtons();
             try {
-                ScanAssetTypes();
+                settings.ScanAssetTypes();
             } catch (Exception exception) {
                 // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
                 rtxtOutput.Text += Environment.NewLine + exception;
@@ -246,7 +244,7 @@ public partial class Form1 : Form {
         Task.Run(() => {
             disableButtons();
             try {
-                MoveAssets();
+                settings.GetCookedAssets();
             } catch (Exception exception) {
                 rtxtOutput.Text += Environment.NewLine + exception;
                 return;
@@ -263,7 +261,7 @@ public partial class Form1 : Form {
         Task.Run(() => {
             disableButtons();
             try {
-                SerializeAssets();
+                settings.SerializeAssets();
             } catch (Exception exception) {
                 rtxtOutput.Text += Environment.NewLine + exception;
                 return;

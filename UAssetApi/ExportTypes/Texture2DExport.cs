@@ -95,7 +95,7 @@ namespace UAssetAPI
                 Data = reader.ReadBytes(Header.ElementCount);
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_OptionalPayload)) {
 
-                MemoryStream bulkStream = new MemoryStream();
+                BufferedStream bulkStream = new BufferedStream(new MemoryStream());
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "uptnl");
                 if (File.Exists(targetFile)) {
                     using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
@@ -109,7 +109,7 @@ namespace UAssetAPI
                 Data = bulkreader.ReadBytes(Header.ElementCount);
 
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadInSeperateFile)) {
-                MemoryStream bulkStream = new MemoryStream();
+                BufferedStream bulkStream = new BufferedStream(new MemoryStream());
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "ubulk");
                 if (File.Exists(targetFile)) {
                     using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
@@ -367,7 +367,7 @@ namespace UAssetAPI
                     }
                     // read next format name
                     pixelFormatEnum = reader.ReadFName();
-                    if (!pixelFormatEnum.IsNone) Console.WriteLine("More then one pixel format??"); 
+                    if (!pixelFormatEnum.IsNone) Console.WriteLine("More then one pixel format??");
                 }
             }
 

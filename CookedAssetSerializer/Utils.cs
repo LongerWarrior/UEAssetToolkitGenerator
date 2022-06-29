@@ -11,10 +11,10 @@ using static CookedAssetSerializer.Globals;
 using static CookedAssetSerializer.Serializers;
 
 namespace CookedAssetSerializer {
-    public static class Utils {
+    public class Utils {
         public static UAsset Asset;
         public static List<Export> Exports => Asset.Exports;
-        public static List<string> ImportVariables = new();
+        private static List<string> import_variables = new();
         public static Dictionary<int, int> Dict = new();
         public static List<int> RefObjects = new();
         public static List<string> GeneratedVariables = new();
@@ -36,12 +36,12 @@ namespace CookedAssetSerializer {
             string fullPath = Asset.FilePath;
             name = Path.GetFileNameWithoutExtension(fullPath);
             var directory = Path.GetDirectoryName(fullPath);
-            var relativePath = Path.GetRelativePath(CONTENT_DIR, directory);
+            var relativePath = Path.GetRelativePath(CONTENT_DIR, directory ?? string.Empty);
             if (relativePath.StartsWith(".")) relativePath = "\\";
             gamePath = Path.Join("\\Game", relativePath, name).Replace("\\", "/");
             path1 = Path.Join(JSON_DIR, gamePath) + ".json";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(path1));
+            Directory.CreateDirectory(Path.GetDirectoryName(path1) ?? string.Empty);
             if (!REFRESH_ASSETS && File.Exists(path1)) return false;
             Asset = new UAsset(fullPath, GLOBAL_UE_VERSION, false);
             FixIndexes();
@@ -190,9 +190,9 @@ namespace CookedAssetSerializer {
             if (index < 0) {
                 //PrintOutput(index+" , "+GetFullName(index) + " , " + propname.ToName());
 
-                var klass = Asset.Imports[-index - 1].ClassName.ToName();
+                /*var klass = Asset.Imports[-index - 1].ClassName.ToName();
                 var owner = GetName(index);
-                var parent = GetParentName(index);
+                var parent = GetParentName(index);*/
                 /*if (parent.StartsWith("/Game")) {
                     string path = ContentDir + parent.Substring(5).Replace("/","\\")+".uasset";
                     if (File.Exists(path)) {
@@ -211,8 +211,7 @@ namespace CookedAssetSerializer {
                     }
                 }*/
 
-
-                ImportVariables.Add(Asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " +
+                import_variables.Add(Asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " +
                                     propname.ToName());
 
                 property = new FObjectProperty();
@@ -288,9 +287,9 @@ namespace CookedAssetSerializer {
             foreach (var file in files) {
                 Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
 
-                PrintOutput("Serialized: " + file, "serialize");
-
                 if (SKIP_SERIALIZATION.Contains(Asset.assetType)) continue;
+
+                PrintOutput(file, "serialize");
 
                 if (Asset.assetType != EAssetType.Uncategorized) {
                     switch (Asset.assetType) {
@@ -368,7 +367,7 @@ namespace CookedAssetSerializer {
             }
         }
 
-        public static void MoveAssets(bool copy = true) {
+        public static void GetCookedAssets(bool copy = true) {
             var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
             foreach (var file in files) {
@@ -379,33 +378,20 @@ namespace CookedAssetSerializer {
                 var relativePath = Path.GetRelativePath(CONTENT_DIR, file);
                 var newPath = Path.Combine(OUTPUT_DIR, relativePath);
 
+                PrintOutput(newPath, "get_cooked");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
-                if (copy) {
-                    File.Copy(file, newPath, true);
-                    PrintOutput("Copied " + file + "to: " + newPath, " copy");
-                } else {
-                    File.Move(file, newPath, true);
-                    PrintOutput("Moved " + file + "to: " + newPath, " move");
-                }
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
 
                 if (File.Exists(uexpFile)) {
-                    if (copy) {
-                        File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                        PrintOutput("Copied " + uexpFile + "to: " + newPath, "copy");
-                    } else {
-                        File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                        PrintOutput("Moved " + uexpFile + "to: " + newPath, "move");
-                    }
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
                 }
 
                 if (!File.Exists(ubulkFile)) continue;
-                if (copy) {
-                    File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-                    PrintOutput("Copied " + ubulkFile + "to: " + ubulkFile, "copy");
-                } else {
-                    File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-                    PrintOutput("Moved " + ubulkFile + "to: " + ubulkFile, "move");
-                }
+                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             }
         }
 
