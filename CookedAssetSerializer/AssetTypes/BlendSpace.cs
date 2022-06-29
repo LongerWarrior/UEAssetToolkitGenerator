@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,69 +10,47 @@ using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeBlendSpace() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
 
-		public static void SerializeBlendSpace() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+            var ja = new JObject();
+            if (Exports[Asset.mainExport - 1] is not BlendSpaceBaseExport blendSpace) return;
+            ja.Add("AssetClass", blendSpace.ClassIndex.ToImport(Asset).ObjectName.ToName());
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject();
 
-			JObject ja = new JObject();
-			BlendSpaceBaseExport blendSpace = exports[asset.mainExport - 1] as BlendSpaceBaseExport;
+            PopulateBlendParameters(ref blendSpace.Data);
 
-			if (blendSpace != null) {
+            var jData = SerializaListOfProperties(blendSpace.Data);
+            asData.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
 
-				ja.Add("AssetClass", blendSpace.ClassIndex.ToImport(asset).ObjectName.ToName());
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
+            jData.Add("SkeletonGuid", GuidToJson(blendSpace.SkeletonGuid));
+            jData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-
-				PopulateBlendParameters(ref blendSpace.Data);
-
-				JObject jdata = SerializaListOfProperties(blendSpace.Data);
-				asdata.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
-
-				jdata.Add("SkeletonGuid", GuidToJson(blendSpace.SkeletonGuid));
-				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-
-				asdata.Add("AssetObjectData", jdata);
-				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
+            asData.Add("AssetObjectData", jData);
+            ja.Add("AssetSerializedData", asData);
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
 
         private static void PopulateBlendParameters(ref List<PropertyData> data, int v = 3) {
-	
-			List<int> fullentries = Enumerable.Range(0, v).ToList();
-			List<int> entries = new List<int>();
-			for (int i = 0; i < data.Count; i++) {
-				if (data[i].Name.ToName() == "BlendParameters") {
-					entries.Add(data[i].DuplicationIndex);
-				}
-			}
+            var fullEntries = Enumerable.Range(0, v).ToList();
+            var entries = (from t in data where t.Name.ToName() == "BlendParameters" select t.DuplicationIndex).ToList();
 
-			if (entries.Count > 0) {
-				var missing = fullentries.Except(entries).ToList();
-				foreach (int missed in missing) {
-
-					data.Add(new StructPropertyData(new FName("BlendParameters"), new FName("BlendParameter"), missed) {
-						Value = new List<PropertyData> {
-							new StrPropertyData(new FName("DisplayName")){ Value = new FString("None")},
-							new FloatPropertyData(new FName("Max")){ Value = 100.0f}
-						}
-					});
-				}
-				data.Sort((x, y) => {
-					var ret = x.Name.ToName().CompareTo(y.Name.ToName());
-					if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
-					return ret;
-				});
-			}
-
-		}
+            if (entries.Count <= 0) return;
+            var missing = fullEntries.Except(entries).ToList();
+            data.AddRange(missing.Select(missed => new StructPropertyData(new FName("BlendParameters"),
+                new FName("BlendParameter"), missed)
+                { Value = new List<PropertyData> { new StrPropertyData(new FName("DisplayName"))
+                { Value = new FString("None") }, new FloatPropertyData(new FName("Max"))
+                { Value = 100.0f } } }));
+            data.Sort((x, y) => {
+                var ret = string.Compare(x.Name.ToName(), y.Name.ToName(), StringComparison.Ordinal);
+                if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+                return ret;
+            });
+        }
     }
-
-
 }

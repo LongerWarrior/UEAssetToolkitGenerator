@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UAssetAPI;
@@ -7,67 +6,52 @@ using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 using static CookedAssetSerializer.Globals;
-using UAssetAPI.StructTypes;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeSimpleAsset(bool isSimple = true, bool skipDependencies = false) {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeSimpleAsset(bool issimple = true, bool skipdependencies = false) {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			NormalExport simple = exports[asset.mainExport - 1] as NormalExport;
+            if (Exports[Asset.mainExport - 1] is not NormalExport simple) return;
+            ja.Add("AssetClass", isSimple ? "SimpleAsset" : simple.ClassIndex.ToImport(Asset).ObjectName.ToName());
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
 
-			if (simple != null) {
+            var asData = new JObject();
+            if (isSimple) {
+                asData.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
+                if (CIRCULAR_DEPENDENCY.Contains(GetFullName(simple.ClassIndex.Index))) skipDependencies = true;
+                asData.Add("SkipDependencies", skipDependencies);
+            }
 
-				if (issimple) {
-					ja.Add("AssetClass", "SimpleAsset");
-				} else {
-					ja.Add("AssetClass", simple.ClassIndex.ToImport(asset).ObjectName.ToName());
-				}
+            var jData = SerializaListOfProperties(simple.Data);
 
-
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				if (issimple) {
-					asdata.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
-					if (circulardependency.Contains( GetFullName(simple.ClassIndex.Index))) {
-						skipdependencies = true;
-					}
-					asdata.Add("SkipDependecies", skipdependencies);
-				}
-
-				JObject jdata = SerializaListOfProperties(simple.Data);
-
-				if (GetFullName(simple.ClassIndex.Index) == "/Script/Paper2D.PaperSprite") {
-
-					if (UAssetAPI.Kismet.KismetSerializer.FindPropertyData(simple, "BakedSourceTexture", out PropertyData _source)){
-						ObjectPropertyData source = (ObjectPropertyData)_source;
-						jdata.Add(new JProperty("SourceTexture",GetFullName(source.Value.Index)));
-					}
-                    for (int i = 0; i < jdata.Properties().Count(); i++) {
-                        var jprop = jdata.Properties().ElementAt(i);
-                        if (jprop.Name == "BakedSourceDimension") {
-                            jdata.Add("SourceDimension", jprop.Value);
-                        }
-                        if (jprop.Name == "BakedRenderData") {
-                            jdata.Add("RenderData", jprop.Value);
-                        }
-                    }
+            if (GetFullName(simple.ClassIndex.Index) == "/Script/Paper2D.PaperSprite") {
+                if (UAssetAPI.Kismet.KismetSerializer.FindPropertyData(simple, "BakedSourceTexture", out var _source)) {
+                    var source = (ObjectPropertyData)_source;
+                    jData.Add(new JProperty("SourceTexture", GetFullName(source.Value.Index)));
                 }
 
-				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+                for (var i = 0; i < jData.Properties().Count(); i++) {
+                    var jProp = jData.Properties().ElementAt(i);
+                    switch (jProp.Name) {
+                        case "BakedSourceDimension":
+                            jData.Add("SourceDimension", jProp.Value);
+                            break;
+                        case "BakedRenderData":
+                            jData.Add("RenderData", jProp.Value);
+                            break;
+                    }
+                }
+            }
 
-				asdata.Add("AssetObjectData", jdata);
-				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(asset));
-				File.WriteAllText(path1, ja.ToString());
+            jData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
 
-			}
-		}
-
+            asData.Add("AssetObjectData", jData);
+            ja.Add("AssetSerializedData", asData);
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
     }
-
-
 }

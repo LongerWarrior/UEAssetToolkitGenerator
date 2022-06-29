@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,110 +9,96 @@ using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 using Textures;
 using SkiaSharp;
-using System.Security.Cryptography;
 using System.Threading;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
-
-		public static void SerializeTexture() {
-            if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+        public static void SerializeTexture() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
             DisableGeneration.Add("LightingGuid");
             DisableGeneration.Add("ImportedSize");
-            string path2 = Path.ChangeExtension(path1, "png");
-            JObject ja = new JObject();
-            Texture2DExport texture = exports[asset.mainExport - 1] as Texture2DExport;
+            var path2 = Path.ChangeExtension(path1, "png");
+            var ja = new JObject();
 
-            if (texture != null) {
+            if (Exports[Asset.mainExport - 1] is not Texture2DExport texture) return;
+            var type = Exports[Asset.mainExport - 1].ClassIndex.ToImport(Asset).ObjectName.ToName();
+            ja.Add("AssetClass", type);
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject();
 
-                var type = exports[asset.mainExport - 1].ClassIndex.ToImport(asset).ObjectName.ToName();
-                ja.Add("AssetClass", type);
-                ja.Add("AssetPackage", gamepath);
-                ja.Add("AssetName", name);
-                JObject asdata = new JObject();
+            ja.Add("AssetSerializedData", asData);
 
-                ja.Add("AssetSerializedData", asdata);
+            var aoData = SerializaListOfProperties(texture.Data);
+            aoData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+            RefObjects = new List<int>();
+            asData.Add("AssetObjectData", aoData);
+            var isCube = false;
+            var numSlices = 1;
+            if (texture.Mips.Length > 0) {
+                asData.Add("TextureWidth", texture.Mips[0].SizeX);
+                asData.Add("TextureHeight", texture.Mips[0].SizeY);
+                asData.Add("TextureDepth", texture.Mips[0].SizeZ);
 
-                JObject aodata = SerializaListOfProperties(texture.Data);
-                aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-                refobjects = new List<int>();
-                asdata.Add("AssetObjectData", aodata);
-                bool iscube = false;
-                int NumSlices = 1;
-                if (texture.Mips.Length > 0) {
-                    asdata.Add("TextureWidth", texture.Mips[0].SizeX);
-                    asdata.Add("TextureHeight", texture.Mips[0].SizeY);
-                    asdata.Add("TextureDepth", texture.Mips[0].SizeZ);
-
-
-                    if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "TextureCube") {
-                        NumSlices = 6;
-                        iscube = true;
-                        texture.Mips[0].SizeY *= NumSlices;
-                        texture.Mips[0].SizeZ = 1;
-                    }
-                    if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "Texture2DArray") {
-                        NumSlices = texture.Mips[0].SizeZ;
-                        texture.Mips[0].SizeY *= NumSlices;
-                        texture.Mips[0].SizeZ = 1;
-
-                    }
-                    asdata.Add("NumSlices", NumSlices);
-
-
-
-                    asdata.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
-
-                    //Thread.Sleep(50);
-
-                    bool srgb = true;
-                    if (FindPropertyData(texture, "SRGB", out PropertyData prop)) {
-                        srgb = ((BoolPropertyData)prop).Value;
-                    }
-                    if (FindPropertyData(texture, "CompressionSettings", out PropertyData _compression)) {
-                        BytePropertyData compression = (BytePropertyData)_compression;
-                        if (compression.ByteType == BytePropertyType.Long) {
-                            if (asset.GetNameReference(compression.Value).ToString().Contains("TC_Normalmap")) {
-                                texture.isNormalMap = true;
-                            }
-                        }
-                    }
-                    var bitmap = TextureDecoder.Decode(texture, texture.Mips[0], NumSlices, out string hash, srgb, iscube);
-                    var hashend = bitmap.Bytes.Length.ToString("x2");
-                    using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
-                    using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-                    using var stream = data.AsStream();
-                    stream.CopyTo(fs);
-                    fs.Close();
-                    //Thread.Sleep(50);
-
-                    hash += hashend;
-                    asdata.Add("SourceImageHash", hash);
-                } else {
-                    asdata.Add("TextureWidth", 1);
-                    asdata.Add("TextureHeight", 1);
-                    asdata.Add("TextureDepth", 1);
-                    asdata.Add("NumSlices", NumSlices);
-                    
-                    using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
-
-                    var bitmap = new SKBitmap(1, 1);
-                    //bitmap.Erase(SKColors.Black);
-                    bitmap.Encode(SKEncodedImageFormat.Png, 100).AsStream().CopyTo(fs); 
-                    fs.Close();
-                    asdata.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
-                    asdata.Add("SourceImageHash", 0.ToString("x2"));
+                if (texture.ClassIndex.ToImport(Asset).ObjectName.ToName() == "TextureCube") {
+                    numSlices = 6;
+                    isCube = true;
+                    texture.Mips[0].SizeY *= numSlices;
+                    texture.Mips[0].SizeZ = 1;
                 }
-            
-                ja.Add(ObjectHierarchy(asset));
-                File.WriteAllText(path1, ja.ToString());
 
+                if (texture.ClassIndex.ToImport(Asset).ObjectName.ToName() == "Texture2DArray") {
+                    numSlices = texture.Mips[0].SizeZ;
+                    texture.Mips[0].SizeY *= numSlices;
+                    texture.Mips[0].SizeZ = 1;
+                }
+
+                asData.Add("NumSlices", numSlices);
+                asData.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
+
+                //GC.Collect();
+                //Thread.Sleep(50);
+
+                var srgb = true;
+                if (FindPropertyData(texture, "SRGB", out var prop)) srgb = ((BoolPropertyData)prop).Value;
+                if (FindPropertyData(texture, "CompressionSettings", out var _compression)) {
+                    var compression = (BytePropertyData)_compression;
+                    if (compression.ByteType == BytePropertyType.Long)
+                        if (Asset.GetNameReference(compression.Value).ToString().Contains("TC_Normalmap"))
+                            texture.isNormalMap = true;
+                }
+
+                var bitmap = texture.Decode(texture.Mips[0], numSlices, out var hash, srgb, isCube);
+                var hashEnd = bitmap.Bytes.Length.ToString("x2");
+                using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
+                using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
+                using var stream = data.AsStream();
+                stream.CopyTo(fs);
+                fs.Close();
+
+                //Thread.Sleep(50);
+                //GC.Collect();
+
+                hash += hashEnd;
+                asData.Add("SourceImageHash", hash);
+            } else {
+                asData.Add("TextureWidth", 1);
+                asData.Add("TextureHeight", 1);
+                asData.Add("TextureDepth", 1);
+                asData.Add("NumSlices", numSlices);
+
+                using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
+
+                var bitmap = new SKBitmap(1, 1);
+                //bitmap.Erase(SKColors.Black);
+                bitmap.Encode(SKEncodedImageFormat.Png, 100).AsStream().CopyTo(fs);
+                fs.Close();
+                asData.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
+                asData.Add("SourceImageHash", 0.ToString("x2"));
             }
+
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
         }
-
-
     }
-
-
 }

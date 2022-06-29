@@ -1,56 +1,45 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeUserDefinedEnum() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
 
-		public static void SerializeUserDefinedEnum() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			EnumExport uenum = exports[asset.mainExport - 1] as EnumExport;
+            if (Exports[Asset.mainExport - 1] is not EnumExport uenum) return;
+            ja.Add("AssetClass", "UserDefinedEnum");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
+            var asData = new JObject();
 
-			if (uenum != null) {
+            ja.Add("AssetSerializedData", asData);
+            var names = new JArray();
+            foreach (var (fname, index) in uenum.Enum.Names)
+                names.Add(new JObject(new JProperty("Value", index), new JProperty("Name", fname.ToName())));
+            asData.Add("Names", names);
+            asData.Add("CppForm", (uint)uenum.Enum.CppForm);
 
-				ja.Add("AssetClass", "UserDefinedEnum");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
+            var namesMap = new JArray();
+            var map = (uenum.Data[0] as MapPropertyData)?.Value;
+            if (map != null)
+                foreach (var key in map.Keys) {
+                    var pair = new JObject();
+                    map.TryGetValue(key, out var value);
+                    pair.Add("Name", SerializePropertyData(key)[0].Value);
+                    pair.Add("DisplayName", SerializePropertyData(value)[0].Value);
+                    namesMap.Add(pair);
+                }
 
-				ja.Add("AssetSerializedData", asdata);
-				JArray names = new JArray();
-				foreach ((FName fname, long index) in uenum.Enum.Names) {
-					names.Add(new JObject(new JProperty("Value", index), new JProperty("Name", fname.ToName())));
-				}
-				asdata.Add("Names", names);
-				asdata.Add("CppForm", (uint)uenum.Enum.CppForm);
+            asData.Add("DisplayNameMap", namesMap);
 
-				JArray namesmap = new JArray();
-				TMap<PropertyData, PropertyData> map = (uenum.Data[0] as MapPropertyData).Value;
-				foreach (PropertyData key in map.Keys) {
-					JObject pair = new JObject();
-					map.TryGetValue(key, out PropertyData value);
-					pair.Add("Name", SerializePropertyData(key)[0].Value);
-					pair.Add("DisplayName", SerializePropertyData(value)[0].Value);
-					namesmap.Add(pair);
-				}
-
-
-				asdata.Add("DisplayNameMap", namesmap);
-
-				ja.Add(ObjectHierarchy(asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-	}
-
-
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
+    }
 }

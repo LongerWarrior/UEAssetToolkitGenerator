@@ -1,7 +1,6 @@
 ﻿namespace Textures {
-
     public class Constants {
-        public const int MAX_MESHBONES = 1024 * 3;
+        public const int MAX_MESH_BONES = 1024 * 3;
         public const int NUM_INFLUENCES_UE4 = 4;
 
         public const int PSK_VERSION = 20210917;
@@ -12,9 +11,9 @@
 
         public const int MAX_ANIM_LINEAR_KEYS = 4;
         public const int ANIM_INFO_SIZE = 2 * 64 + 10 * 4;
-        public const int VJointPosPsk_SIZE = 4 * 4 + 3 * 4 + 4 + 3 * 4;
-        public const int FNamedBoneBinary_SIZE = 64 + 3 * 4 + VJointPosPsk_SIZE;
-        public const int VQuatAnimKey_SIZE = 3 * 4 + 4 * 4 + 4;
+        public const int V_JOINT_POS_PSK_SIZE = 4 * 4 + 3 * 4 + 4 + 3 * 4;
+        public const int F_NAMED_BONE_BINARY_SIZE = 64 + 3 * 4 + V_JOINT_POS_PSK_SIZE;
+        public const int V_QUAT_ANIM_KEY_SIZE = 3 * 4 + 4 * 4 + 4;
 
         public const int DXT_BITS_PER_PIXEL = 4;
 

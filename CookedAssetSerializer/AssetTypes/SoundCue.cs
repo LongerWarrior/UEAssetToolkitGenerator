@@ -6,42 +6,29 @@ using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 using static UAssetAPI.Kismet.KismetSerializer;
-using UAssetAPI.PropertyTypes;
-using UAssetAPI.StructTypes;
 using System;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeSoundCue() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            DisableGeneration.Add("FirstNode");
+            SoundGraphData = new Dictionary<int, List<int>>();
+            var ja = new JObject();
 
-		public static void SerializeSoundCue() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			DisableGeneration.Add("FirstNode");
-			SoundGraphData = new();
-			JObject ja = new JObject();
-			SoundCueExport soundcue = exports[Utils.asset.mainExport - 1] as SoundCueExport;
+            if (Exports[Asset.mainExport - 1] is not SoundCueExport soundCue) return;
+            ja.Add("AssetClass", "SoundCue");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
 
-			if (soundcue != null) {
+            var asData = new JObject { { "SoundCueGraph", string.Join(Environment.NewLine, soundCue.GetCueGraph()) } };
+            var jData = SerializaListOfProperties(soundCue.Data);
+            jData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-				ja.Add("AssetClass", "SoundCue");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				asdata.Add("SoundCueGraph", String.Join(Environment.NewLine, soundcue.GetCueGraph()));
-
-				JObject jdata = SerializaListOfProperties(soundcue.Data);
-
-				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-
-				asdata.Add("AssetObjectData", jdata);
-				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(Utils.asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-
+            asData.Add("AssetObjectData", jData);
+            ja.Add("AssetSerializedData", asData);
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
     }
-
-
 }

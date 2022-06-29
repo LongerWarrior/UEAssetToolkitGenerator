@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,35 +7,26 @@ using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
-
     public partial class Serializers {
+        public static void SerializeMaterialParameterCollection() {
+            if (!SetupSerialization(out var name, out var gamePath, out var path1)) return;
+            var ja = new JObject();
+            var material = Exports[Asset.mainExport - 1] as NormalExport;
 
-		public static void SerializeMaterialParameterCollection() {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
-			JObject ja = new JObject();
-			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
+            if (material == null) return;
+            ja.Add("AssetClass", "MaterialParameterCollection");
+            ja.Add("AssetPackage", gamePath);
+            ja.Add("AssetName", name);
 
-			if (material != null) {
+            var asData = new JObject();
+            var aoData = SerializaListOfProperties(material.Data);
+            aoData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+            RefObjects = new List<int>();
+            asData.Add("AssetObjectData", aoData);
+            ja.Add("AssetSerializedData", asData);
 
-				ja.Add("AssetClass", "MaterialParameterCollection");
-				ja.Add("AssetPackage", gamepath);
-				ja.Add("AssetName", name);
-				JObject asdata = new JObject();
-				
-				JObject aodata = SerializaListOfProperties(material.Data);
-				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-				refobjects = new List<int>();
-				asdata.Add("AssetObjectData", aodata);
-				ja.Add("AssetSerializedData", asdata);
-				
-				ja.Add(ObjectHierarchy(asset));
-				File.WriteAllText(path1, ja.ToString());
-
-			}
-		}
-
-		
+            ja.Add(ObjectHierarchy(Asset));
+            File.WriteAllText(path1, ja.ToString());
+        }
     }
-
-
 }
