@@ -1,17 +1,9 @@
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using UAssetAPI;
-using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
 
 
-namespace UAssetAPI
-{
-
-
-
+namespace UAssetAPI {
     public struct FStripDataFlags {
         public byte GlobalStripFlags;
         public byte ClassStripFlags;
@@ -27,9 +19,17 @@ namespace UAssetAPI
             writer.Write(ClassStripFlags);
         }
 
-        public bool IsEditorDataStripped() => (GlobalStripFlags & 1) != 0;
-        public bool IsDataStrippedForServer() => (GlobalStripFlags & 2) != 0;
-        public bool IsClassDataStripped(byte flag) => (ClassStripFlags & flag) != 0;
+        public bool IsEditorDataStripped() {
+            return (GlobalStripFlags & 1) != 0;
+        }
+
+        public bool IsDataStrippedForServer() {
+            return (GlobalStripFlags & 2) != 0;
+        }
+
+        public bool IsClassDataStripped(byte flag) {
+            return (ClassStripFlags & flag) != 0;
+        }
     }
 
     public struct FOptTexturePlatformData {
@@ -41,18 +41,22 @@ namespace UAssetAPI
             NumMipsInTail = reader.ReadUInt32();
         }
     }
+
     [Flags]
     public enum EBulkDataFlags : uint {
-        BULKDATA_PayloadAtEndOfFile = 0x0001,               // bulk data stored at the end of this file, data offset added to global data offset in package
-        BULKDATA_CompressedZlib = 0x0002,                   // the same value as for UE3
-        BULKDATA_Unused = 0x0020,                           // the same value as for UE3
-        BULKDATA_ForceInlinePayload = 0x0040,               // bulk data stored immediately after header
-        BULKDATA_PayloadInSeperateFile = 0x0100,            // data stored in .ubulk file near the asset (UE4.12+)
-        BULKDATA_SerializeCompressedBitWindow = 0x0200,     // use platform-specific compression
-        BULKDATA_OptionalPayload = 0x0800,                  // same as BULKDATA_PayloadInSeperateFile, but stored with .uptnl extension (UE4.20+)
-        BULKDATA_Size64Bit = 0x2000,                        // 64-bit size fields, UE4.22+
-        BULKDATA_BadDataVersion = 0x8000,                   // I really don't know one ushort before the data
-        BULKDATA_NoOffsetFixUp = 0x10000                    // do not add Summary.BulkDataStartOffset to bulk location, UE4.26
+        BULKDATA_PayloadAtEndOfFile =
+            0x0001, // bulk data stored at the end of this file, data offset added to global data offset in package
+        BULKDATA_CompressedZlib = 0x0002, // the same value as for UE3
+        BULKDATA_Unused = 0x0020, // the same value as for UE3
+        BULKDATA_ForceInlinePayload = 0x0040, // bulk data stored immediately after header
+        BULKDATA_PayloadInSeperateFile = 0x0100, // data stored in .ubulk file near the asset (UE4.12+)
+        BULKDATA_SerializeCompressedBitWindow = 0x0200, // use platform-specific compression
+
+        BULKDATA_OptionalPayload =
+            0x0800, // same as BULKDATA_PayloadInSeperateFile, but stored with .uptnl extension (UE4.20+)
+        BULKDATA_Size64Bit = 0x2000, // 64-bit size fields, UE4.22+
+        BULKDATA_BadDataVersion = 0x8000, // I really don't know one ushort before the data
+        BULKDATA_NoOffsetFixUp = 0x10000 // do not add Summary.BulkDataStartOffset to bulk location, UE4.26
     }
 
     public struct FByteBulkDataHeader {
@@ -63,13 +67,15 @@ namespace UAssetAPI
 
         public FByteBulkDataHeader(AssetBinaryReader reader) {
             BulkDataFlags = (EBulkDataFlags)reader.ReadUInt32();
-            ElementCount = BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_Size64Bit) ? (int)reader.ReadInt64() : reader.ReadInt32();
-            SizeOnDisk = BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_Size64Bit) ? (uint)reader.ReadUInt64() : reader.ReadUInt32();
+            ElementCount = BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_Size64Bit)
+                ? (int)reader.ReadInt64()
+                : reader.ReadInt32();
+            SizeOnDisk = BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_Size64Bit)
+                ? (uint)reader.ReadUInt64()
+                : reader.ReadUInt32();
             OffsetInFile = reader.ReadInt64();
             if (!BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_NoOffsetFixUp)) // UE4.26 flag
-            {
                 OffsetInFile += reader.Asset.BulkDataStartOffset;
-            }
 
             if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_BadDataVersion)) {
                 reader.BaseStream.Position += sizeof(ushort);
@@ -86,6 +92,7 @@ namespace UAssetAPI
         public FByteBulkData(AssetBinaryReader reader) {
             Header = new FByteBulkDataHeader(reader);
             BulkDataFlags = Header.BulkDataFlags;
+            Data = new byte[Header.ElementCount];
 
             if (Header.ElementCount == 0) {
                 // Nothing to do here
@@ -94,41 +101,45 @@ namespace UAssetAPI
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_ForceInlinePayload)) {
                 Data = reader.ReadBytes(Header.ElementCount);
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_OptionalPayload)) {
-
-                BufferedStream bulkStream = new BufferedStream(new MemoryStream());
+                var bulkStream = new MemoryStream();
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "uptnl");
                 if (File.Exists(targetFile)) {
-                    using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
-                        newStream.CopyTo(bulkStream);
-                    }
-                } else {
-                    return;
-                }
-                AssetBinaryReader bulkreader = new AssetBinaryReader(bulkStream);
+                    using var newStream = File.Open(targetFile, FileMode.Open);
+                    newStream.CopyTo(bulkStream);
+                } else return;
+
+                var bulkreader = new AssetBinaryReader(bulkStream);
                 bulkreader.BaseStream.Position = Header.OffsetInFile;
                 Data = bulkreader.ReadBytes(Header.ElementCount);
-
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadInSeperateFile)) {
-                BufferedStream bulkStream = new BufferedStream(new MemoryStream());
+                // BufferedStream bulkStream = new BufferedStream(new MemoryStream());
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "ubulk");
                 if (File.Exists(targetFile)) {
-                    using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
-                        newStream.CopyTo(bulkStream);
-                    }
+                    using var newStream = File.Open(targetFile, FileMode.Open);
+                    newStream.Position = Header.OffsetInFile;
+                    var length = newStream.Read(Data, 0, Header.ElementCount);
+                    if (length != Header.ElementCount) throw new NotImplementedException("ubulk bad read result");
+                    newStream.Close();
+                    return;
+
+                    //newStream.CopyTo(bulkStream);
                 } else {
                     return;
                 }
-                AssetBinaryReader bulkreader = new AssetBinaryReader(bulkStream);
+                /*AssetBinaryReader bulkreader = new AssetBinaryReader(bulkStream);
                 bulkreader.BaseStream.Position = Header.OffsetInFile;
-                Data = bulkreader.ReadBytes(Header.ElementCount);
+                Data = bulkreader.ReadBytes(Header.ElementCount);*/
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadAtEndOfFile)) {
                 //stored in same file, but at different position
                 //save archive position
                 var savePos = reader.BaseStream.Position;
-                if (Header.OffsetInFile + Header.ElementCount <=  reader.BaseStream.Length) {
+                if (Header.OffsetInFile + Header.ElementCount <= reader.BaseStream.Length) {
                     reader.BaseStream.Position = Header.OffsetInFile;
                     Data = reader.ReadBytes(Header.ElementCount);
-                } else throw new NotImplementedException($"Failed to read PayloadAtEndOfFile, {Header.OffsetInFile} is out of range");
+                } else {
+                    throw new NotImplementedException(
+                        $"Failed to read PayloadAtEndOfFile, {Header.OffsetInFile} is out of range");
+                }
 
                 reader.BaseStream.Position = savePos;
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_CompressedZlib)) {
@@ -138,7 +149,6 @@ namespace UAssetAPI
         }
 
         public void Write(AssetBinaryWriter writer) {
-
         }
 
         /*protected FByteBulkData(FAssetArchive Ar, bool skip = false) {
@@ -164,7 +174,7 @@ namespace UAssetAPI
         public int SizeZ;
 
         public FTexture2DMipMap(AssetBinaryReader reader) {
-            cooked = reader.ReadInt32()!=0;
+            cooked = reader.ReadInt32() != 0;
 
             Data = new FByteBulkData(reader);
 
@@ -179,14 +189,14 @@ namespace UAssetAPI
     }
 
     public enum EVirtualTextureCodec : byte {
-        Black,			//Special case codec, always outputs black pixels 0,0,0,0
-        OpaqueBlack,	//Special case codec, always outputs opaque black pixels 0,0,0,255
-        White,			//Special case codec, always outputs white pixels 255,255,255,255
-        Flat,			//Special case codec, always outputs 128,125,255,255 (flat normal map)
-        RawGPU,			//Uncompressed data in an GPU-ready format (e.g R8G8B8A8, BC7, ASTC, ...)
-        ZippedGPU,		//Same as RawGPU but with the data zipped
-        Crunch,			//Use the Crunch library to compress data
-        Max,			// Add new codecs before this entry
+        Black, //Special case codec, always outputs black pixels 0,0,0,0
+        OpaqueBlack, //Special case codec, always outputs opaque black pixels 0,0,0,255
+        White, //Special case codec, always outputs white pixels 255,255,255,255
+        Flat, //Special case codec, always outputs 128,125,255,255 (flat normal map)
+        RawGPU, //Uncompressed data in an GPU-ready format (e.g R8G8B8A8, BC7, ASTC, ...)
+        ZippedGPU, //Same as RawGPU but with the data zipped
+        Crunch, //Use the Crunch library to compress data
+        Max // Add new codecs before this entry
     };
 
     public class FVirtualTextureDataChunk {
@@ -263,27 +273,23 @@ namespace UAssetAPI
         public FVirtualTextureBuiltData VTData;
 
         public FTexturePlatformData(AssetBinaryReader reader) {
-
             SizeX = reader.ReadInt32();
             SizeY = reader.ReadInt32();
             PackedData = reader.ReadInt32();
 
             PixelFormat = reader.ReadFString();
 
-            if ((PackedData & BitMask_HasOptData) == BitMask_HasOptData) {
-                OptData = new FOptTexturePlatformData(reader);
-            }
+            if ((PackedData & BitMask_HasOptData) == BitMask_HasOptData) OptData = new FOptTexturePlatformData(reader);
 
-            FirstMipToSerialize = reader.ReadInt32(); // only for cooked, but we don't read FTexturePlatformData for non-cooked textures
+            FirstMipToSerialize =
+                reader.ReadInt32(); // only for cooked, but we don't read FTexturePlatformData for non-cooked textures
 
             var mipCount = reader.ReadInt32();
             Mips = new FTexture2DMipMap[mipCount];
-            for (var i = 0; i < Mips.Length; i++) {
-                Mips[i] = new FTexture2DMipMap(reader);
-            }
+            for (var i = 0; i < Mips.Length; i++) Mips[i] = new FTexture2DMipMap(reader);
 
             if (reader.Asset.EngineVersion >= UE4Version.VER_UE4_23) {
-                var bIsVirtual = reader.ReadInt32()!=0;
+                var bIsVirtual = reader.ReadInt32() != 0;
                 if (bIsVirtual) {
                     //VTData = new FVirtualTextureBuiltData(reader, FirstMipToSerialize);
                 }
@@ -292,10 +298,7 @@ namespace UAssetAPI
     }
 
 
-
-
     public class Texture2DExport : NormalExport {
-
         public FStripDataFlags stripFlags;
         public FStripDataFlags stripDataFlags;
         public bool bCooked;
@@ -307,7 +310,13 @@ namespace UAssetAPI
 
         public int SizeX { get; private set; }
         public int SizeY { get; private set; }
-        public int PackedData { get; private set; } // important only while UTextureCube4 is derived from UTexture2D in out implementation
+
+        public int
+            PackedData {
+            get;
+            private set;
+        } // important only while UTextureCube4 is derived from UTexture2D in out implementation
+
         public int FirstMipToSerialize { get; private set; }
         public FOptTexturePlatformData OptData { get; private set; }
         public FTexture2DMipMap[] Mips { get; private set; }
@@ -317,22 +326,20 @@ namespace UAssetAPI
         public bool isNormalMap = false;
 
 
-
         public Texture2DExport(Export super) : base(super) {
-
         }
-        public Texture2DExport() {
 
+        public Texture2DExport() {
         }
 
         public override void Read(AssetBinaryReader reader, int nextStarting) {
             base.Read(reader, nextStarting);
 
-            int idk = reader.ReadInt32();
+            var idk = reader.ReadInt32();
             stripFlags = new FStripDataFlags(reader);
             stripDataFlags = new FStripDataFlags(reader);
             //var bCooked = Ar.Ver >= EUnrealEngineObjectUE4Version.ADD_COOKED_TO_TEXTURE2D && Ar.ReadBoolean();
-            bool bCooked = reader.ReadInt32() !=0;
+            var bCooked = reader.ReadInt32() != 0;
 
             if (bCooked) {
                 pixelFormatEnum = reader.ReadFName();
@@ -346,12 +353,10 @@ namespace UAssetAPI
                     Enum.TryParse(pixelFormatEnum.ToName(), out pixelFormat);
 
                     if (Format == EPixelFormat.PF_Unknown) {
-
                         PlatformData = new FTexturePlatformData(reader);
 
-                        if (reader.BaseStream.Position != skipOffset) {
-                            Console.WriteLine(reader.BaseStream.Position +" "+ skipOffset);
-                        }
+                        if (reader.BaseStream.Position != skipOffset)
+                            Console.WriteLine(reader.BaseStream.Position + " " + skipOffset);
 
                         // copy data to UTexture2D
                         SizeX = PlatformData.SizeX;
@@ -365,22 +370,12 @@ namespace UAssetAPI
                     } else {
                         //Ar.SeekAbsolute(skipOffset, SeekOrigin.Begin);
                     }
+
                     // read next format name
                     pixelFormatEnum = reader.ReadFName();
                     if (!pixelFormatEnum.IsNone) Console.WriteLine("More then one pixel format??");
                 }
             }
-
-
-
-
-
-
-
-
-
-
-
 
 
             //ReferenceSkeleton = new FReferenceSkeleton();
@@ -416,7 +411,6 @@ namespace UAssetAPI
             //    //ExistingMarkerNames = Ar.ReadArray(Ar.ReadFName);
             //    throw new NotImplementedException("ExistingMarkerNames not implemented");
             //}
-
         }
 
         public override void Write(AssetBinaryWriter writer) {

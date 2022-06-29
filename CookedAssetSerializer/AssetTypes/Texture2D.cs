@@ -56,7 +56,7 @@ namespace CookedAssetSerializer {
                 asData.Add("NumSlices", numSlices);
                 asData.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
 
-                GC.Collect();
+                //GC.Collect();
                 //Thread.Sleep(50);
 
                 var srgb = true;
@@ -75,8 +75,9 @@ namespace CookedAssetSerializer {
                 using var stream = data.AsStream();
                 stream.CopyTo(fs);
                 fs.Close();
+
                 //Thread.Sleep(50);
-                GC.Collect();
+                //GC.Collect();
 
                 hash += hashEnd;
                 asData.Add("SourceImageHash", hash);

@@ -122,12 +122,12 @@ namespace UAssetAPI
         SubsurfaceProfile,
         //Texture2DArray,
         //TextureCube
-        
+
         //MaterialFunction
         SoundCue,
     }
     public class UAsset {
-        public EAssetType assetType = EAssetType.Uncategorized; 
+        public EAssetType assetType = EAssetType.Uncategorized;
         public int mainExport = 0;
         public static Dictionary<int, int> jsonindexes = new Dictionary<int, int>();
 
@@ -162,9 +162,9 @@ namespace UAssetAPI
                     case "CurveFloat":
                     case "CurveLinearColor":
                     case "CurveVector": return EAssetType.CurveBase;
-                    
+
                     case "AnimSequence": return EAssetType.AnimSequence;
-                    //case "SkeletalMesh": return EAssetType.SkeletalMesh;
+                    case "SkeletalMesh": return EAssetType.SkeletalMesh;
                     case "Skeleton": return EAssetType.Skeleton;
                     case "StaticMesh": return EAssetType.StaticMesh;
                     case "AnimMontage": return EAssetType.AnimMontage;
@@ -186,7 +186,7 @@ namespace UAssetAPI
                 }
             }
             return EAssetType.Uncategorized;
-        } 
+        }
 
         private void GetMainExport() {
             if (ExportCount == 1) {
@@ -209,7 +209,7 @@ namespace UAssetAPI
                         bisasset.Add(i);
                     }
                 }
-                
+
                 if (possiblemainexport.Count == 1) {
                     mainExport = possiblemainexport[0];
                     return;
@@ -278,19 +278,19 @@ namespace UAssetAPI
                     return false;
                 }
 
-                if (!buffer.SequenceEqual(buffer2)) { 
-                    
+                if (!buffer.SequenceEqual(buffer2)) {
+
                     for (int k = 0; k < buffer.Length; k++) {
                         if (buffer[k] != buffer2[k]) {
                             Debug.WriteLine("WrongByte - Pos: " + (leng - buffer.Length + k) + " Original: " + buffer[k] + " New: " + buffer2[k]);
                             notbroken = false;
                             break;
-                            
+
                         }
                     }
 
                 }
-                
+
             }
 
             return notbroken;
@@ -1424,7 +1424,7 @@ namespace UAssetAPI
                     writer.Write(0);
                 }
                 else
-                { 
+                {
                     // TODO: support for enum-based custom versions
                     writer.Write(CustomVersionContainer.Count);
                     for (int i = 0; i < CustomVersionContainer.Count; i++)
