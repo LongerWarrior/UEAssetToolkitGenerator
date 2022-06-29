@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CookedAssetSerializer;
+using Newtonsoft.Json;
 using UAssetAPI;
-using static CookedAssetSerializer.Globals;
 
 namespace CookedAssetSerializerGUI;
 
@@ -10,29 +10,26 @@ public partial class Form1 : Form {
     public Form1() {
         InitializeComponent();
         setupForm();
+        setupGlobals();
     }
-
-    private Globals settings;
-
-    #region CustomFormSetup
-    private const int HT_CAPTION = 0x2;
-    private const int WM_NCLBUTTONDOWN = 0x00A1;
-    [DllImport("user32", CharSet = CharSet.Auto)]
-    private static extern bool ReleaseCapture();
-    [DllImport("user32", CharSet = CharSet.Auto)]
-    private static extern int SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
-
-    protected override void OnMouseDown(MouseEventArgs e) {
-        if (e.Button != MouseButtons.Left) return;
-        Rectangle rct = DisplayRectangle;
-        if (!rct.Contains(e.Location)) return;
-        ReleaseCapture();
-        SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-    }
-    #endregion
 
     #region Vars
-    private object[] versionOptionsKeys = {
+    private Globals settings;
+
+    private bool[] isSaved = {
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+    };
+
+    private readonly object[] versionOptionsKeys = {
         "Unknown version",
         "4.0",
         "4.1",
@@ -64,7 +61,7 @@ public partial class Form1 : Form {
         "4.27"
     };
 
-    private UE4Version[] versionOptionsValues = {
+    private readonly UE4Version[] versionOptionsValues = {
         UE4Version.UNKNOWN,
         UE4Version.VER_UE4_0,
         UE4Version.VER_UE4_1,
@@ -97,12 +94,44 @@ public partial class Form1 : Form {
     };
     #endregion
 
-    private void setupForm() {
-        // Temporary until saving/loading exists
-        // rtxtContentDir.Text = Directory.GetCurrentDirectory();
-        // rtxtJSONDir.Text = Directory.GetCurrentDirectory();
-        // rtxtOutputDir.Text = Directory.GetCurrentDirectory();
+    #region CustomFormSetup
+    private const int HT_CAPTION = 0x2;
+    private const int WM_NCLBUTTONDOWN = 0x00A1;
+    [DllImport("user32", CharSet = CharSet.Auto)]
+    private static extern bool ReleaseCapture();
+    [DllImport("user32", CharSet = CharSet.Auto)]
+    private static extern int SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
 
+    protected override void OnMouseDown(MouseEventArgs e) {
+        if (e.Button != MouseButtons.Left) return;
+        Rectangle rct = DisplayRectangle;
+        if (!rct.Contains(e.Location)) return;
+        ReleaseCapture();
+        SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+    }
+    #endregion
+
+    private void OnClosed(object sender, FormClosedEventArgs e) {
+        foreach (var status in isSaved) {
+            if (!status) {
+                if (MessageBox.Show(@"Your changes have not been saved! Do you want to save?", @"Holup!",
+                        MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+                setupGlobals();
+                saveSettings();
+                break;
+            }
+        }
+
+    }
+
+    private void setupAssetsToSkipSerialization(List<EAssetType> assets) {
+        lbAssetsToSkipSerialization.DataSource = Enum.GetValues(typeof(EAssetType));
+        foreach (var asset in assets) {
+            lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
+        }
+    }
+
+    private void setupForm() {
         // Temporary inputs
         rtxtContentDir.Text = @"F:\DRG Modding\DRGPacker\_unpacked\FSD\Content";
         rtxtJSONDir.Text = @"F:\DRG Modding\DRGPacker\JSON";
@@ -120,28 +149,12 @@ public partial class Form1 : Form {
             EAssetType.FileMediaSource,
             EAssetType.StaticMesh,
         };
-        lbAssetsToSkipSerialization.DataSource = Enum.GetValues(typeof(EAssetType));
-        foreach (var asset in defaultAssets) {
-            lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
-        }
+        setupAssetsToSkipSerialization(defaultAssets);
         // For some stupid reason, the first item in the lb is always enabled, which in this case, is the Blueprint,
         // which is the absolute worst time for this """feature""" to happen
         lbAssetsToSkipSerialization.SetSelected(0, false);
-    }
 
-    private void emptyLogFiles() {
-        string[] files = {
-            "debug_log.txt",
-            "output_log.txt"
-        };
-        foreach (string file in files) {
-            string path;
-            if (rtxtJSONDir.Text.EndsWith("\\")) path = rtxtJSONDir.Text + file;
-            else path = rtxtJSONDir.Text + "\\" + file;
-            if (!File.Exists(path)) continue;
-            File.Delete(path);
-            outputText("Cleared log file: " + path);
-        }
+        isSaved[0] = true;
     }
 
     private string[] sanitiseInputs(string[] lines) {
@@ -170,8 +183,36 @@ public partial class Form1 : Form {
         circularDependencies.AddRange(sanitiseInputs(rtxtCircularDependancy.Lines));
 
         settings = new Globals(rtxtContentDir.Text, rtxtJSONDir.Text, rtxtOutputDir.Text,
-            versionOptionsValues[cbUEVersion.SelectedIndex],
-            rbRefreshAssets.Checked, assetsToSkip, circularDependencies, simpleAssets, typesToCopy);
+            versionOptionsValues[cbUEVersion.SelectedIndex], cbUEVersion.SelectedIndex,
+            chkRefreshAssets.Checked, assetsToSkip, circularDependencies, simpleAssets, typesToCopy);
+    }
+
+    private void loadSettings() {
+        rtxtContentDir.Text = settings.GetContentDir();
+        rtxtJSONDir.Text = settings.GetJSONDir();
+        rtxtOutputDir.Text = settings.GetOutputDir();
+        cbUEVersion.SelectedIndex = settings.GetSelectedIndex();
+        chkRefreshAssets.Checked = settings.GetRefreshAssets();
+        setupAssetsToSkipSerialization(settings.GetSkipSerialization());
+        rtxtCircularDependancy.Lines = settings.GetCircularDependency().ToArray();
+        rtxtSimpleAssets.Lines = settings.GetSimpleAssets().ToArray();
+        rtxtCookedAssets.Lines = settings.GetTypesToCopy().ToArray();
+        isSaved[0] = true;
+    }
+
+    private void saveSettings() {
+        string output = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+        SaveFileDialog dialog = new SaveFileDialog();
+        dialog.Filter = @"JSON files (*.json)|*.json";
+        dialog.Title = @"Save current settings";
+        dialog.RestoreDirectory = true;
+
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+        if (dialog.FileName == "") return;
+        File.WriteAllText(dialog.FileName, output);
+        outputText("Saved settings to: " + dialog.FileName);
+        isSaved[0] = true;
     }
 
     private void disableButtons() {
@@ -202,22 +243,44 @@ public partial class Form1 : Form {
         Process.Start("notepad.exe", path);
     }
 
-    private string openFileDialog() {
+    private string openDirectoryDialog() {
         FolderBrowserDialog fbd = new FolderBrowserDialog();
         fbd.ShowDialog();
         return fbd.SelectedPath;
     }
 
+    private string openFileDialog(string filter) {
+        OpenFileDialog dialog = new OpenFileDialog();
+        dialog.Filter = filter;
+        dialog.RestoreDirectory = true;
+        return dialog.ShowDialog() != DialogResult.OK ? "" : dialog.FileName;
+    }
+
+    private void emptyLogFiles() {
+        string[] files = {
+            "debug_log.txt",
+            "output_log.txt"
+        };
+        foreach (string file in files) {
+            string path;
+            if (rtxtJSONDir.Text.EndsWith("\\")) path = rtxtJSONDir.Text + file;
+            else path = rtxtJSONDir.Text + "\\" + file;
+            if (!File.Exists(path)) continue;
+            File.Delete(path);
+            outputText("Cleared log file: " + path);
+        }
+    }
+
     private void btnSelectContentDir_Click(object sender, EventArgs e) {
-        rtxtContentDir.Text = openFileDialog();
+        rtxtContentDir.Text = openDirectoryDialog();
     }
 
     private void btnSelectJSONDir_Click(object sender, EventArgs e) {
-        rtxtJSONDir.Text = openFileDialog();
+        rtxtJSONDir.Text = openDirectoryDialog();
     }
 
     private void btnSelectOutputDir_Click(object sender, EventArgs e) {
-        rtxtOutputDir.Text = openFileDialog();
+        rtxtOutputDir.Text = openDirectoryDialog();
     }
 
     private void btnScanAssets_Click(object sender, EventArgs e) {
@@ -228,7 +291,6 @@ public partial class Form1 : Form {
             try {
                 settings.ScanAssetTypes();
             } catch (Exception exception) {
-                // outputText("\n" + exception.ToString()); // TODO: Why the fuck does this not work lol?
                 rtxtOutput.Text += Environment.NewLine + exception;
                 return;
             }
@@ -273,18 +335,87 @@ public partial class Form1 : Form {
     }
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e) {
-        openFile(JSON_DIR + "\\AllTypes.txt");
+        openFile(rtxtJSONDir.Text + "\\AllTypes.txt");
     }
 
     private void btnOpenAssetTypes_Click(object sender, EventArgs e) {
-        openFile(JSON_DIR + "\\AssetTypes.json");
+        openFile(rtxtJSONDir.Text + "\\AssetTypes.json");
     }
 
     private void btnOpenLogs_Click(object sender, EventArgs e) {
-        openFile(JSON_DIR + "\\output_log.txt", true);
+        openFile(rtxtJSONDir.Text + "\\output_log.txt", true);
     }
 
     private void btnClearLogs_Click(object sender, EventArgs e) {
         emptyLogFiles();
+    }
+
+    private void btnLoadConfig_Click(object sender, EventArgs e) {
+        string configFile = openFileDialog(@"JSON files (*.json)|*.json");
+        if (!File.Exists(configFile)) {
+            outputText("Please select a valid file!");
+            return;
+        }
+        // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
+        try {
+            settings.ClearLists();
+            settings = JsonConvert.DeserializeObject<Globals>(File.ReadAllText(configFile));
+            loadSettings();
+            outputText("Loaded settings from: " + configFile);
+        } catch (Exception exception) {
+            outputText("Please load in a valid config file!");
+            outputText(exception.ToString());
+        }
+    }
+
+    private void btnSaveConfig_Click(object sender, EventArgs e) {
+        setupGlobals();
+        saveSettings();
+    }
+
+    private void rtxtContentDir_TextChanged(object sender, EventArgs e) {
+        if (rtxtContentDir.Text != settings.GetContentDir()) isSaved[1] = false;
+        else isSaved[1] = true;
+    }
+
+    private void rtxtJSONDir_TextChanged(object sender, EventArgs e) {
+        if (rtxtJSONDir.Text != settings.GetJSONDir()) isSaved[2] = false;
+        else isSaved[2] = true;
+    }
+
+    private void rtxtOutputDir_TextChanged(object sender, EventArgs e) {
+        if (rtxtOutputDir.Text != settings.GetOutputDir()) isSaved[3] = false;
+        else isSaved[3] = true;
+    }
+
+    private void lbAssetsToSkipSerialization_SelectedIndexChanged(object sender, EventArgs e) {
+        // TODO: Fix
+        // if (lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>() != settings.GetSkipSerialization().ToArray()) isSaved[4] = false;
+        // else isSaved[4] = true;
+    }
+
+    private void rtxtSimpleAssets_TextChanged(object sender, EventArgs e) {
+        if (rtxtSimpleAssets.Lines != settings.GetSimpleAssets().ToArray()) isSaved[5] = false;
+        else isSaved[5] = true;
+    }
+
+    private void rtxtCookedAssets_TextChanged(object sender, EventArgs e) {
+        if (rtxtCookedAssets.Lines != settings.GetTypesToCopy().ToArray()) isSaved[6] = false;
+        else isSaved[6] = true;
+    }
+
+    private void rtxtCircularDependancy_TextChanged(object sender, EventArgs e) {
+        if (rtxtCircularDependancy.Lines != settings.GetCircularDependency().ToArray()) isSaved[7] = false;
+        else isSaved[7] = true;
+    }
+
+    private void chkRefreshAssets_CheckedChanged(object sender, EventArgs e) {
+        if (chkRefreshAssets.Checked != settings.GetRefreshAssets()) isSaved[8] = false;
+        else isSaved[8] = true;
+    }
+
+    private void cbUEVersion_SelectedIndexChanged(object sender, EventArgs e) {
+        if (cbUEVersion.SelectedIndex != settings.GetSelectedIndex()) isSaved[9] = false;
+        else isSaved[9] = true;
     }
 }
