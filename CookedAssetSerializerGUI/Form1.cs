@@ -12,6 +12,8 @@ public partial class Form1 : Form {
         setupForm();
         setupGlobals();
         isSetupFinished = true;
+
+        Task.Run(eventLoop);
     }
 
     #region Vars
@@ -31,6 +33,8 @@ public partial class Form1 : Form {
     };
 
     private readonly bool isSetupFinished;
+
+    private volatile bool isRunning;
 
     private readonly object[] versionOptionsKeys = {
         "Unknown version",
@@ -120,6 +124,16 @@ public partial class Form1 : Form {
                 MessageBoxButtons.YesNo) != DialogResult.Yes) return;
         setupGlobals();
         saveSettings();
+    }
+
+    private void eventLoop() {
+        while (true) {
+            if (isRunning) {
+                lblProgress.Text = settings.GetAssetCount() / settings.GetAssetTotal() * 100 + @"%";
+                rtxtOutput.Text = "this is running";
+            }
+            Thread.Sleep(100);
+        }
     }
 
     private void setupAssetsToSkipSerialization(List<EAssetType> assets) {
@@ -287,7 +301,9 @@ public partial class Form1 : Form {
         Task.Run(() => {
             disableButtons();
             try {
+                isRunning = true;
                 settings.ScanAssetTypes();
+                isRunning = false;
             } catch (Exception exception) {
                 rtxtOutput.Text += Environment.NewLine + exception;
                 return;
@@ -356,7 +372,7 @@ public partial class Form1 : Form {
         }
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try {
-            settings.ClearLists();
+            settings.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
             settings = JsonConvert.DeserializeObject<Globals>(File.ReadAllText(configFile));
             loadSettings();
             outputText("Loaded settings from: " + configFile);

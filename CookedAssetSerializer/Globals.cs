@@ -25,6 +25,9 @@ namespace CookedAssetSerializer {
         [JsonProperty]
         public static int SELECTED_INDEX;
 
+        public static int AssetTotal = 0;
+        public static int AssetCount = 0;
+
         public Globals(string contentDir, string jsonDir, string outputDir, UE4Version ueVersion, int selectedIndex, bool refreshAssets,
             List<EAssetType> skipSerialization, List<string> circularDeps, List<string> simpleAssets, List<string> cookedAssets) {
             CONTENT_DIR = contentDir;
@@ -77,6 +80,14 @@ namespace CookedAssetSerializer {
 
         public List<string> GetTypesToCopy() {
             return TYPES_TO_COPY;
+        }
+
+        public int GetAssetTotal() {
+            return AssetTotal;
+        }
+
+        public int GetAssetCount() {
+            return AssetCount;
         }
 
         public void ClearLists() {

@@ -56,10 +56,11 @@ partial class Form1 {
             this.btnClearLogs = new System.Windows.Forms.Button();
             this.btnLoadConfig = new System.Windows.Forms.Button();
             this.btnSaveConfig = new System.Windows.Forms.Button();
+            this.lblProgress = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            //
+            // 
             // btnSelectContentDir
-            //
+            // 
             this.btnSelectContentDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnSelectContentDir.FlatAppearance.BorderSize = 2;
             this.btnSelectContentDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -72,9 +73,9 @@ partial class Form1 {
             this.btnSelectContentDir.Text = "Content Dir";
             this.btnSelectContentDir.UseVisualStyleBackColor = true;
             this.btnSelectContentDir.Click += new System.EventHandler(this.btnSelectContentDir_Click);
-            //
+            // 
             // rtxtContentDir
-            //
+            // 
             this.rtxtContentDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtContentDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtContentDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -87,9 +88,9 @@ partial class Form1 {
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
             this.rtxtContentDir.TextChanged += new System.EventHandler(this.rtxtContentDir_TextChanged);
-            //
+            // 
             // rtxtJSONDir
-            //
+            // 
             this.rtxtJSONDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtJSONDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtJSONDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -102,9 +103,9 @@ partial class Form1 {
             this.rtxtJSONDir.TabIndex = 3;
             this.rtxtJSONDir.Text = "C:\\ExamplePath\\JSON";
             this.rtxtJSONDir.TextChanged += new System.EventHandler(this.rtxtJSONDir_TextChanged);
-            //
+            // 
             // btnSelectJSONDir
-            //
+            // 
             this.btnSelectJSONDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnSelectJSONDir.FlatAppearance.BorderSize = 2;
             this.btnSelectJSONDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -117,9 +118,9 @@ partial class Form1 {
             this.btnSelectJSONDir.Text = "JSON Dir";
             this.btnSelectJSONDir.UseVisualStyleBackColor = true;
             this.btnSelectJSONDir.Click += new System.EventHandler(this.btnSelectJSONDir_Click);
-            //
+            // 
             // rtxtOutputDir
-            //
+            // 
             this.rtxtOutputDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtOutputDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtOutputDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -132,9 +133,9 @@ partial class Form1 {
             this.rtxtOutputDir.TabIndex = 5;
             this.rtxtOutputDir.Text = "C:\\ExamplePath\\Output";
             this.rtxtOutputDir.TextChanged += new System.EventHandler(this.rtxtOutputDir_TextChanged);
-            //
+            // 
             // btnSelectOutputDir
-            //
+            // 
             this.btnSelectOutputDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnSelectOutputDir.FlatAppearance.BorderSize = 2;
             this.btnSelectOutputDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -147,9 +148,9 @@ partial class Form1 {
             this.btnSelectOutputDir.Text = "Output Dir";
             this.btnSelectOutputDir.UseVisualStyleBackColor = true;
             this.btnSelectOutputDir.Click += new System.EventHandler(this.btnSelectOutputDir_Click);
-            //
+            // 
             // label1
-            //
+            // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -158,9 +159,9 @@ partial class Form1 {
             this.label1.Size = new System.Drawing.Size(118, 28);
             this.label1.TabIndex = 6;
             this.label1.Text = "UE Version:";
-            //
+            // 
             // cbUEVersion
-            //
+            // 
             this.cbUEVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.cbUEVersion.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.cbUEVersion.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -171,22 +172,22 @@ partial class Form1 {
             this.cbUEVersion.Size = new System.Drawing.Size(323, 36);
             this.cbUEVersion.TabIndex = 7;
             this.cbUEVersion.SelectedIndexChanged += new System.EventHandler(this.cbUEVersion_SelectedIndexChanged);
-            //
+            // 
             // chkRefreshAssets
-            //
+            // 
             this.chkRefreshAssets.AutoSize = true;
             this.chkRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkRefreshAssets.Location = new System.Drawing.Point(605, 607);
+            this.chkRefreshAssets.Location = new System.Drawing.Point(595, 264);
             this.chkRefreshAssets.Name = "chkRefreshAssets";
             this.chkRefreshAssets.Size = new System.Drawing.Size(172, 32);
             this.chkRefreshAssets.TabIndex = 8;
             this.chkRefreshAssets.Text = "Refresh Assets";
             this.chkRefreshAssets.UseVisualStyleBackColor = true;
             this.chkRefreshAssets.CheckedChanged += new System.EventHandler(this.chkRefreshAssets_CheckedChanged);
-            //
+            // 
             // label2
-            //
+            // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -195,9 +196,9 @@ partial class Form1 {
             this.label2.Size = new System.Drawing.Size(124, 38);
             this.label2.TabIndex = 9;
             this.label2.Text = "Settings";
-            //
+            // 
             // label3
-            //
+            // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -206,9 +207,9 @@ partial class Form1 {
             this.label3.Size = new System.Drawing.Size(336, 38);
             this.label3.TabIndex = 10;
             this.label3.Text = "Assets to skip serializing";
-            //
+            // 
             // lbAssetsToSkipSerialization
-            //
+            // 
             this.lbAssetsToSkipSerialization.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.lbAssetsToSkipSerialization.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lbAssetsToSkipSerialization.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -221,9 +222,9 @@ partial class Form1 {
             this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(482, 336);
             this.lbAssetsToSkipSerialization.TabIndex = 11;
             this.lbAssetsToSkipSerialization.SelectedIndexChanged += new System.EventHandler(this.lbAssetsToSkipSerialization_SelectedIndexChanged);
-            //
+            // 
             // label4
-            //
+            // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -232,9 +233,9 @@ partial class Form1 {
             this.label4.Size = new System.Drawing.Size(307, 38);
             this.label4.TabIndex = 12;
             this.label4.Text = "Cooked assets to copy";
-            //
+            // 
             // rtxtCookedAssets
-            //
+            // 
             this.rtxtCookedAssets.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtCookedAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -245,9 +246,9 @@ partial class Form1 {
             this.rtxtCookedAssets.TabIndex = 13;
             this.rtxtCookedAssets.Text = resources.GetString("rtxtCookedAssets.Text");
             this.rtxtCookedAssets.TextChanged += new System.EventHandler(this.rtxtCookedAssets_TextChanged);
-            //
+            // 
             // rtxtSimpleAssets
-            //
+            // 
             this.rtxtSimpleAssets.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtSimpleAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtSimpleAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -259,9 +260,9 @@ partial class Form1 {
             this.rtxtSimpleAssets.Text = resources.GetString("rtxtSimpleAssets.Text");
             this.rtxtSimpleAssets.WordWrap = false;
             this.rtxtSimpleAssets.TextChanged += new System.EventHandler(this.rtxtSimpleAssets_TextChanged);
-            //
+            // 
             // label5
-            //
+            // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -270,9 +271,9 @@ partial class Form1 {
             this.label5.Size = new System.Drawing.Size(192, 38);
             this.label5.TabIndex = 14;
             this.label5.Text = "Simple assets";
-            //
+            // 
             // btnScanAssets
-            //
+            // 
             this.btnScanAssets.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnScanAssets.FlatAppearance.BorderSize = 2;
             this.btnScanAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -285,9 +286,9 @@ partial class Form1 {
             this.btnScanAssets.Text = "Scan Assets";
             this.btnScanAssets.UseVisualStyleBackColor = true;
             this.btnScanAssets.Click += new System.EventHandler(this.btnScanAssets_Click);
-            //
+            // 
             // btnMoveCookedAssets
-            //
+            // 
             this.btnMoveCookedAssets.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnMoveCookedAssets.FlatAppearance.BorderSize = 2;
             this.btnMoveCookedAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -300,9 +301,9 @@ partial class Form1 {
             this.btnMoveCookedAssets.Text = "Move Cooked Assets";
             this.btnMoveCookedAssets.UseVisualStyleBackColor = true;
             this.btnMoveCookedAssets.Click += new System.EventHandler(this.btnMoveCookedAssets_Click);
-            //
+            // 
             // btnSerializeAssets
-            //
+            // 
             this.btnSerializeAssets.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnSerializeAssets.FlatAppearance.BorderSize = 2;
             this.btnSerializeAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -315,9 +316,9 @@ partial class Form1 {
             this.btnSerializeAssets.Text = "Serialize Assets";
             this.btnSerializeAssets.UseVisualStyleBackColor = true;
             this.btnSerializeAssets.Click += new System.EventHandler(this.btnSerializeAssets_Click);
-            //
+            // 
             // rtxtCircularDependancy
-            //
+            // 
             this.rtxtCircularDependancy.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtCircularDependancy.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtCircularDependancy.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -329,9 +330,9 @@ partial class Form1 {
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
             this.rtxtCircularDependancy.TextChanged += new System.EventHandler(this.rtxtCircularDependancy_TextChanged);
-            //
+            // 
             // label6
-            //
+            // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -340,9 +341,9 @@ partial class Form1 {
             this.label6.Size = new System.Drawing.Size(458, 38);
             this.label6.TabIndex = 19;
             this.label6.Text = "Assets with a circular dependancy";
-            //
+            // 
             // label8
-            //
+            // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -351,9 +352,9 @@ partial class Form1 {
             this.label8.Size = new System.Drawing.Size(111, 38);
             this.label8.TabIndex = 22;
             this.label8.Text = "Output";
-            //
+            // 
             // rtxtOutput
-            //
+            // 
             this.rtxtOutput.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtOutput.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtOutput.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -365,9 +366,9 @@ partial class Form1 {
             this.rtxtOutput.TabIndex = 23;
             this.rtxtOutput.Text = "";
             this.rtxtOutput.WordWrap = false;
-            //
+            // 
             // label7
-            //
+            // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
@@ -376,9 +377,9 @@ partial class Form1 {
             this.label7.Size = new System.Drawing.Size(69, 38);
             this.label7.TabIndex = 21;
             this.label7.Text = "Run";
-            //
+            // 
             // btnOpenAssetTypes
-            //
+            // 
             this.btnOpenAssetTypes.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnOpenAssetTypes.FlatAppearance.BorderSize = 2;
             this.btnOpenAssetTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -391,9 +392,9 @@ partial class Form1 {
             this.btnOpenAssetTypes.Text = "Open AssetTypes";
             this.btnOpenAssetTypes.UseVisualStyleBackColor = true;
             this.btnOpenAssetTypes.Click += new System.EventHandler(this.btnOpenAssetTypes_Click);
-            //
+            // 
             // btnOpenAllTypes
-            //
+            // 
             this.btnOpenAllTypes.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnOpenAllTypes.FlatAppearance.BorderSize = 2;
             this.btnOpenAllTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -406,9 +407,9 @@ partial class Form1 {
             this.btnOpenAllTypes.Text = "Open AllTypes";
             this.btnOpenAllTypes.UseVisualStyleBackColor = true;
             this.btnOpenAllTypes.Click += new System.EventHandler(this.btnOpenAllTypes_Click);
-            //
+            // 
             // btnOpenLogs
-            //
+            // 
             this.btnOpenLogs.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnOpenLogs.FlatAppearance.BorderSize = 2;
             this.btnOpenLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -421,9 +422,9 @@ partial class Form1 {
             this.btnOpenLogs.Text = "Open Logs";
             this.btnOpenLogs.UseVisualStyleBackColor = true;
             this.btnOpenLogs.Click += new System.EventHandler(this.btnOpenLogs_Click);
-            //
+            // 
             // btnClearLogs
-            //
+            // 
             this.btnClearLogs.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnClearLogs.FlatAppearance.BorderSize = 2;
             this.btnClearLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -436,9 +437,9 @@ partial class Form1 {
             this.btnClearLogs.Text = "Clear Logs";
             this.btnClearLogs.UseVisualStyleBackColor = true;
             this.btnClearLogs.Click += new System.EventHandler(this.btnClearLogs_Click);
-            //
+            // 
             // btnLoadConfig
-            //
+            // 
             this.btnLoadConfig.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnLoadConfig.FlatAppearance.BorderSize = 2;
             this.btnLoadConfig.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -451,9 +452,9 @@ partial class Form1 {
             this.btnLoadConfig.Text = "Load Config Settings";
             this.btnLoadConfig.UseVisualStyleBackColor = true;
             this.btnLoadConfig.Click += new System.EventHandler(this.btnLoadConfig_Click);
-            //
+            // 
             // btnSaveConfig
-            //
+            // 
             this.btnSaveConfig.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.btnSaveConfig.FlatAppearance.BorderSize = 2;
             this.btnSaveConfig.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -466,13 +467,25 @@ partial class Form1 {
             this.btnSaveConfig.Text = "Save Config Settings";
             this.btnSaveConfig.UseVisualStyleBackColor = true;
             this.btnSaveConfig.Click += new System.EventHandler(this.btnSaveConfig_Click);
-            //
+            // 
+            // lblProgress
+            // 
+            this.lblProgress.AutoSize = true;
+            this.lblProgress.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblProgress.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.lblProgress.Location = new System.Drawing.Point(648, 597);
+            this.lblProgress.Name = "lblProgress";
+            this.lblProgress.Size = new System.Drawing.Size(57, 38);
+            this.lblProgress.TabIndex = 31;
+            this.lblProgress.Text = "0%";
+            // 
             // Form1
-            //
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
             this.ClientSize = new System.Drawing.Size(1425, 1033);
+            this.Controls.Add(this.lblProgress);
             this.Controls.Add(this.btnSaveConfig);
             this.Controls.Add(this.btnLoadConfig);
             this.Controls.Add(this.btnClearLogs);
@@ -544,4 +557,5 @@ partial class Form1 {
     private Button btnClearLogs;
     private Button btnLoadConfig;
     private Button btnSaveConfig;
+    private Label lblProgress;
 }

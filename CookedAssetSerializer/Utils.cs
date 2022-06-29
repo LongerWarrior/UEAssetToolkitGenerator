@@ -24,7 +24,7 @@ namespace CookedAssetSerializer {
             Console.WriteLine(output);
             var filename = type == "debug" ? "debug" : "output";
             using StreamWriter sw = File.AppendText(Path.Combine(JSON_DIR, filename + "_log.txt"));
-            sw.WriteLine($"[{type}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {output}");
+            sw.WriteLine($"[{type}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
         }
 
         public static bool SetupSerialization(out string name, out string gamePath, out string path1) {
@@ -259,21 +259,25 @@ namespace CookedAssetSerializer {
 
             var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
+            AssetTotal = files.Length;
+            AssetCount = 0;
             foreach (var file in files) {
                 var type = GetAssetType(file, GLOBAL_UE_VERSION);
                 var path = "/" + Path.GetRelativePath(CONTENT_DIR, file).Replace("\\", "/");
-                PrintOutput(path, "scan");
+
+                PrintOutput(path, "Scan");
+                AssetCount++;
 
                 if (types.ContainsKey(type)) types[type].Add(path);
                 else types[type] = new List<string> { path };
 
-                if (type == typeToFind) PrintOutput(type + " : " + path, "scan");
+                if (type == typeToFind) PrintOutput(type + " : " + path, "Scan");
             }
 
-            PrintOutput("Find all files " + files.Length, "scan");
+            PrintOutput("Find all files " + files.Length, "Scan");
             var jTypes = new JObject();
             foreach (var entry in types) {
-                PrintOutput(entry.Key + " : " + entry.Value.Count, "scan");
+                PrintOutput(entry.Key + " : " + entry.Value.Count, "Scan");
                 jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
                 allTypes.Add("\"" + entry.Key + "\",");
             }
@@ -284,12 +288,15 @@ namespace CookedAssetSerializer {
 
         public static void SerializeAssets() {
             var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
+
+            AssetTotal = files.Length;
+            AssetCount = 0;
             foreach (var file in files) {
                 Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
-
                 if (SKIP_SERIALIZATION.Contains(Asset.assetType)) continue;
 
-                PrintOutput(file, "serialize");
+                AssetCount++;
+                PrintOutput(file, "SerializeAssets");
 
                 if (Asset.assetType != EAssetType.Uncategorized) {
                     switch (Asset.assetType) {
@@ -370,15 +377,19 @@ namespace CookedAssetSerializer {
         public static void GetCookedAssets(bool copy = true) {
             var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
+            AssetTotal = files.Length;
+            AssetCount = 0;
             foreach (var file in files) {
                 var uexpFile = Path.ChangeExtension(file, "uexp");
                 var ubulkFile = Path.ChangeExtension(file, "ubulk");
                 var type = GetAssetType(file, GLOBAL_UE_VERSION);
                 if (!TYPES_TO_COPY.Contains(type)) continue;
+
                 var relativePath = Path.GetRelativePath(CONTENT_DIR, file);
                 var newPath = Path.Combine(OUTPUT_DIR, relativePath);
 
-                PrintOutput(newPath, "get_cooked");
+                AssetCount++;
+                PrintOutput(newPath, "GetCookedAssets");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
                 if (copy) File.Copy(file, newPath, true);
