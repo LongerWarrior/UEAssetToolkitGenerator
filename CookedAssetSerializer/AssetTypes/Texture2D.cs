@@ -64,7 +64,7 @@ namespace CookedAssetSerializer {
 
                     asdata.Add("CookedPixelFormat", texture.PlatformData.PixelFormat.ToString());
 
-                    Thread.Sleep(50);
+                    //Thread.Sleep(50);
 
                     bool srgb = true;
                     if (FindPropertyData(texture, "SRGB", out PropertyData prop)) {
@@ -85,7 +85,7 @@ namespace CookedAssetSerializer {
                     using var stream = data.AsStream();
                     stream.CopyTo(fs);
                     fs.Close();
-                    Thread.Sleep(50);
+                    //Thread.Sleep(50);
 
                     hash += hashend;
                     asdata.Add("SourceImageHash", hash);

@@ -5,7 +5,6 @@ using static CookedAssetSerializer.Serializers;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.Globals;
 
-
 namespace CookedAssetSerializer {
 
     public static class Globals {
@@ -48,9 +47,8 @@ namespace CookedAssetSerializer {
 
             //ScanAssetTypes(@"C:\Games\DRGNEW\FSD\Content", globalUE);
             //MoveAssets(@"C:\Games\DRGNEW\FSD\Content", @"C:\Games\DRGNEW\FSD\Cooked",typestocopy,globalUE);
-            SerializeAssets(@"C:\Games\DRGNEW\FSD\Content\Test");
-
-
+            //MoveAssets(@"D:\GR\Ghostrunner\Content", @"D:\GR\Ghostrunner\Cooked_textures", typestocopy,globalUE);
+            SerializeAssets(@"C:\Games\DRGNEW\FSD\Content\Cooked_textures");
 
         }
 

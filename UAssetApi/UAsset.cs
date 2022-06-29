@@ -164,7 +164,7 @@ namespace UAssetAPI
                     case "CurveVector": return EAssetType.CurveBase;
                     
                     case "AnimSequence": return EAssetType.AnimSequence;
-                    //case "SkeletalMesh": return EAssetType.SkeletalMesh;
+                    case "SkeletalMesh": return EAssetType.SkeletalMesh;
                     case "Skeleton": return EAssetType.Skeleton;
                     case "StaticMesh": return EAssetType.StaticMesh;
                     case "AnimMontage": return EAssetType.AnimMontage;

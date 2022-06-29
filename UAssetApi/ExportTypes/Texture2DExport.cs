@@ -86,6 +86,7 @@ namespace UAssetAPI
         public FByteBulkData(AssetBinaryReader reader) {
             Header = new FByteBulkDataHeader(reader);
             BulkDataFlags = Header.BulkDataFlags;
+            Data = new byte[Header.ElementCount];
 
             if (Header.ElementCount == 0) {
                 // Nothing to do here
@@ -109,18 +110,28 @@ namespace UAssetAPI
                 Data = bulkreader.ReadBytes(Header.ElementCount);
 
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadInSeperateFile)) {
-                MemoryStream bulkStream = new MemoryStream();
+                //MemoryStream bulkStream = new MemoryStream();
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "ubulk");
                 if (File.Exists(targetFile)) {
                     using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
-                        newStream.CopyTo(bulkStream);
+                        newStream.Position = Header.OffsetInFile;
+                        var length = newStream.Read(Data, 0, Header.ElementCount);
+                        if (length != Header.ElementCount) {
+                            throw new NotImplementedException("ubulk bad read result");
+                        }
+                        newStream.Close();
+                        return;
+
+                        //newStream.CopyTo(bulkStream);
                     }
                 } else {
                     return;
                 }
-                AssetBinaryReader bulkreader = new AssetBinaryReader(bulkStream);
-                bulkreader.BaseStream.Position = Header.OffsetInFile;
-                Data = bulkreader.ReadBytes(Header.ElementCount);
+                
+                
+                //AssetBinaryReader bulkreader = new AssetBinaryReader(bulkStream);
+                //bulkreader.BaseStream.Position = Header.OffsetInFile;
+                //Data = bulkreader.ReadBytes(Header.ElementCount);
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadAtEndOfFile)) {
                 //stored in same file, but at different position
                 //save archive position
