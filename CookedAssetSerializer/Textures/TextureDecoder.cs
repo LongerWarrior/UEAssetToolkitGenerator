@@ -16,6 +16,7 @@ namespace Textures {
         public static SKBitmap Decode(this Texture2DExport texture, FTexture2DMipMap mip, int slices, out string hash,
             bool srgb, bool isCube = false) {
             hash = "";
+
             if (texture.IsVirtual || mip == null) return null;
 
             DecodeTexture(mip, texture.Format, texture.isNormalMap, out var data, out var colorType, srgb);

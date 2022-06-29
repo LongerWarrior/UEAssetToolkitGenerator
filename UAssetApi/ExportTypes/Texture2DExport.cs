@@ -112,7 +112,7 @@ namespace UAssetAPI {
                 bulkreader.BaseStream.Position = Header.OffsetInFile;
                 Data = bulkreader.ReadBytes(Header.ElementCount);
             } else if (BulkDataFlags.HasFlag(EBulkDataFlags.BULKDATA_PayloadInSeperateFile)) {
-                // BufferedStream bulkStream = new BufferedStream(new MemoryStream());
+                //MemoryStream bulkStream = new MemoryStream();
                 var targetFile = Path.ChangeExtension(reader.Asset.FilePath, "ubulk");
                 if (File.Exists(targetFile)) {
                     using var newStream = File.Open(targetFile, FileMode.Open);
