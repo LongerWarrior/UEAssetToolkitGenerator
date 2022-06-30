@@ -139,16 +139,19 @@ public partial class Form1 : Form {
 
     private void setupAssetsToSkipSerialization(List<EAssetType> assets) {
         lbAssetsToSkipSerialization.DataSource = Enum.GetValues(typeof(EAssetType));
+        bool hasBP = false;
         foreach (var asset in assets) {
             lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
+            // Temporary awful hack until I get loading for lbAssetsToSkipSerialization data working
+            if (asset == EAssetType.Blueprint) hasBP = true;
         }
+        lbAssetsToSkipSerialization.SetSelected(0, hasBP);
     }
 
     private void setupForm() {
-        // Temporary inputs
-        rtxtContentDir.Text = @"F:\DRG Modding\DRGPacker\_unpacked\FSD\Content";
-        rtxtJSONDir.Text = @"F:\DRG Modding\DRGPacker\JSON";
-        rtxtOutputDir.Text = @"F:\DRG Modding\DRGPacker\JSON\Output";
+        rtxtContentDir.Text = Environment.CurrentDirectory;
+        rtxtJSONDir.Text = Environment.CurrentDirectory;
+        rtxtOutputDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
