@@ -22,7 +22,7 @@ namespace CookedAssetSerializer {
             if (isSimple) {
                 asData.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
                 if (CIRCULAR_DEPENDENCY.Contains(GetFullName(simple.ClassIndex.Index))) skipDependencies = true;
-                asData.Add("SkipDependencies", skipDependencies);
+                asData.Add("SkipDependecies", skipDependencies);
             }
 
             var jData = SerializaListOfProperties(simple.Data);
