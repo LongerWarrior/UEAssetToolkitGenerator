@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
 using UAssetAPI;
+using Timer = System.Windows.Forms.Timer;
 
 namespace CookedAssetSerializerGUI;
 
@@ -13,7 +14,7 @@ public partial class Form1 : Form {
         setupGlobals();
         isSetupFinished = true;
 
-        Task.Run(eventLoop);
+        //Task.Run(eventLoop);
     }
 
     #region Vars
@@ -126,13 +127,13 @@ public partial class Form1 : Form {
         saveSettings();
     }
 
-    private void eventLoop() {
+    private async Task eventLoop() {
         while (true) {
             if (isRunning) {
+                // TODO: Figure out why this doesn't set the label text. Definitely to do with some multithreading issue
                 lblProgress.Text = settings.GetAssetCount() / settings.GetAssetTotal() * 100 + @"%";
-                rtxtOutput.Text = "this is running";
             }
-            Thread.Sleep(100);
+            await Task.Delay(100);
         }
     }
 
@@ -200,9 +201,12 @@ public partial class Form1 : Form {
     }
 
     private void loadSettings() {
-        rtxtContentDir.Text = settings.GetContentDir();
-        rtxtJSONDir.Text = settings.GetJSONDir();
-        rtxtOutputDir.Text = settings.GetOutputDir();
+        if (MessageBox.Show(@"Do you want to load in the file paths?", @"Holup!",
+                MessageBoxButtons.YesNo) == DialogResult.Yes) {
+            rtxtContentDir.Text = settings.GetContentDir();
+            rtxtJSONDir.Text = settings.GetJSONDir();
+            rtxtOutputDir.Text = settings.GetOutputDir();
+        }
         cbUEVersion.SelectedIndex = settings.GetSelectedIndex();
         chkRefreshAssets.Checked = settings.GetRefreshAssets();
         setupAssetsToSkipSerialization(settings.GetSkipSerialization());
@@ -370,6 +374,7 @@ public partial class Form1 : Form {
             outputText("Please select a valid file!");
             return;
         }
+
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try {
             settings.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason

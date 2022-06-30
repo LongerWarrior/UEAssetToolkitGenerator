@@ -293,9 +293,13 @@ namespace CookedAssetSerializer {
             AssetCount = 0;
             foreach (var file in files) {
                 Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
-                if (SKIP_SERIALIZATION.Contains(Asset.assetType)) continue;
-
                 AssetCount++;
+
+                if (SKIP_SERIALIZATION.Contains(Asset.assetType)) {
+                    PrintOutput("Skipped serialization on file " + file, "SerializeAssets");
+                    continue;
+                }
+
                 PrintOutput(file, "SerializeAssets");
 
                 if (Asset.assetType != EAssetType.Uncategorized) {
