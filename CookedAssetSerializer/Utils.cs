@@ -24,7 +24,7 @@ namespace CookedAssetSerializer {
             Console.WriteLine(output);
             var filename = type == "debug" ? "debug" : "output";
             using StreamWriter sw = File.AppendText(Path.Combine(JSON_DIR, filename + "_log.txt"));
-            sw.WriteLine($"[{type}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
+            sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
         }
 
         public static bool SetupSerialization(out string name, out string gamePath, out string path1) {
@@ -296,7 +296,7 @@ namespace CookedAssetSerializer {
                 AssetCount++;
 
                 if (SKIP_SERIALIZATION.Contains(Asset.assetType)) {
-                    PrintOutput("Skipped serialization on file " + file, "SerializeAssets");
+                    PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                     continue;
                 }
 
@@ -387,12 +387,16 @@ namespace CookedAssetSerializer {
                 var uexpFile = Path.ChangeExtension(file, "uexp");
                 var ubulkFile = Path.ChangeExtension(file, "ubulk");
                 var type = GetAssetType(file, GLOBAL_UE_VERSION);
-                if (!TYPES_TO_COPY.Contains(type)) continue;
+
+                AssetCount++;
+                if (!TYPES_TO_COPY.Contains(type)) {
+                    PrintOutput("Skipped operation on " + file, "GetCookedAssets");
+                    continue;
+                }
 
                 var relativePath = Path.GetRelativePath(CONTENT_DIR, file);
                 var newPath = Path.Combine(OUTPUT_DIR, relativePath);
 
-                AssetCount++;
                 PrintOutput(newPath, "GetCookedAssets");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
