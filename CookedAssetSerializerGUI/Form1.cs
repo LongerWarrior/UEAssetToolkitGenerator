@@ -130,10 +130,10 @@ public partial class Form1 : Form {
     private async Task eventLoop() {
         while (true) {
             if (isRunning) {
-                // TODO: Figure out why this doesn't set the label text. Definitely to do with some multithreading issue
+                // TODO: This can only work if Utils is refactored to be an instanced object rather than static (low priority)
                 lblProgress.Text = settings.GetAssetCount() / settings.GetAssetTotal() * 100 + @"%";
             }
-            await Task.Delay(100);
+            await Task.Delay(500);
         }
     }
 

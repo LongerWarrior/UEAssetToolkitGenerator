@@ -19,7 +19,6 @@ namespace CookedAssetSerializer {
             ja.Add("AssetPackage", gamePath);
             ja.Add("AssetName", name);
             var asData = new JObject();
-            var aoData = new JObject();
 
             ja.Add("AssetSerializedData", asData);
             asData.Add("AssetObjectData", SerializaListOfProperties(fontface.Data));
