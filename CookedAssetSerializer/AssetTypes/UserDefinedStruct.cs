@@ -17,7 +17,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeUserDefinedStruct() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			UserDefinedStructExport mainobject = exports[asset.mainExport - 1] as UserDefinedStructExport;
+			UserDefinedStructExport mainobject = Exports[Asset.mainExport - 1] as UserDefinedStructExport;
 
 			if (mainobject != null) {
 
@@ -29,11 +29,11 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetSerializedData", asdata);
 
 				asdata.Add("SuperStruct", Index(mainobject.SuperIndex.Index));
-				refobjects.Add(Index(mainobject.SuperIndex.Index));
+				RefObjects.Add(Index(mainobject.SuperIndex.Index));
 				JArray Children = new JArray();
 				foreach (FPackageIndex package in mainobject.Children) {
 
-					if (exports[package.Index - 1] is FunctionExport func) {
+					if (Exports[package.Index - 1] is FunctionExport func) {
 						Children.Add(SerializeFunction(func));
 					}
 				}
@@ -62,9 +62,9 @@ namespace CookedAssetSerializer {
 				}
 				
 				asdata.Add("StructDefaultInstance", SerializaListOfProperties(mainobject.DefaultStructInstance));
-				asdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+				asdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

@@ -17,7 +17,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeMaterialInstanceConstant() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
+			NormalExport material = Exports[Asset.mainExport - 1] as NormalExport;
 			DisableGeneration.Add("MaterialLayersParameters");
 			
 			if (material != null) {
@@ -26,7 +26,7 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
-				if (circulardependency.Contains( GetFullName(material.ClassIndex.Index))) {
+				if (CIRCULAR_DEPENDENCY.Contains( GetFullName(material.ClassIndex.Index))) {
 					asdata.Add("SkipDependecies", true);
 				}
 				
@@ -38,12 +38,12 @@ namespace CookedAssetSerializer {
 				if (!FindPropertyData(material, "AssetUserData", out prop)) {
 					aodata.Add("AssetUserData", new JArray());
 				}
-				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-				refobjects = new List<int>();
+				aodata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+				RefObjects = new List<int>();
 				asdata.Add("AssetObjectData", aodata);
 				ja.Add("AssetSerializedData", asdata);
 				
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

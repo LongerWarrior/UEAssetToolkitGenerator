@@ -23,17 +23,17 @@ namespace CookedAssetSerializer {
 			DisableGeneration.Add("NumReplicatedProperties");
 			DisableGeneration.Add("bHasNativizedParent");
 			DisableGeneration.Add("bHasCookedComponentInstancingData");
-			if (asset.assetType == EAssetType.WidgetBlueprint) {
+			if (Asset.assetType == EAssetType.WidgetBlueprint) {
 				DisableGeneration.Add("bHasScriptImplementedTick");
 				DisableGeneration.Add("bHasScriptImplementedPaint");
 			}
 
 			JObject ja = new JObject();
-			ClassExport mainobject = exports[asset.mainExport - 1] as ClassExport;
+			ClassExport mainobject = Exports[Asset.mainExport - 1] as ClassExport;
 
 			if (mainobject != null) {
 
-				string classname = mainobject.ClassIndex.ToImport(asset).ObjectName.ToName();
+				string classname = mainobject.ClassIndex.ToImport(Asset).ObjectName.ToName();
 				switch (classname) {
 					case "BlueprintGeneratedClass": ja.Add("AssetClass", "Blueprint"); break;
 					case "WidgetBlueprintGeneratedClass": ja.Add("AssetClass", "WidgetBlueprint"); FixMovieSceneSections(); break;
@@ -51,11 +51,11 @@ namespace CookedAssetSerializer {
 				List<FunctionExport> functions = new List<FunctionExport>();
 				foreach (FPackageIndex package in mainobject.Children) {
 
-					if (exports[package.Index - 1] is FunctionExport func) {
+					if (Exports[package.Index - 1] is FunctionExport func) {
 						Children.Add(SerializeFunction(func));
 					}
 				}
-				if (asset.assetType != EAssetType.AnimBlueprint) {
+				if (Asset.assetType != EAssetType.AnimBlueprint) {
 					if (!dummy) {
 						asdata.Add("Children", Children);
 					} else {
@@ -95,20 +95,20 @@ namespace CookedAssetSerializer {
 				}
 				
 
-				ja.Add(ObjectHierarchy(asset,false));
+				ja.Add(ObjectHierarchy(Asset,false));
 				File.WriteAllText(path1, ja.ToString());
 
 			}
 		}
 
 		private static void FixMovieSceneSections() {
-			foreach(NormalExport normal in asset.Exports) {
-				if (normal.ClassIndex.Index < 0 && normal.ClassIndex.ToImport(asset).ObjectName.ToName() == "MovieScene2DTransformSection") {
+			foreach(NormalExport normal in Asset.Exports) {
+				if (normal.ClassIndex.Index < 0 && normal.ClassIndex.ToImport(Asset).ObjectName.ToName() == "MovieScene2DTransformSection") {
 					PopulateMovieScene2DTransformSection(ref normal.Data, "Translation");
 					PopulateMovieScene2DTransformSection(ref normal.Data, "Scale");
 					PopulateMovieScene2DTransformSection(ref normal.Data, "Shear");
                 }
-				if (normal.ClassIndex.Index < 0 && normal.ClassIndex.ToImport(asset).ObjectName.ToName() == "MovieSceneVectorSection") {
+				if (normal.ClassIndex.Index < 0 && normal.ClassIndex.ToImport(Asset).ObjectName.ToName() == "MovieSceneVectorSection") {
 					PopulateMovieScene2DTransformSection(ref normal.Data, "Curves", 4);
 				}
 			}

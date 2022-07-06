@@ -16,14 +16,14 @@ namespace CookedAssetSerializer {
 		public static void SerializeSimpleAsset(bool issimple = true, bool skipdependencies = false) {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			NormalExport simple = exports[asset.mainExport - 1] as NormalExport;
+			NormalExport simple = Exports[Asset.mainExport - 1] as NormalExport;
 
 			if (simple != null) {
 
 				if (issimple) {
 					ja.Add("AssetClass", "SimpleAsset");
 				} else {
-					ja.Add("AssetClass", simple.ClassIndex.ToImport(asset).ObjectName.ToName());
+					ja.Add("AssetClass", simple.ClassIndex.ToImport(Asset).ObjectName.ToName());
 				}
 
 
@@ -32,7 +32,7 @@ namespace CookedAssetSerializer {
 				JObject asdata = new JObject();
 				if (issimple) {
 					asdata.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
-					if (circulardependency.Contains( GetFullName(simple.ClassIndex.Index))) {
+					if (CIRCULAR_DEPENDENCY.Contains( GetFullName(simple.ClassIndex.Index))) {
 						skipdependencies = true;
 					}
 					asdata.Add("SkipDependecies", skipdependencies);
@@ -57,11 +57,11 @@ namespace CookedAssetSerializer {
                     }
                 }
 
-				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+				jdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
 				asdata.Add("AssetObjectData", jdata);
 				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

@@ -18,7 +18,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeFontFace() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			FontFaceExport fontface = exports[asset.mainExport - 1] as FontFaceExport;
+			FontFaceExport fontface = Exports[Asset.mainExport - 1] as FontFaceExport;
 			var path2 = Path.ChangeExtension(path1,"ttf");
 
 			if (fontface != null) {
@@ -38,7 +38,7 @@ namespace CookedAssetSerializer {
 					File.WriteAllBytes(path2, fontface.FontFaceData.Data);
 					length = fontface.FontFaceData.Data.Length;
 				} else {
-					var targetFile = Path.ChangeExtension(asset.FilePath, "ufont");
+					var targetFile = Path.ChangeExtension(Asset.FilePath, "ufont");
 					if (File.Exists(targetFile)) {
 						File.Copy(targetFile, path2,true);
 						length = new FileInfo(targetFile).Length;
@@ -53,7 +53,7 @@ namespace CookedAssetSerializer {
 					}
 				}
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

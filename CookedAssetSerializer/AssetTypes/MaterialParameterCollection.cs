@@ -15,7 +15,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeMaterialParameterCollection() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			NormalExport material = exports[asset.mainExport - 1] as NormalExport;
+			NormalExport material = Exports[Asset.mainExport - 1] as NormalExport;
 
 			if (material != null) {
 
@@ -23,17 +23,17 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
-				if (circulardependency.Contains( GetFullName(material.ClassIndex.Index))) {
+				if (CIRCULAR_DEPENDENCY.Contains( GetFullName(material.ClassIndex.Index))) {
 					asdata.Add("SkipDependecies", true);
 				}
 				
 				JObject aodata = SerializaListOfProperties(material.Data);
-				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-				refobjects = new List<int>();
+				aodata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+				RefObjects = new List<int>();
 				asdata.Add("AssetObjectData", aodata);
 				ja.Add("AssetSerializedData", asdata);
 				
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

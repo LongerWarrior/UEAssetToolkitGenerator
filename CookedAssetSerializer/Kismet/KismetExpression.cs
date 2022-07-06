@@ -158,12 +158,12 @@ namespace CookedAssetSerializer {
         public static FSimpleMemberReference FillSimpleMemberReference(int index) {
             FSimpleMemberReference member = new FSimpleMemberReference();
             if (index > 0) {
-                member.MemberName = asset.Exports[index - 1].ObjectName.ToName();
-                member.MemberParent = GetName(asset.Exports[index - 1].OuterIndex.Index);
-                member.MemberGuid = asset.Exports[index - 1].PackageGuid;
+                member.MemberName = Asset.Exports[index - 1].ObjectName.ToName();
+                member.MemberParent = GetName(Asset.Exports[index - 1].OuterIndex.Index);
+                member.MemberGuid = Asset.Exports[index - 1].PackageGuid;
             } else if (index < 0) {
-                member.MemberName = asset.Imports[-index - 1].ObjectName.ToName();
-                member.MemberParent = asset.Imports[-index - 1].ClassPackage.ToName();
+                member.MemberName = Asset.Imports[-index - 1].ObjectName.ToName();
+                member.MemberParent = Asset.Imports[-index - 1].ClassPackage.ToName();
                 member.MemberGuid = new Guid("00000000000000000000000000000000");
             }
 

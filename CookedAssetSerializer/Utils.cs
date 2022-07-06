@@ -11,36 +11,41 @@ using static CookedAssetSerializer.Serializers;
 
 namespace CookedAssetSerializer {
 	public static class Utils {
-
-
-		public static UAsset asset;
-		public static List<Export> exports => asset.Exports;
+		public static UAsset Asset;
+		public static List<Export> Exports => Asset.Exports;
 		public static List<string> importvariables = new List<string>();
-		public static Dictionary<int, int> dict = new Dictionary<int, int>();
-		public static List<int> refobjects = new List<int>();
+		public static Dictionary<int, int> Dict = new Dictionary<int, int>();
+		public static List<int> RefObjects = new List<int>();
 		public static List<string> GeneratedVariables = new List<string>();
 		public static List<string> DisableGeneration = new List<string>();
+		
+		public static void PrintOutput(string output, string type = "debug") {
+			Console.WriteLine(output);
+			var filename = type == "debug" ? "debug" : "output";
+			using StreamWriter sw = File.AppendText(Path.Combine(JSON_DIR, filename + "_log.txt"));
+			sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
+		}
 
 		public static bool SetupSerialization(out string name, out string gamepath, out string path1) {
-			dict = new();
+			Dict = new();
 			DisableGeneration = new();
 			GeneratedVariables = new();
-			refobjects = new();
+			RefObjects = new();
 
-			string fullpath = asset.FilePath;
+			string fullpath = Asset.FilePath;
 			name = Path.GetFileNameWithoutExtension(fullpath);
 			var directory = Path.GetDirectoryName(fullpath);
-			var relativepath = Path.GetRelativePath(ContentDir, directory);
+			var relativepath = Path.GetRelativePath(CONTENT_DIR, directory);
 			if (relativepath.StartsWith(".")) {
 				relativepath = "\\";
 			}
 			gamepath = Path.Join("\\Game", relativepath, name).Replace("\\", "/");
-			path1 = Path.Join(JsonDir, gamepath) + ".json";
+			path1 = Path.Join(JSON_DIR, gamepath) + ".json";
 
 			Directory.CreateDirectory(Path.GetDirectoryName(path1));
-			if (!refreshassets && File.Exists(path1)) return false;
+			if (!REFRESH_ASSETS && File.Exists(path1)) return false;
 
-			asset = new UAsset(fullpath, globalUE, false);
+			Asset = new UAsset(fullpath, GLOBAL_UE_VERSION, false);
 
 			FixIndexes();
 
@@ -72,7 +77,7 @@ namespace CookedAssetSerializer {
 		public static bool FindPropertyData(FPackageIndex export, string propname, out PropertyData prop) {
 
 			prop = null;
-			if (export.IsExport() && export.ToExport(asset) is NormalExport exp) {
+			if (export.IsExport() && export.ToExport(Asset) is NormalExport exp) {
 				foreach (PropertyData property in exp.Data) {
 					if (property.Name.ToName() == propname) {
 						prop = property;
@@ -129,30 +134,30 @@ namespace CookedAssetSerializer {
 
 		public static void FixIndexes() {
 			int index = 0;
-			dict.Add(0, -1);
+			Dict.Add(0, -1);
 
-			for (int i = 1; i <= asset.Imports.Count; i++) {
+			for (int i = 1; i <= Asset.Imports.Count; i++) {
 				//string importname = asset.Imports[i - 1].ObjectName.Value.Value;
-				dict.Add(-i, index);
+				Dict.Add(-i, index);
 				index++;
 			}
 
-			for (int i = 1; i <= asset.Exports.Count; i++) {
-				if (asset.Exports[i - 1] is FunctionExport) {
+			for (int i = 1; i <= Asset.Exports.Count; i++) {
+				if (Asset.Exports[i - 1] is FunctionExport) {
 					/*if (asset.Exports[i - 1].ObjectName.ToName().StartsWith("ExecuteUbergraph_")) {
 						dict.Add(i, index);
 						index++;
 					}*/
 				} else {
-					dict.Add(i, index);
+					Dict.Add(i, index);
 					index++;
 				}
 			}
 		}
 
 		public static int GetClassIndex() {
-			for (int i = 1; i <= asset.Exports.Count; i++) {
-				if (asset.Exports[i - 1] is ClassExport) {
+			for (int i = 1; i <= Asset.Exports.Count; i++) {
+				if (Asset.Exports[i - 1] is ClassExport) {
 					return i;
 				}
 			}
@@ -160,7 +165,7 @@ namespace CookedAssetSerializer {
 		}
 
 		public static int Index(int index) {
-			if (dict.TryGetValue(index, out int validindex)) {
+			if (Dict.TryGetValue(index, out int validindex)) {
 				return validindex;
 			} else {
 				//Console.WriteLine("Non valid Import index : "+index);
@@ -171,9 +176,9 @@ namespace CookedAssetSerializer {
 
 		public static string GetName(int index) {
 			if (index > 0) {
-				return asset.Exports[index - 1].ObjectName.ToName();
+				return Asset.Exports[index - 1].ObjectName.ToName();
 			} else if (index < 0) {
-				return asset.Imports[-index - 1].ObjectName.ToName();
+				return Asset.Imports[-index - 1].ObjectName.ToName();
 			} else {
 				return "";
 			}
@@ -182,20 +187,20 @@ namespace CookedAssetSerializer {
 		public static string GetFullName(int index, bool alt = false) {
 
 			if (index > 0) {
-				if (asset.Exports[index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Exports[index - 1].OuterIndex.Index);
-					return parent + "." + asset.Exports[index - 1].ObjectName.ToName();
+				if (Asset.Exports[index - 1].OuterIndex.Index != 0) {
+					string parent = GetFullName(Asset.Exports[index - 1].OuterIndex.Index);
+					return parent + "." + Asset.Exports[index - 1].ObjectName.ToName();
 				} else {
-					return asset.Exports[index - 1].ObjectName.ToName();
+					return Asset.Exports[index - 1].ObjectName.ToName();
 				}
 
 			} else if (index < 0) {
 
-				if (asset.Imports[-index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Imports[-index - 1].OuterIndex.Index);
-					return parent + "." + asset.Imports[-index - 1].ObjectName.ToName();
+				if (Asset.Imports[-index - 1].OuterIndex.Index != 0) {
+					string parent = GetFullName(Asset.Imports[-index - 1].OuterIndex.Index);
+					return parent + "." + Asset.Imports[-index - 1].ObjectName.ToName();
 				} else {
-					return asset.Imports[-index - 1].ObjectName.ToName();
+					return Asset.Imports[-index - 1].ObjectName.ToName();
 				}
 
 			} else {
@@ -205,8 +210,8 @@ namespace CookedAssetSerializer {
 
 		public static string GetParentName(int index) {
 			if (index > 0) {
-				if (asset.Exports[index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Exports[index - 1].OuterIndex.Index);
+				if (Asset.Exports[index - 1].OuterIndex.Index != 0) {
+					string parent = GetFullName(Asset.Exports[index - 1].OuterIndex.Index);
 					return parent;
 				} else {
 					return "";
@@ -214,8 +219,8 @@ namespace CookedAssetSerializer {
 
 			} else if (index < 0) {
 
-				if (asset.Imports[-index - 1].OuterIndex.Index != 0) {
-					string parent = GetFullName(asset.Imports[-index - 1].OuterIndex.Index);
+				if (Asset.Imports[-index - 1].OuterIndex.Index != 0) {
+					string parent = GetFullName(Asset.Imports[-index - 1].OuterIndex.Index);
 					return parent;
 				} else {
 					return "";
@@ -231,7 +236,7 @@ namespace CookedAssetSerializer {
 
 				//Console.WriteLine(index+" , "+GetFullName(index) + " , " + propname.ToName());
 
-				string klass = asset.Imports[-index - 1].ClassName.ToName();
+				string klass = Asset.Imports[-index - 1].ClassName.ToName();
 				string owner = GetName(index);
 				string parent = GetParentName(index);
 				/*if (parent.StartsWith("/Game")) {
@@ -253,13 +258,13 @@ namespace CookedAssetSerializer {
 				}*/
 
 
-				importvariables.Add(asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " + propname.ToName());
+				importvariables.Add(Asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index) + " " + propname.ToName());
 
 				property = new FObjectProperty();
 				return false;
 
 			}
-			Export export = asset.Exports[index - 1];
+			Export export = Asset.Exports[index - 1];
 			if (export is StructExport) {
 				foreach (FProperty prop in (export as StructExport).LoadedProperties) {
 					if (prop.Name == propname) {
@@ -297,182 +302,177 @@ namespace CookedAssetSerializer {
 			}
 			return true;
 		}
-
-
-		public static void ScanAssetTypes(string directory, UE4Version version, string typetofind = "") {
-			
+		
+		public static void ScanAssetTypes(string typeToFind = "") {
 			Dictionary<string, List<string>> types = new();
-			List<string> alltypes = new();
+			List<string> allTypes = new();
 
-			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
+			var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
-			foreach (string file in files) {
+			AssetTotal = files.Length;
+			AssetCount = 0;
+			foreach (var file in files) {
+				var type = GetAssetType(file, GLOBAL_UE_VERSION);
+				var path = "/" + Path.GetRelativePath(CONTENT_DIR, file).Replace("\\", "/");
 
-				string type = GetAssetType(file, version);
-				var path = "/" + Path.GetRelativePath(ContentDir, file).Replace("\\", "/");
+				PrintOutput(path, "Scan");
+				AssetCount++;
 
-				if (types.ContainsKey(type)) {
-					types[type].Add(path); 
-				} else {
-					types[type] = new List<string> { path };
-				}
+				if (types.ContainsKey(type)) types[type].Add(path);
+				else types[type] = new List<string> { path };
 
-				if (type == typetofind) {
-					Console.WriteLine(type + " : " + path);
-				}
-
-			}
-			Console.WriteLine("Find all files " + files.Length);
-			JObject jtypes = new JObject(); 
-			foreach (KeyValuePair<string, List<string>> entry in types) {
-				Console.WriteLine(entry.Key + " : " + entry.Value.Count);
-				jtypes.Add(entry.Key, JArray.FromObject(entry.Value));
-                alltypes.Add("\""+entry.Key+ "\",");
-            }
-            File.WriteAllText(JsonDir+"\\AssetTypes.json", jtypes.ToString());
-			File.WriteAllText(JsonDir+"\\AllTypes.txt", String.Join("\n",alltypes));
-
-		}
-
-		public static void SerializeAssets(string directory) {
-
-			string[] files = Directory.GetFiles(directory, "*.uasset", SearchOption.AllDirectories);
-			foreach (string file in files) {
-
-				asset = new UAsset(file, globalUE, true);
-
-				if (skipserialization.Contains(asset.assetType)) continue;
-
-				if (asset.assetType != EAssetType.Uncategorized) {
-					switch (asset.assetType) {
-
-						case EAssetType.Blueprint:
-						case EAssetType.WidgetBlueprint:
-						case EAssetType.AnimBlueprint:
-							SerializeBPAsset(false);
-							break;
-						case EAssetType.DataTable:
-							SerializeDataTable();
-							break;
-						case EAssetType.StringTable:
-							SerializeStringTable();
-							break;
-						case EAssetType.UserDefinedStruct:
-							SerializeUserDefinedStruct();
-							break;
-						case EAssetType.BlendSpaceBase:
-							SerializeBlendSpace();
-							break;
-
-						case EAssetType.AnimMontage:
-						case EAssetType.CameraAnim:
-						case EAssetType.LandscapeGrassType:
-						case EAssetType.MediaPlayer:
-						case EAssetType.MediaTexture:
-						case EAssetType.SubsurfaceProfile:
-							SerializeSimpleAsset(false);
-							break;
-						case EAssetType.Skeleton:
-							SerializeSkeleton();
-							break;
-						case EAssetType.MaterialParameterCollection:
-							SerializeMaterialParameterCollection();
-							break;
-						case EAssetType.PhycialMaterial:
-							SerializePhysicalMaterial();
-							break;
-						case EAssetType.Material:
-							SerializeMaterial();
-							break;
-						case EAssetType.MaterialInstanceConstant:
-							SerializeMaterialInstanceConstant();
-							break;
-						case EAssetType.UserDefinedEnum:
-							SerializeUserDefinedEnum();
-							break;
-						case EAssetType.SoundCue:
-							SerializeSoundCue();
-							break;
-						case EAssetType.Font:
-							SerializeFont();
-							break;
-						case EAssetType.FontFace:
-							SerializeFontFace();
-							break;
-						case EAssetType.CurveBase:
-							SerializeCurveBase();
-							break;
-						case EAssetType.Texture2D:
-							SerializeTexture();
-							break;
-						case EAssetType.SkeletalMesh:
-							break;
-						case EAssetType.FileMediaSource:
-							SerializeFileMediaSource();
-							break;
-						case EAssetType.StaticMesh:
-							SerializeStaticMesh();
-							break;
-						default:
-							break;
-					}
-				} else {
-					var atype = GetFullName(exports[asset.mainExport - 1].ClassIndex.Index);
-					if (simpleassets.Contains(atype)) {
-						SerializeSimpleAsset(true);
-					}
-				}
+				if (type == typeToFind) PrintOutput(type + " : " + path, "Scan");
 			}
 
+			PrintOutput("Find all files " + files.Length, "Scan");
+			var jTypes = new JObject();
+			foreach (var entry in types) {
+				PrintOutput(entry.Key + " : " + entry.Value.Count, "Scan");
+				jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
+				allTypes.Add("\"" + entry.Key + "\",");
+			}
+
+			File.WriteAllText(JSON_DIR + "\\AssetTypes.json", jTypes.ToString());
+			File.WriteAllText(JSON_DIR + "\\AllTypes.txt", string.Join("\n", allTypes));
 		}
 
-		public static void MoveAssets(string dirfrom, string dirto, List<string> types, UE4Version version, bool copy = true) {
+		public static void SerializeAssets() {
+            var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
 
-			string[] files = Directory.GetFiles(dirfrom, "*.uasset", SearchOption.AllDirectories);
+            AssetTotal = files.Length;
+            AssetCount = 0;
+            foreach (var file in files) {
+                Asset = new UAsset(file, GLOBAL_UE_VERSION, true);
+                AssetCount++;
 
-			foreach (string file in files) {
-				var uexpfile = Path.ChangeExtension(file, "uexp");
-				var ubulkfile = Path.ChangeExtension(file, "ubulk");
-				string type = GetAssetType(file, version);
-				if (types.Contains(type)) {
-					var relativepath = Path.GetRelativePath(dirfrom, file);
-					var newpath = Path.Combine(dirto, relativepath);
-					
-					Directory.CreateDirectory(Path.GetDirectoryName(newpath));
-					if (copy) {
-						File.Copy(file, newpath, true);
-					} else {
-						File.Move(file, newpath, true);
-					}
-					if (File.Exists(uexpfile)) {
-						if (copy) {
-							File.Copy(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
-						} else {
-							File.Move(uexpfile, Path.ChangeExtension(newpath, "uexp"), true);
-						}
+                if (SKIP_SERIALIZATION.Contains(Asset.assetType)) {
+                    PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                    continue;
+                }
+
+                PrintOutput(file, "SerializeAssets");
+
+                if (Asset.assetType != EAssetType.Uncategorized) {
+                    switch (Asset.assetType) {
+                        case EAssetType.Blueprint:
+                        case EAssetType.WidgetBlueprint:
+                        case EAssetType.AnimBlueprint:
+                            SerializeBPAsset(false);
+                            break;
+                        case EAssetType.DataTable:
+                            SerializeDataTable();
+                            break;
+                        case EAssetType.StringTable:
+                            SerializeStringTable();
+                            break;
+                        case EAssetType.UserDefinedStruct:
+                            SerializeUserDefinedStruct();
+                            break;
+                        case EAssetType.BlendSpaceBase:
+                            SerializeBlendSpace();
+                            break;
+                        case EAssetType.AnimMontage:
+                        case EAssetType.CameraAnim:
+                        case EAssetType.LandscapeGrassType:
+                        case EAssetType.MediaPlayer:
+                        case EAssetType.MediaTexture:
+                        case EAssetType.SubsurfaceProfile:
+                            SerializeSimpleAsset(false);
+                            break;
+                        case EAssetType.Skeleton:
+                            SerializeSkeleton();
+                            break;
+                        case EAssetType.MaterialParameterCollection:
+                            SerializeMaterialParameterCollection();
+                            break;
+                        case EAssetType.PhycialMaterial:
+                            SerializePhysicalMaterial();
+                            break;
+                        case EAssetType.Material:
+                            SerializeMaterial();
+                            break;
+                        case EAssetType.MaterialInstanceConstant:
+                            SerializeMaterialInstanceConstant();
+                            break;
+                        case EAssetType.UserDefinedEnum:
+                            SerializeUserDefinedEnum();
+                            break;
+                        case EAssetType.SoundCue:
+                            SerializeSoundCue();
+                            break;
+                        case EAssetType.Font:
+                            SerializeFont();
+                            break;
+                        case EAssetType.FontFace:
+                            SerializeFontFace();
+                            break;
+                        case EAssetType.CurveBase:
+                            SerializeCurveBase();
+                            break;
+                        case EAssetType.Texture2D:
+                            SerializeTexture();
+                            break;
+                        case EAssetType.SkeletalMesh:
+                            break;
+                        case EAssetType.FileMediaSource:
+                            SerializeFileMediaSource();
+                            break;
+                        case EAssetType.StaticMesh:
+                            SerializeStaticMesh();
+                            break;
                     }
-					if (File.Exists(ubulkfile)) {
-						if (copy) {
-							File.Copy(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
-						} else {
-							File.Move(ubulkfile, Path.ChangeExtension(newpath, "ubulk"), true);
-						}
-					}
-					
-				}
+                } else {
+                    var aType = GetFullName(Exports[Asset.mainExport - 1].ClassIndex.Index);
+                    if (SIMPLE_ASSETS.Contains(aType)) SerializeSimpleAsset();
+                }
+            }
+        }
 
-			}
-		}
+        public static void GetCookedAssets(bool copy = true) {
+            var files = Directory.GetFiles(CONTENT_DIR, "*.uasset", SearchOption.AllDirectories);
+
+            AssetTotal = files.Length;
+            AssetCount = 0;
+            foreach (var file in files) {
+                var uexpFile = Path.ChangeExtension(file, "uexp");
+                var ubulkFile = Path.ChangeExtension(file, "ubulk");
+                var type = GetAssetType(file, GLOBAL_UE_VERSION);
+
+                AssetCount++;
+                if (!TYPES_TO_COPY.Contains(type)) {
+                    PrintOutput("Skipped operation on " + file, "GetCookedAssets");
+                    continue;
+                }
+
+                var relativePath = Path.GetRelativePath(CONTENT_DIR, file);
+                var newPath = Path.Combine(OUTPUT_DIR, relativePath);
+
+                PrintOutput(newPath, "GetCookedAssets");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
+
+                if (File.Exists(uexpFile)) {
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                }
+
+                if (!File.Exists(ubulkFile)) continue;
+                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+            }
+        }
 
 		public static string GetAssetType(string file, UE4Version version) {
 			string name = Path.GetFileNameWithoutExtension(file).ToLower();
-			asset = new UAsset(file, version, true);
-			if (asset.Exports.Count == 1) {
-				return GetFullName(asset.Exports[0].ClassIndex.Index);
+			Asset = new UAsset(file, version, true);
+			if (Asset.Exports.Count == 1) {
+				return GetFullName(Asset.Exports[0].ClassIndex.Index);
 			} else {
 				List<Export> exportnames = new();
 				List<Export> isasset = new();
-				foreach (Export exp in asset.Exports) {
+				foreach (Export exp in Asset.Exports) {
 					if (exp.ObjectName.ToName().ToLower() == name + "_c") {
 						exportnames.Add(exp);
 					}
@@ -481,7 +481,7 @@ namespace CookedAssetSerializer {
                     }
 				}
 				if (exportnames.Count == 0) {
-					foreach (Export exp in asset.Exports) {
+					foreach (Export exp in Asset.Exports) {
 						if (exp.ObjectName.ToName().ToLower() == name) {
 							exportnames.Add(exp);
 						}

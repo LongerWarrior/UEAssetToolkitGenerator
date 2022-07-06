@@ -15,7 +15,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeDataTable() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			DataTableExport dataTable = exports[asset.mainExport - 1] as DataTableExport;
+			DataTableExport dataTable = Exports[Asset.mainExport - 1] as DataTableExport;
 
 			if (dataTable != null) {
 
@@ -28,9 +28,9 @@ namespace CookedAssetSerializer {
 				//asdata.Add(SerializePropertyData(dataTable.Data[0]));
 				asdata.Add(SerializaListOfProperties(dataTable.Data).Properties());
 				asdata.Add(SerializeDataTable(dataTable.Table));
-				asdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+				asdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

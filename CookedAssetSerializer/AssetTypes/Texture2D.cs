@@ -22,11 +22,11 @@ namespace CookedAssetSerializer {
             DisableGeneration.Add("ImportedSize");
             string path2 = Path.ChangeExtension(path1, "png");
             JObject ja = new JObject();
-            Texture2DExport texture = exports[asset.mainExport - 1] as Texture2DExport;
+            Texture2DExport texture = Exports[Asset.mainExport - 1] as Texture2DExport;
 
             if (texture != null) {
 
-                var type = exports[asset.mainExport - 1].ClassIndex.ToImport(asset).ObjectName.ToName();
+                var type = Exports[Asset.mainExport - 1].ClassIndex.ToImport(Asset).ObjectName.ToName();
                 ja.Add("AssetClass", type);
                 ja.Add("AssetPackage", gamepath);
                 ja.Add("AssetName", name);
@@ -35,8 +35,8 @@ namespace CookedAssetSerializer {
                 ja.Add("AssetSerializedData", asdata);
 
                 JObject aodata = SerializaListOfProperties(texture.Data);
-                aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-                refobjects = new List<int>();
+                aodata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+                RefObjects = new List<int>();
                 asdata.Add("AssetObjectData", aodata);
                 bool iscube = false;
                 int NumSlices = 1;
@@ -46,13 +46,13 @@ namespace CookedAssetSerializer {
                     asdata.Add("TextureDepth", texture.Mips[0].SizeZ);
 
 
-                    if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "TextureCube") {
+                    if (texture.ClassIndex.ToImport(Asset).ObjectName.ToName() == "TextureCube") {
                         NumSlices = 6;
                         iscube = true;
                         texture.Mips[0].SizeY *= NumSlices;
                         texture.Mips[0].SizeZ = 1;
                     }
-                    if (texture.ClassIndex.ToImport(asset).ObjectName.ToName() == "Texture2DArray") {
+                    if (texture.ClassIndex.ToImport(Asset).ObjectName.ToName() == "Texture2DArray") {
                         NumSlices = texture.Mips[0].SizeZ;
                         texture.Mips[0].SizeY *= NumSlices;
                         texture.Mips[0].SizeZ = 1;
@@ -73,7 +73,7 @@ namespace CookedAssetSerializer {
                     if (FindPropertyData(texture, "CompressionSettings", out PropertyData _compression)) {
                         BytePropertyData compression = (BytePropertyData)_compression;
                         if (compression.ByteType == BytePropertyType.Long) {
-                            if (asset.GetNameReference(compression.Value).ToString().Contains("TC_Normalmap")) {
+                            if (Asset.GetNameReference(compression.Value).ToString().Contains("TC_Normalmap")) {
                                 texture.isNormalMap = true;
                             }
                         }
@@ -105,7 +105,7 @@ namespace CookedAssetSerializer {
                     asdata.Add("SourceImageHash", 0.ToString("x2"));
                 }
             
-                ja.Add(ObjectHierarchy(asset));
+                ja.Add(ObjectHierarchy(Asset));
                 File.WriteAllText(path1, ja.ToString());
 
             }

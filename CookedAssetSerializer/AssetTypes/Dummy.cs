@@ -16,7 +16,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeDummy() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			Export simple = exports[asset.mainExport - 1] as Export;
+			Export simple = Exports[Asset.mainExport - 1] as Export;
 
 			if (simple != null) {
 
@@ -38,7 +38,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeDummy(bool withproperties) {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			NormalExport simple = exports[asset.mainExport - 1] as NormalExport;
+			NormalExport simple = Exports[Asset.mainExport - 1] as NormalExport;
 
 			if (simple != null) {
 
@@ -59,9 +59,9 @@ namespace CookedAssetSerializer {
 				jdata.Add("$ReferencedObjects", new JArray());
 				asdata.Add("AssetObjectData", jdata);
 				ja.Add("AssetSerializedData", asdata);
-				if (refobjects.Count > 0) {
-					Console.WriteLine(asset.FilePath);
-					ja.Add(ObjectHierarchy(asset));
+				if (RefObjects.Count > 0) {
+					Console.WriteLine(Asset.FilePath);
+					ja.Add(ObjectHierarchy(Asset));
 				} else {
 					ja.Add(new JProperty("ObjectHierarchy", new JArray()));
 				}

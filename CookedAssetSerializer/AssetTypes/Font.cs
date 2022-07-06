@@ -20,7 +20,7 @@ namespace CookedAssetSerializer {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			DisableGeneration.Add("Textures");
 			JObject ja = new JObject();
-			FontExport font = exports[asset.mainExport-1] as FontExport;
+			FontExport font = Exports[Asset.mainExport-1] as FontExport;
 
 			if (font != null) {
 
@@ -115,11 +115,11 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetSerializedData", asdata);
 				JObject jdata = SerializaListOfProperties(font.Data);
 				asdata.Add("AssetObjectData", jdata);
-				jdata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+				jdata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 				
 
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

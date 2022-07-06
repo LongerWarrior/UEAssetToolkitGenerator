@@ -15,7 +15,7 @@ namespace CookedAssetSerializer {
 		public static void SerializeUserDefinedEnum() {
 			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
 			JObject ja = new JObject();
-			EnumExport uenum = exports[asset.mainExport - 1] as EnumExport;
+			EnumExport uenum = Exports[Asset.mainExport - 1] as EnumExport;
 
 			if (uenum != null) {
 
@@ -45,7 +45,7 @@ namespace CookedAssetSerializer {
 
 				asdata.Add("DisplayNameMap", namesmap);
 
-				ja.Add(ObjectHierarchy(asset));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}

@@ -45,7 +45,7 @@ namespace CookedAssetSerializer {
 				ArrayPropertyData timelines = (ArrayPropertyData)_timelines;
 				foreach (ObjectPropertyData timeline in timelines.Value) {
 					var timelineindex = timeline.Value.Index-1;
-					NormalExport timelineexport = (NormalExport)exports[timelineindex];
+					NormalExport timelineexport = (NormalExport)Exports[timelineindex];
 					if (FindPropertyData(timelineexport, "VariableName", out PropertyData _name)) {
 						GeneratedVariables.Add(((NamePropertyData)_name).Value.ToName());
 					}
@@ -79,14 +79,14 @@ namespace CookedAssetSerializer {
 				}
 			}
 
-			if (asset.assetType == EAssetType.WidgetBlueprint) {
+			if (Asset.assetType == EAssetType.WidgetBlueprint) {
 
 
 				//Also append widget tree generated variables
 				if (FindPropertyData(mainobject, "WidgetTree", out PropertyData _wtree)) {
 					ObjectPropertyData wtree = (ObjectPropertyData)_wtree;
 
-					if (wtree.Value.Index > 0 && exports[wtree.Value.Index-1] is NormalExport widgettree) {
+					if (wtree.Value.Index > 0 && Exports[wtree.Value.Index-1] is NormalExport widgettree) {
 						if (FindPropertyData(widgettree, "RootWidget", out PropertyData _root)) {
 							ObjectPropertyData root = (ObjectPropertyData)_root;
 							GetAllWidgets(root);
@@ -117,7 +117,7 @@ namespace CookedAssetSerializer {
 					ArrayPropertyData animations = (ArrayPropertyData)_animations;
 					foreach (ObjectPropertyData animation in animations.Value) {
 						if (animation.Value.Index > 0) {
-							string animname = animation.Value.ToExport(asset).ObjectName.ToName();
+							string animname = animation.Value.ToExport(Asset).ObjectName.ToName();
 							if (animname.EndsWith("_INST")) {
 								GeneratedVariables.Add(animname.Substring(0,animname.Length-5));
 							}
@@ -165,13 +165,13 @@ namespace CookedAssetSerializer {
 		};
 		public static void GetAllWidgets(ObjectPropertyData reftowidget) {
 			bool isvariable = false;
-			if (reftowidget.Value.Index > 0 && exports[reftowidget.Value.Index - 1] is NormalExport widget) {
+			if (reftowidget.Value.Index > 0 && Exports[reftowidget.Value.Index - 1] is NormalExport widget) {
 				if (FindPropertyData(widget, "bIsVariable", out PropertyData _bisvariable)) {
 					BoolPropertyData bisvariable = (BoolPropertyData)_bisvariable;
 					isvariable = bisvariable.Value;
 				} else {
 					if (widget.ClassIndex.IsImport()) {
-						var baseclass = widget.ClassIndex.ToImport(asset);
+						var baseclass = widget.ClassIndex.ToImport(Asset);
 						if (baseclass.ClassName.ToName() == "Class" && VariableWidgets.Contains(baseclass.ObjectName.ToName())) {
 							isvariable = true;
 						}
@@ -187,7 +187,7 @@ namespace CookedAssetSerializer {
 				if (FindPropertyData(widget, "Slots", out PropertyData _slots)) {
 					ArrayPropertyData slots = (ArrayPropertyData)_slots;
 					foreach (ObjectPropertyData slot in slots.Value) {
-						if (slot.Value.IsExport() && exports[slot.Value.Index-1] is NormalExport child) {
+						if (slot.Value.IsExport() && Exports[slot.Value.Index-1] is NormalExport child) {
 							if (FindPropertyData(child, "Content", out PropertyData content)) {
 								GetAllWidgets((ObjectPropertyData)content);
 							}
@@ -229,7 +229,7 @@ namespace CookedAssetSerializer {
 			JObject jfunc = new JObject();
 			if (FieldKind) { jfunc.Add("FieldKind", "Function"); }
 
-			jfunc.Add("ObjectClass", asset.Imports[Math.Abs(function.TemplateIndex.Index) - 1].ClassName.ToName());
+			jfunc.Add("ObjectClass", Asset.Imports[Math.Abs(function.TemplateIndex.Index) - 1].ClassName.ToName());
 			jfunc.Add("ObjectName", function.ObjectName.ToName());
 			jfunc.Add("SuperStruct", Index(function.SuperIndex.Index));
 			jfunc.Add("Children", new JArray());
@@ -320,9 +320,9 @@ namespace CookedAssetSerializer {
 				//        break; };
 				case FDelegateProperty fdelegate: {
 						if (fdelegate.SignatureFunction.Index > 0) {
-							jprop.Add("SignatureFunction", asset.Exports[fdelegate.SignatureFunction.Index - 1].ObjectName.ToName());
+							jprop.Add("SignatureFunction", Asset.Exports[fdelegate.SignatureFunction.Index - 1].ObjectName.ToName());
 						} else if (fdelegate.SignatureFunction.Index < 0) {
-							jprop.Add("SignatureFunction", asset.Imports[-fdelegate.SignatureFunction.Index - 1].ObjectName.ToName());
+							jprop.Add("SignatureFunction", Asset.Imports[-fdelegate.SignatureFunction.Index - 1].ObjectName.ToName());
 						} else {
 							jprop.Add("SignatureFunction", -1);
 						}
@@ -410,10 +410,10 @@ namespace CookedAssetSerializer {
 			jexport.Add("ObjectName", export.ObjectName.ToName());
 			jexport.Add("ObjectFlags", (Int64)export.ObjectFlags);
 			JObject properties = SerializaListOfProperties(export.Data);
-			properties.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+			properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
 			jexport.Add("Properties", properties);
 
-			refobjects = new List<int>();
+			RefObjects = new List<int>();
 			return jexport;
 		}
 
@@ -441,7 +441,7 @@ namespace CookedAssetSerializer {
 				case TextPropertyData: { jprop.Value = property.ToJson(); res.Add(jprop); break; }
 				case BytePropertyData prop: {
 						if (prop.ByteType == BytePropertyType.Long) {
-							jprop.Value = asset.GetNameReference(prop.Value).Value;
+							jprop.Value = Asset.GetNameReference(prop.Value).Value;
 
 						} else {
 							jprop.Value = prop.Value;
@@ -452,17 +452,17 @@ namespace CookedAssetSerializer {
 
 				case EnumPropertyData prop: { jprop.Value = prop.Value.ToName(); res.Add(jprop); break; }
 				case NamePropertyData prop: { jprop.Value = prop.Value.ToName(); res.Add(jprop); break; }
-				case InterfacePropertyData prop: { jprop.Value = Index(prop.Value.Index); refobjects.Add((int)jprop.Value); res.Add(jprop); break; }
+				case InterfacePropertyData prop: { jprop.Value = Index(prop.Value.Index); RefObjects.Add((int)jprop.Value); res.Add(jprop); break; }
 				case ObjectPropertyData prop: {
 						int index = Index(prop.Value.Index);
 						if (index == -1 && prop.Value.Index != 0) {
-							if (prop.Value.ToExport(asset) is FunctionExport func) {
+							if (prop.Value.ToExport(Asset) is FunctionExport func) {
 								jprop.Value = func.ObjectName.ToName(); res.Add(jprop);
 							} else {
 								Console.WriteLine("Non valid object index" + prop.Value.Index);
 							}
 						} else {
-							jprop.Value = index; refobjects.Add(index); res.Add(jprop);
+							jprop.Value = index; RefObjects.Add(index); res.Add(jprop);
 						}
 
 						break;
@@ -548,7 +548,7 @@ namespace CookedAssetSerializer {
 						var fontdata = prop.Value;
 						if (fontdata.bIsCooked) {
 							value.Add("FontFaceAsset", Index(fontdata.LocalFontFaceAsset.Index));
-							refobjects.Add(Index(fontdata.LocalFontFaceAsset.Index));
+							RefObjects.Add(Index(fontdata.LocalFontFaceAsset.Index));
 							if (fontdata.FontFilename != null) {
 								value.Add("FontFilename", fontdata.FontFilename.ToString());
 							} else {
@@ -671,7 +671,7 @@ namespace CookedAssetSerializer {
 
 		public static JProperty SerializeData(List<PropertyData> Data, bool mainobject = true) {
 			JProperty jdata;
-			refobjects = new List<int>();
+			RefObjects = new List<int>();
 
 			if (mainobject) {
 				jdata = new JProperty("AssetObjectData");
@@ -694,25 +694,25 @@ namespace CookedAssetSerializer {
 					}
 				}
 				if (!hasSCS) { jdatavalue.Add("SimpleConstructionScript", -1); }
-				if (asset.assetType == EAssetType.WidgetBlueprint) {
+				if (Asset.assetType == EAssetType.WidgetBlueprint) {
 					if(!FindPropertyData(Data,"Animations", out PropertyData _animations)) {
 						jdatavalue.Add("Animations", new JArray());
 					}
                 }
 
 			}
-			jdatavalue.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-			refobjects = new List<int>();
+			jdatavalue.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+			RefObjects = new List<int>();
 			jdata.Value = jdatavalue;
 
 			return jdata;
 		}
 
 		public static JProperty ObjectHierarchy(UAsset asset, bool fixnames=false) {
-			refobjects = new List<int>();
+			RefObjects = new List<int>();
 			JArray ObjHie = new JArray();
 			for (var i = 1; i <= asset.Imports.Count; i++) {
-				if (dict.ContainsKey(-i)) {
+				if (Dict.ContainsKey(-i)) {
 					Import import = asset.Imports[i - 1];
 					JObject jimport = new JObject();
 					jimport.Add("ObjectIndex", Index(-i));
@@ -741,7 +741,7 @@ namespace CookedAssetSerializer {
 			}
 
 			for (var i = 1; i <= asset.Exports.Count; i++) {
-				if (dict.ContainsKey(i)) {
+				if (Dict.ContainsKey(i)) {
 					JObject jexport = new JObject();
 					if (i == asset.mainExport) {
 						jexport.Add("ObjectIndex", Index(i));

@@ -30,11 +30,11 @@ namespace CookedAssetSerializer {
                 return;
             }
             JObject ja = new JObject();
-            StaticMeshExport mesh = exports[asset.mainExport - 1] as StaticMeshExport;
+            StaticMeshExport mesh = Exports[Asset.mainExport - 1] as StaticMeshExport;
 
             if (mesh != null) {
 
-                var type = exports[asset.mainExport - 1].ClassIndex.ToImport(asset).ObjectName.ToName();
+                var type = Exports[Asset.mainExport - 1].ClassIndex.ToImport(Asset).ObjectName.ToName();
                 ja.Add("AssetClass", type);
                 ja.Add("AssetPackage", gamepath);
                 ja.Add("AssetName", name);
@@ -43,8 +43,8 @@ namespace CookedAssetSerializer {
                 ja.Add("AssetSerializedData", asdata);
 
                 JObject aodata = SerializaListOfProperties(mesh.Data);
-                aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
-                refobjects = new List<int>();
+                aodata.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+                RefObjects = new List<int>();
                 asdata.Add("AssetObjectData", aodata);
 
 
@@ -87,7 +87,7 @@ namespace CookedAssetSerializer {
                 }
                
 
-                ja.Add(ObjectHierarchy(asset,false));
+                ja.Add(ObjectHierarchy(Asset,false));
                 File.WriteAllText(path1, ja.ToString());
 
             }
