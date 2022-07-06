@@ -6,6 +6,7 @@ using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
+using static CookedAssetSerializer.Globals;
 using UAssetAPI.PropertyTypes;
 using Textures;
 using SkiaSharp;
@@ -43,6 +44,10 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
+				
+				if (circulardependency.Contains( GetFullName(material.ClassIndex.Index))) {
+					asdata.Add("SkipDependecies", true);
+				}
 
 				PopulateCachedExpressionDataEntries(ref material.Data);
 				SerializeReferencedFunctions(material.Data, out JProperty[] functions);

@@ -5,6 +5,7 @@ using System.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Utils;
 using static CookedAssetSerializer.SerializationUtils;
+using static CookedAssetSerializer.Globals;
 
 namespace CookedAssetSerializer {
 
@@ -21,6 +22,9 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
+				if (circulardependency.Contains( GetFullName(material.ClassIndex.Index))) {
+					asdata.Add("SkipDependecies", true);
+				}
 				
 				JObject aodata = SerializaListOfProperties(material.Data);
 				aodata.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
