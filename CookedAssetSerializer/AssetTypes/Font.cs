@@ -108,9 +108,9 @@ namespace CookedAssetSerializer {
 					} else {
 						asdata.Add("IsOfflineFont", true);
 					}
-				} else {
+				}/* else {
 					asdata.Add("IsOfflineFont", true);
-				}
+				}*/
 
 				ja.Add("AssetSerializedData", asdata);
 				JObject jdata = SerializaListOfProperties(font.Data);

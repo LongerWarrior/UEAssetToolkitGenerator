@@ -396,49 +396,41 @@ public partial class Form1 : Form {
     }
 
     private void rtxtContentDir_TextChanged(object sender, EventArgs e) {
-        if (rtxtContentDir.Text != settings.GetContentDir()) isSaved[1] = false;
-        else isSaved[1] = true;
+        isSaved[1] = rtxtContentDir.Text != settings.GetContentDir();
     }
 
     private void rtxtJSONDir_TextChanged(object sender, EventArgs e) {
-        if (rtxtJSONDir.Text != settings.GetJSONDir()) isSaved[2] = false;
-        else isSaved[2] = true;
+        isSaved[2] = rtxtJSONDir.Text != settings.GetJSONDir();
     }
 
     private void rtxtOutputDir_TextChanged(object sender, EventArgs e) {
-        if (rtxtOutputDir.Text != settings.GetOutputDir()) isSaved[3] = false;
-        else isSaved[3] = true;
+        isSaved[3] = rtxtOutputDir.Text != settings.GetOutputDir();
     }
 
     private void lbAssetsToSkipSerialization_SelectedIndexChanged(object sender, EventArgs e) {
         // TODO: Fix
-        // if (lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>() != settings.GetSkipSerialization().ToArray()) isSaved[4] = false;
-        // else isSaved[4] = true;
+        //isSaved[4] = lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>() != settings.GetSkipSerialization().ToArray();
     }
 
     private void rtxtSimpleAssets_TextChanged(object sender, EventArgs e) {
-        if (rtxtSimpleAssets.Lines != settings.GetSimpleAssets().ToArray()) isSaved[5] = false;
-        else isSaved[5] = true;
+        isSaved[5] = rtxtSimpleAssets.Lines == settings.GetSimpleAssets().ToArray();
     }
 
     private void rtxtCookedAssets_TextChanged(object sender, EventArgs e) {
-        if (rtxtCookedAssets.Lines != settings.GetTypesToCopy().ToArray()) isSaved[6] = false;
-        else isSaved[6] = true;
+        isSaved[6] = rtxtCookedAssets.Lines != settings.GetTypesToCopy().ToArray();
     }
 
     private void rtxtCircularDependancy_TextChanged(object sender, EventArgs e) {
-        if (rtxtCircularDependancy.Lines != settings.GetCircularDependency().ToArray()) isSaved[7] = false;
-        else isSaved[7] = true;
+        isSaved[7] = rtxtCircularDependancy.Lines != settings.GetCircularDependency().ToArray();
     }
 
-    private void chkRefreshAssets_CheckedChanged(object sender, EventArgs e) {
-        if (chkRefreshAssets.Checked != settings.GetRefreshAssets()) isSaved[8] = false;
-        else isSaved[8] = true;
+    private void chkRefreshAssets_CheckedChanged(object sender, EventArgs e)
+    {
+        isSaved[8] = chkRefreshAssets.Checked != settings.GetRefreshAssets();
     }
 
     private void cbUEVersion_SelectedIndexChanged(object sender, EventArgs e) {
         if (!isSetupFinished) return;
-        if (cbUEVersion.SelectedIndex != settings.GetSelectedIndex()) isSaved[9] = false;
-        else isSaved[9] = true;
+        isSaved[9] = cbUEVersion.SelectedIndex != settings.GetSelectedIndex();
     }
 }
