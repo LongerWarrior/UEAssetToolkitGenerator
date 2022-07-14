@@ -3,7 +3,6 @@ using UAssetAPI.FieldTypes;
 using UAssetAPI.Kismet.Bytecode;
 using UAssetAPI.Kismet.Bytecode.Expressions;
 using System;
-using static CookedAssetSerializer.Utils;
 using UAssetAPI;
 
 namespace CookedAssetSerializer {

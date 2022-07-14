@@ -26,7 +26,7 @@ namespace CookedAssetSerializer {
 				ja.Add("AssetPackage", gamepath);
 				ja.Add("AssetName", name);
 				JObject asdata = new JObject();
-				if (CIRCULAR_DEPENDENCY.Contains( GetFullName(material.ClassIndex.Index))) {
+				if (CircularDependency.Contains( GetFullName(material.ClassIndex.Index))) {
 					asdata.Add("SkipDependecies", true);
 				}
 				

@@ -32,7 +32,7 @@ namespace CookedAssetSerializer {
 				JObject asdata = new JObject();
 				if (issimple) {
 					asdata.Add("AssetClass", GetFullName(simple.ClassIndex.Index));
-					if (CIRCULAR_DEPENDENCY.Contains( GetFullName(simple.ClassIndex.Index))) {
+					if (CircularDependency.Contains( GetFullName(simple.ClassIndex.Index))) {
 						skipdependencies = true;
 					}
 					asdata.Add("SkipDependecies", skipdependencies);
