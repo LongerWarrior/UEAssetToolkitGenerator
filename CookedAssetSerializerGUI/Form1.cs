@@ -396,41 +396,41 @@ public partial class Form1 : Form {
     }
 
     private void rtxtContentDir_TextChanged(object sender, EventArgs e) {
-        isSaved[1] = rtxtContentDir.Text != settings.GetContentDir();
+        isSaved[1] = rtxtContentDir.Text == settings.GetContentDir();
     }
 
     private void rtxtJSONDir_TextChanged(object sender, EventArgs e) {
-        isSaved[2] = rtxtJSONDir.Text != settings.GetJSONDir();
+        isSaved[2] = rtxtJSONDir.Text == settings.GetJSONDir();
     }
 
     private void rtxtOutputDir_TextChanged(object sender, EventArgs e) {
-        isSaved[3] = rtxtOutputDir.Text != settings.GetOutputDir();
+        isSaved[3] = rtxtOutputDir.Text == settings.GetOutputDir();
     }
 
     private void lbAssetsToSkipSerialization_SelectedIndexChanged(object sender, EventArgs e) {
         // TODO: Fix
-        //isSaved[4] = lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>() != settings.GetSkipSerialization().ToArray();
+        //isSaved[4] = lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>() == settings.GetSkipSerialization().ToArray();
     }
 
     private void rtxtSimpleAssets_TextChanged(object sender, EventArgs e) {
-        isSaved[5] = rtxtSimpleAssets.Lines == settings.GetSimpleAssets().ToArray();
+        isSaved[5] = rtxtSimpleAssets.Lines != settings.GetSimpleAssets().ToArray();
     }
 
     private void rtxtCookedAssets_TextChanged(object sender, EventArgs e) {
-        isSaved[6] = rtxtCookedAssets.Lines != settings.GetTypesToCopy().ToArray();
+        isSaved[6] = rtxtCookedAssets.Lines == settings.GetTypesToCopy().ToArray();
     }
 
     private void rtxtCircularDependancy_TextChanged(object sender, EventArgs e) {
-        isSaved[7] = rtxtCircularDependancy.Lines != settings.GetCircularDependency().ToArray();
+        isSaved[7] = rtxtCircularDependancy.Lines == settings.GetCircularDependency().ToArray();
     }
 
     private void chkRefreshAssets_CheckedChanged(object sender, EventArgs e)
     {
-        isSaved[8] = chkRefreshAssets.Checked != settings.GetRefreshAssets();
+        isSaved[8] = chkRefreshAssets.Checked == settings.GetRefreshAssets();
     }
 
     private void cbUEVersion_SelectedIndexChanged(object sender, EventArgs e) {
         if (!isSetupFinished) return;
-        isSaved[9] = cbUEVersion.SelectedIndex != settings.GetSelectedIndex();
+        isSaved[9] = cbUEVersion.SelectedIndex == settings.GetSelectedIndex();
     }
 }
