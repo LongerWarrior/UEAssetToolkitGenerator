@@ -1425,7 +1425,8 @@ namespace UAssetGUI
                                 break;
                             case KismetExpression[] bytecode:
                                 //case PointingTreeNodeType.Bytecode:
-                                CookedAssetSerializer.Utils.Asset = asset;
+                                // TODO: What is the purpose of this line?
+                                //CookedAssetSerializer.Utils.Asset = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
                                 jsonView.Text = new JObject(new JProperty("Script", SerializeScript(bytecode))).ToString();
@@ -1435,7 +1436,8 @@ namespace UAssetGUI
                                 standardRendering = false;
                                 break;
                             case string[] graph:
-                                CookedAssetSerializer.Utils.Asset = asset;
+                                // TODO: What is the purpose of this line?
+                                //CookedAssetSerializer.Utils.Asset = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
                                 jsonView.Text = "";
