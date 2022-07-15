@@ -128,7 +128,7 @@ namespace Textures.BC
         }
 
         private static unsafe byte[] GetBCIndices(byte* data) =>
-            new byte[] {
+            new[] {
                 (byte)((data[2] & 0b1110_0000) >> 5),
                 (byte)((data[2] & 0b0001_1100) >> 2),
                 (byte)(((data[2] & 0b0000_0011) << 1) | ((data[1] & 0b1 << 7) >> 7)),

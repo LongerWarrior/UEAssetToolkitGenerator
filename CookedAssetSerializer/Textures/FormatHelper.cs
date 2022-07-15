@@ -23,28 +23,44 @@ namespace Textures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBlockWidth(EPixelFormat Format)
         {
-            if (!HasFormatTableKey(Format)) return 8;
+            if (!HasFormatTableKey(Format))
+            {
+                return 8;
+            }
+
             return FormatTable[GetBaseFormat(Format)].BlockWidth;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBlockHeight(EPixelFormat Format)
         {
-            if (!HasFormatTableKey(Format)) return 8;
+            if (!HasFormatTableKey(Format))
+            {
+                return 8;
+            }
+
             return FormatTable[GetBaseFormat(Format)].BlockHeight;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBytesPerPixel(EPixelFormat Format)
         {
-            if (!HasFormatTableKey(Format)) return 8;
+            if (!HasFormatTableKey(Format))
+            {
+                return 8;
+            }
+
             return FormatTable[GetBaseFormat(Format)].BytesPerPixel;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBlockDepth(EPixelFormat Format)
         {
-            if (!HasFormatTableKey(Format)) return 8;
+            if (!HasFormatTableKey(Format))
+            {
+                return 8;
+            }
+
             return FormatTable[GetBaseFormat(Format)].BlockDepth;
         }
 
@@ -60,11 +76,14 @@ namespace Textures
             string[] items = { "_UNORM", "_SRGB", "_SINT", "_SNORM", "_UINT", "_UFLOAT", "_SFLOAT", "_FLOAT", "H_SF16", "H_UF16", "PF_" };
             string output = format.ToString();
             for (int i = 0; i < items.Length; i++)
+            {
                 output = output.Replace(items[i], string.Empty);
+            }
+
             return output;
         }
 
-        private static readonly Dictionary<string, FormatInfo> FormatTable = new Dictionary<string, FormatInfo>()
+        private static readonly Dictionary<string, FormatInfo> FormatTable = new Dictionary<string, FormatInfo>
         {
             { "RGBA32",             new FormatInfo(16, 1,  1, 1, TargetBuffer.Color) },
             { "RGBA16",             new FormatInfo(8, 1,  1, 1, TargetBuffer.Color) },

@@ -1,17 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.SerializationUtils;
-using UAssetAPI.PropertyTypes;
-using Textures;
-using SkiaSharp;
 using System.Security.Cryptography;
-using System.Threading;
+using Newtonsoft.Json.Linq;
+using UAssetAPI;
+using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
@@ -87,7 +83,7 @@ namespace CookedAssetSerializer {
                 }
                
 
-                ja.Add(ObjectHierarchy(Asset,false));
+                ja.Add(ObjectHierarchy(Asset));
                 File.WriteAllText(path1, ja.ToString());
 
             }

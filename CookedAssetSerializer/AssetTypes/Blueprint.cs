@@ -1,22 +1,23 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.Program;
-using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.FieldTypes;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
     public partial class Serializers {
 
 		public static void SerializeBPAsset(bool dummy) {
-			if (!SetupSerialization(out string name, out string gamepath, out string path1)) return;
+			if (!SetupSerialization(out string name, out string gamepath, out string path1))
+			{
+				return;
+			}
 
 			DisableGeneration.Add("UberGraphFunction");
 			DisableGeneration.Add("CookedComponentInstancingData");
@@ -84,9 +85,9 @@ namespace CookedAssetSerializer {
 				asdata.Add("Interfaces", SerializeInterfaces(mainobject.Interfaces.ToList()));
 				asdata.Add("ClassDefaultObject", Index(mainobject.ClassDefaultObject.Index));
 				ja.Add("AssetSerializedData", asdata);
-				asdata.Add(SerializeData(mainobject.Data, true));
+				asdata.Add(SerializeData(mainobject.Data));
 
-				CollectGeneratedVariables(mainobject);
+				GeneratedVariables = CollectGeneratedVariables(mainobject, Asset, GeneratedVariables);
 
 				if (!dummy) {
 					asdata.Add("GeneratedVariableNames", JArray.FromObject(GeneratedVariables));
@@ -95,7 +96,7 @@ namespace CookedAssetSerializer {
 				}
 				
 
-				ja.Add(ObjectHierarchy(Asset,false));
+				ja.Add(ObjectHierarchy(Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}
@@ -130,7 +131,11 @@ namespace CookedAssetSerializer {
 				}
 				Data.Sort((x, y) => {
 					var ret = x.Name.ToName().CompareTo(y.Name.ToName());
-					if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+					if (ret == 0)
+					{
+						ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+					}
+
 					return ret;
 				});
 				

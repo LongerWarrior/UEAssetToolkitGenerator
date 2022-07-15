@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
@@ -42,7 +41,7 @@ namespace CookedAssetSerializer {
 						JArray oldbonetree = (JArray)SerializePropertyData(property)[0].Value;
 						foreach (JObject obj in oldbonetree) {
 
-							if (Enum.TryParse<EBoneTranslationRetargetingMode>(obj.Properties().First().Value.ToString().Split("::")[1], out EBoneTranslationRetargetingMode res)) {
+							if (Enum.TryParse(obj.Properties().First().Value.ToString().Split("::")[1], out EBoneTranslationRetargetingMode res)) {
 								newbonetree.Add(res);
 							} else {
 								throw new NotImplementedException("EBoneTranslationRetargetingMode unknow value");

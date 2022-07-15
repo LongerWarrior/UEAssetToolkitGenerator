@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Serializers;
 using static CookedAssetSerializer.SerializationUtils;
@@ -250,8 +250,10 @@ namespace CookedAssetSerializer
 
             if (exportnames.Count == 0)
                 foreach (var exp in asset.Exports)
+                {
                     if (exp.ObjectName.ToName().ToLower() == name)
                         exportnames.Add(exp);
+                }
 
             if (exportnames.Count == 1)
             {

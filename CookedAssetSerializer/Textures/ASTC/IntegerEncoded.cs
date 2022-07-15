@@ -94,7 +94,7 @@ namespace Textures.ASTC
             T |= BitStream.ReadBits(1) << 7;
 
             int C;
-            BitArrayStream Tb = new BitArrayStream(new BitArray(new int[] { T }));
+            BitArrayStream Tb = new BitArrayStream(new BitArray(new[] { T }));
             if (Tb.ReadBits(2, 4) == 7)
             {
                 C = (Tb.ReadBits(5, 7) << 2) | Tb.ReadBits(0, 1);
@@ -115,7 +115,7 @@ namespace Textures.ASTC
                 }
             }
 
-            BitArrayStream Cb = new BitArrayStream(new BitArray(new int[] { C }));
+            BitArrayStream Cb = new BitArrayStream(new BitArray(new[] { C }));
             if (Cb.ReadBits(0, 1) == 3)
             {
                 t[2] = 2;
@@ -162,7 +162,7 @@ namespace Textures.ASTC
             m[2] = BitStream.ReadBits(NumberBitsPerValue);
             Q |= BitStream.ReadBits(2) << 5;
 
-            BitArrayStream Qb = new BitArrayStream(new BitArray(new int[] { Q }));
+            BitArrayStream Qb = new BitArrayStream(new BitArray(new[] { Q }));
             if (Qb.ReadBits(1, 2) == 3 && Qb.ReadBits(5, 6) == 0)
             {
                 q[0] = q[1] = 4;
@@ -182,7 +182,7 @@ namespace Textures.ASTC
                     C = Qb.ReadBits(0, 4);
                 }
 
-                BitArrayStream Cb = new BitArrayStream(new BitArray(new int[] { C }));
+                BitArrayStream Cb = new BitArrayStream(new BitArray(new[] { C }));
                 if (Cb.ReadBits(0, 2) == 5)
                 {
                     q[1] = 4;

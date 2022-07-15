@@ -1,15 +1,15 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using UAssetAPI.StructTypes;
-using UAssetAPI;
-using static Utils.TypeConversionUtils;
-using static System.MathF;
+using System.Security.Cryptography;
+using SkiaSharp;
 using Textures.ASTC;
 using Textures.BC;
 using Textures.DXT;
-using SkiaSharp;
-using System.Security.Cryptography;
-using System.Linq;
+using UAssetAPI;
+using UAssetAPI.StructTypes;
+using static Utils.TypeConversionUtils;
+using static System.MathF;
 
 namespace Textures
 {
@@ -300,14 +300,14 @@ namespace Textures
 
                 for (int x = 0; x < width; x++)
                 {
-                    minR = MathF.Min(HalfToFloat(srcPtr[0]), minR);
-                    minG = MathF.Min(HalfToFloat(srcPtr[1]), minG);
-                    minB = MathF.Min(HalfToFloat(srcPtr[2]), minB);
-                    minA = MathF.Min(HalfToFloat(srcPtr[3]), minA);
-                    maxR = MathF.Max(HalfToFloat(srcPtr[0]), maxR);
-                    maxG = MathF.Max(HalfToFloat(srcPtr[1]), maxG);
-                    maxB = MathF.Max(HalfToFloat(srcPtr[2]), maxB);
-                    maxA = MathF.Max(HalfToFloat(srcPtr[3]), maxA);
+                    minR = Min(HalfToFloat(srcPtr[0]), minR);
+                    minG = Min(HalfToFloat(srcPtr[1]), minG);
+                    minB = Min(HalfToFloat(srcPtr[2]), minB);
+                    minA = Min(HalfToFloat(srcPtr[3]), minA);
+                    maxR = Max(HalfToFloat(srcPtr[0]), maxR);
+                    maxG = Max(HalfToFloat(srcPtr[1]), maxG);
+                    maxB = Max(HalfToFloat(srcPtr[2]), maxB);
+                    maxA = Max(HalfToFloat(srcPtr[3]), maxA);
                     srcPtr += 4;
                 }
             }

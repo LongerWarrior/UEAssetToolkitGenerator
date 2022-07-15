@@ -1,12 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
+using Newtonsoft.Json.Linq;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 

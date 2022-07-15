@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
 
 namespace CookedAssetSerializer.AssetTypes
 {

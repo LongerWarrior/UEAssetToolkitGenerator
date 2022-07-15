@@ -1,16 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.SerializationUtils;
-using UAssetAPI.PropertyTypes;
-using Textures;
+using Newtonsoft.Json.Linq;
 using SkiaSharp;
-using System.Security.Cryptography;
-using System.Threading;
+using Textures;
+using UAssetAPI;
+using UAssetAPI.PropertyTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
@@ -78,7 +73,7 @@ namespace CookedAssetSerializer {
                             }
                         }
                     }
-                    var bitmap = TextureDecoder.Decode(texture, texture.Mips[0], NumSlices, out string hash, srgb, iscube);
+                    var bitmap = texture.Decode(texture.Mips[0], NumSlices, out string hash, srgb, iscube);
                     var hashend = bitmap.Bytes.Length.ToString("x2");
                     using var fs = new FileStream(path2, FileMode.Create, FileAccess.Write);
                     using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);

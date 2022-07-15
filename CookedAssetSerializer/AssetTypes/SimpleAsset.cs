@@ -1,13 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using UAssetAPI;
-using static CookedAssetSerializer.Utils;
-using static CookedAssetSerializer.SerializationUtils;
+using UAssetAPI.Kismet;
 using UAssetAPI.PropertyTypes;
-using static CookedAssetSerializer.Globals;
-using UAssetAPI.StructTypes;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
@@ -42,7 +39,7 @@ namespace CookedAssetSerializer {
 
 				if (GetFullName(simple.ClassIndex.Index) == "/Script/Paper2D.PaperSprite") {
 
-					if (UAssetAPI.Kismet.KismetSerializer.FindPropertyData(simple, "BakedSourceTexture", out PropertyData _source)){
+					if (KismetSerializer.FindPropertyData(simple, "BakedSourceTexture", out PropertyData _source)){
 						ObjectPropertyData source = (ObjectPropertyData)_source;
 						jdata.Add(new JProperty("SourceTexture",GetFullName(source.Value.Index)));
 					}
