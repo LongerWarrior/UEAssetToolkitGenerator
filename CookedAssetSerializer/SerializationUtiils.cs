@@ -17,6 +17,7 @@ namespace CookedAssetSerializer
         public Dictionary<int, int> Dict;
         public List<string> DisableGeneration;
         public List<string> GeneratedVariables;
+        public List<string> ImportVariables;
     }
     
     public static class SerializationUtils
@@ -58,13 +59,13 @@ namespace CookedAssetSerializer
             "WidgetSwitcher"
         };
         
-        public static JArray SerializeScript(FunctionExport function)
+        public static JArray SerializeScript(FunctionExport function, AssetInfo assetInfo)
         {
             var jscript = new JArray();
             var index = 0;
             foreach (var instruction in function.ScriptBytecode)
             {
-                jscript.Add(SerializeExpression(instruction, ref index, true));
+                jscript.Add(SerializeExpression(instruction, ref index, assetInfo.Asset, assetInfo.ImportVariables, true));
             }
 
             return jscript;
@@ -221,13 +222,13 @@ namespace CookedAssetSerializer
         }
 
 
-        public static JArray SerializeScript(KismetExpression[] code)
+        public static JArray SerializeScript(KismetExpression[] code, AssetInfo assetInfo)
         {
             var jscript = new JArray();
             var index = 0;
             foreach (var instruction in code)
             {
-                jscript.Add(SerializeExpression(instruction, ref index, true));
+                jscript.Add(SerializeExpression(instruction, ref index, assetInfo.Asset, assetInfo.ImportVariables, true));
             }
 
             return jscript;
@@ -266,7 +267,7 @@ namespace CookedAssetSerializer
             }
 
             jfunc.Add("ChildProperties", ChildProperties);
-            jfunc.Add("Script", SerializeScript(function));
+            jfunc.Add("Script", SerializeScript(function, assetInfo));
             jfunc.Add("FunctionFlags", ((uint)function.FunctionFlags).ToString());
 
             return jfunc;
