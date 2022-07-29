@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using UAssetAPI;
-using UAssetAPI.Kismet;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
 using static CookedAssetSerializer.SerializationUtils;
@@ -15,9 +14,10 @@ namespace CookedAssetSerializer.AssetTypes
         public FontSerializer(Settings assetSettings)
         {
             Settings = assetSettings;
+            SerializeAsset();
         }
 
-        public void SerializeAsset()
+        private void SerializeAsset()
         {
 	        if (!SetupSerialization()) return;
 	        

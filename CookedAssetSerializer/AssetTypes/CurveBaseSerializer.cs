@@ -1,4 +1,6 @@
-﻿using UAssetAPI;
+﻿using Newtonsoft.Json.Linq;
+using UAssetAPI;
+using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer.AssetTypes
 {
@@ -6,7 +8,8 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public CurveBaseSerializer(Settings settings) : base(settings)
         {
-            SerializeAsset();
+            Setup();
+            SerializeAsset(new JProperty("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset)));
         }
     }
 }

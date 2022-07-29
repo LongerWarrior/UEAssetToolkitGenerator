@@ -167,8 +167,7 @@ namespace CookedAssetSerializer
                             SerializeUserDefinedStruct();
                             break;
                         case EAssetType.BlendSpaceBase:
-                            var bsb = new BlendSpaceSerializer(Settings);
-                            bsb.SerializeAsset();
+                            new BlendSpaceSerializer(Settings);
                             break;
                         case EAssetType.AnimMontage:
                         case EAssetType.CameraAnim:
@@ -177,22 +176,23 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
                             var sas = new SimpleAssetSerializer<NormalExport>(Settings);
-                            sas.SerializeAsset(null, null, null, false, false);
+                            sas.Setup(false);
+                            sas.SerializeAsset();
                             break;
                         case EAssetType.Skeleton:
                             SerializeSkeleton();
                             break;
                         case EAssetType.MaterialParameterCollection:
-                            SerializeMaterialParameterCollection();
+                            new MaterialParameterCollectionSerializer(Settings);
                             break;
                         case EAssetType.PhycialMaterial:
-                            SerializePhysicalMaterial();
+                            new PhysicalMaterialSerializer(Settings);
                             break;
                         case EAssetType.Material:
                             SerializeMaterial();
                             break;
                         case EAssetType.MaterialInstanceConstant:
-                            SerializeMaterialInstanceConstant();
+                            new MaterialInstanceConstantSerializer(Settings);
                             break;
                         case EAssetType.UserDefinedEnum:
                             SerializeUserDefinedEnum();
@@ -201,7 +201,7 @@ namespace CookedAssetSerializer
                             new SoundCueSerializer(Settings);
                             break;
                         case EAssetType.Font:
-                            SerializeFont();
+                            new FontSerializer(Settings);
                             break;
                         case EAssetType.FontFace:
                             SerializeFontFace();
@@ -227,6 +227,7 @@ namespace CookedAssetSerializer
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
                     if (!Settings.SimpleAssets.Contains(aType)) continue;
                     var sas = new SimpleAssetSerializer<NormalExport>(Settings);
+                    sas.Setup();
                     sas.SerializeAsset();
                 }
             }

@@ -14,8 +14,7 @@ namespace CookedAssetSerializer.AssetTypes
             Settings = assetSettings;
         }
 
-        public void SerializeAsset(JProperty preSlopAssetData = null, JProperty postSlopAssetData = null, 
-            JProperty extraAssetData = null, bool skipRefs = false, bool isSimple = true)
+        public void Setup(bool isSimple = true)
         {
             if (!SetupSerialization()) return;
 
@@ -24,7 +23,11 @@ namespace CookedAssetSerializer.AssetTypes
             if (isSimple) ClassName = "SimpleAsset";
 
             SerializeHeaders();
-            
+        }
+
+        public void SerializeAsset(JProperty preSlopAssetData = null, JProperty postSlopAssetData = null, 
+            JProperty extraAssetData = null, JProperty postSlopProps = null, bool skipRefs = false)
+        {
             if (preSlopAssetData != null) AssetData.Add(preSlopAssetData);
 
             var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
@@ -52,6 +55,8 @@ namespace CookedAssetSerializer.AssetTypes
             }
             
             if (postSlopAssetData != null) AssetData.Add(postSlopAssetData);
+            
+            if (postSlopProps != null) properties.Add(postSlopProps);
             
             if (!skipRefs) properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
             

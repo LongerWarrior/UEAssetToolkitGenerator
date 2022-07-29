@@ -24,9 +24,10 @@ namespace CookedAssetSerializer.AssetTypes
         public BlendSpaceSerializer(Settings assetSettings)
         {
             Settings = assetSettings;
+            SerializeAsset();
         }
 
-        public void SerializeAsset()
+        private void SerializeAsset()
         {
             if (!SetupSerialization()) return;
 
