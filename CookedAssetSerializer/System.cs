@@ -204,7 +204,7 @@ namespace CookedAssetSerializer
                             new FontSerializer(Settings);
                             break;
                         case EAssetType.FontFace:
-                            SerializeFontFace();
+                            new FontFaceSerializer(Settings);
                             break;
                         case EAssetType.CurveBase:
                             new CurveBaseSerializer(Settings);

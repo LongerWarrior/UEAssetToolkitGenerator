@@ -11,9 +11,9 @@ namespace CookedAssetSerializer.AssetTypes
         protected Settings Settings;
         
         protected UAsset Asset;
-        protected string AssetName;
-        protected string AssetPath;
-        private string OutPath;
+        private string AssetName;
+        private string AssetPath;
+        protected string OutPath;
 
         private readonly JObject JsonOut = new JObject();
         protected readonly JObject AssetData = new JObject();
@@ -66,7 +66,6 @@ namespace CookedAssetSerializer.AssetTypes
         
         protected void SerializeHeaders()
         {
-            // Add the required header data
             JsonOut.Add("AssetClass", ClassName);
             JsonOut.Add("AssetPackage", AssetPath);
             JsonOut.Add("AssetName", AssetName);
