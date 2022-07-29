@@ -32,7 +32,7 @@ namespace CookedAssetSerializer.AssetTypes
                 DisableGeneration.Add("bHasScriptImplementedPaint");
             }
 
-            SetupAssetInfo();
+            if (!SetupAssetInfo()) return;
 
             // Write the class name depending on the type of blueprint
             switch (ClassName) 
@@ -78,10 +78,10 @@ namespace CookedAssetSerializer.AssetTypes
 
             // Serialize the blueprint's class data/interfaces
             AssetData.Add("ClassFlags", ((Int64)ClassExport.ClassFlags).ToString());
-            AssetData.Add("ClassWithin", Index(ClassExport.ClassWithin.Index, Dict));
+            AssetData.Add("ClassWithin", Index(ClassExport.ClassWithin.Index, AssetInfo.Dict));
             AssetData.Add("ClassConfigName", ClassExport.ClassConfigName.ToName());
             AssetData.Add("Interfaces", SerializeInterfaces(ClassExport.Interfaces.ToList(), AssetInfo));
-            AssetData.Add("ClassDefaultObject", Index(ClassExport.ClassDefaultObject.Index, Dict));
+            AssetData.Add("ClassDefaultObject", Index(ClassExport.ClassDefaultObject.Index, AssetInfo.Dict));
             
             AssignAssetSerializedData();
             

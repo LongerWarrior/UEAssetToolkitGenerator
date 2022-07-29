@@ -6,7 +6,7 @@ using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer.AssetTypes
 {
-    public class Serializer<T> where T: NormalExport
+    public class Serializer<T> where T: Export
     {
         protected Settings Settings;
         
@@ -40,7 +40,7 @@ namespace CookedAssetSerializer.AssetTypes
             AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/");
             OutPath = Path.Join(Settings.JSONDir, AssetPath) + ".json";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(OutPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(OutPath));
             if (!Settings.RefreshAssets && File.Exists(OutPath)) return false;
 
             Asset = new UAsset(fullAssetPath, Settings.GlobalUEVersion, false);
@@ -50,16 +50,18 @@ namespace CookedAssetSerializer.AssetTypes
             return true;
         }
         
-        protected void SetupAssetInfo()
+        protected bool SetupAssetInfo()
         {
             ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
-            if (ClassExport == null) return;
+            if (ClassExport == null) return false;
             ClassName = ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName();
 
             AssetInfo.Asset = Asset;
             AssetInfo.Dict = Dict;
             AssetInfo.DisableGeneration = DisableGeneration;
             AssetInfo.GeneratedVariables = GeneratedVariables;
+
+            return true;
         }
         
         protected void SerializeHeaders(JObject extra = null)

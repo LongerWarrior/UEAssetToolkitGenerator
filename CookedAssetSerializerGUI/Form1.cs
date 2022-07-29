@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
 using UAssetAPI;
-using Timer = System.Windows.Forms.Timer;
 
 namespace CookedAssetSerializerGUI;
 
@@ -18,7 +17,7 @@ public partial class Form1 : Form {
     }
 
     #region Vars
-    private CookedAssetSerializer.Utils formSettings;
+    private CookedAssetSerializer.System formSettings;
     
     private Settings settings;
 
@@ -194,7 +193,7 @@ public partial class Form1 : Form {
             TypesToCopy = typesToCopy
         };
 
-        formSettings = new CookedAssetSerializer.Utils(settings, cbUEVersion.SelectedIndex);
+        formSettings = new CookedAssetSerializer.System(settings, cbUEVersion.SelectedIndex);
     }
 
     private void loadSettings() {
@@ -373,7 +372,7 @@ public partial class Form1 : Form {
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try {
             formSettings.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
-            formSettings = JsonConvert.DeserializeObject<CookedAssetSerializer.Utils>(File.ReadAllText(configFile));
+            formSettings = JsonConvert.DeserializeObject<CookedAssetSerializer.System>(File.ReadAllText(configFile));
             loadSettings();
             outputText("Loaded settings from: " + configFile);
         } catch (Exception exception) {

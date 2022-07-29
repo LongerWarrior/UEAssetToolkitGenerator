@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CookedAssetSerializer.AssetTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAssetAPI;
@@ -9,7 +10,7 @@ using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer
 {
-    public class Utils
+    public class System
     {
         private readonly Settings Settings;
 
@@ -18,7 +19,7 @@ namespace CookedAssetSerializer
         private int AssetTotal;
         private int AssetCount;
 
-        public Utils(Settings settings, int selectedIndex)
+        public System(Settings settings, int selectedIndex)
         {
             Settings = settings;
             SelectedIndex = selectedIndex;
@@ -153,7 +154,8 @@ namespace CookedAssetSerializer
                         case EAssetType.Blueprint:
                         case EAssetType.WidgetBlueprint:
                         case EAssetType.AnimBlueprint:
-                            SerializeBPAsset(false);
+                            BlueprintSerializer bs = new BlueprintSerializer(Settings);
+                            bs.SerializeAsset(false);
                             break;
                         case EAssetType.DataTable:
                             SerializeDataTable();

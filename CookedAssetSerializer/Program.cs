@@ -579,12 +579,24 @@ namespace CookedAssetSerializer {
                 "/Script/Engine.SubUVAnimation",
                 "/Script/Engine.AimOffsetBlendSpace",
             };
+            
+            Settings settings = new Settings
+            {
+                ContentDir = CONTENT_DIR,
+                JSONDir = JSON_DIR,
+                OutputDir = OUTPUT_DIR,
+                GlobalUEVersion = GLOBAL_UE_VERSION,
+                RefreshAssets = REFRESH_ASSETS,
+                SkipSerialization = skipSerialization,
+                CircularDependency = circularDependency,
+                SimpleAssets = simpleAssets,
+                TypesToCopy = typesToCopy
+            };
 
-            Globals settings = new Globals(CONTENT_DIR, JSON_DIR, OUTPUT_DIR, GLOBAL_UE_VERSION, 0, REFRESH_ASSETS,
-                skipSerialization, circularDependency, simpleAssets, typesToCopy);
-            /*settings.ScanAssetTypes();
-            settings.GetCookedAssets();*/
-            settings.SerializeAssets();
+            System program = new System(settings, 0);
+            /*program.ScanAssetTypes();
+            program.GetCookedAssets();*/
+            program.SerializeAssets();
         }
     }
 }

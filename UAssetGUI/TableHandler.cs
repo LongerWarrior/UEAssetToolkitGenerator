@@ -12,7 +12,7 @@ using UAssetAPI.Kismet.Bytecode;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
 using static CookedAssetSerializer.SerializationUtils;
-using static CookedAssetSerializer.Utils;
+using static CookedAssetSerializer.System;
 
 namespace UAssetGUI
 {
@@ -1427,7 +1427,7 @@ namespace UAssetGUI
                             case KismetExpression[] bytecode:
                                 //case PointingTreeNodeType.Bytecode:
                                 // TODO: What is the purpose of this line?
-                                CookedAssetSerializer.Utils.Asset = asset;
+                                CookedAssetSerializer.System.Asset = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
                                 // TODO: This calling of SerializeScript might cause a problem
@@ -1439,7 +1439,7 @@ namespace UAssetGUI
                                 break;
                             case string[] graph:
                                 // TODO: What is the purpose of this line?
-                                CookedAssetSerializer.Utils.Asset = asset;
+                                CookedAssetSerializer.System.Asset = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
                                 jsonView.Text = "";

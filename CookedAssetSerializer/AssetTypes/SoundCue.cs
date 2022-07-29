@@ -14,7 +14,7 @@ namespace CookedAssetSerializer {
 			DisableGeneration.Add("FirstNode");
 			SoundGraphData = new();
 			JObject ja = new JObject();
-			SoundCueExport soundcue = Exports[Utils.Asset.mainExport - 1] as SoundCueExport;
+			SoundCueExport soundcue = Exports[System.Asset.mainExport - 1] as SoundCueExport;
 
 			if (soundcue != null) {
 
@@ -30,7 +30,7 @@ namespace CookedAssetSerializer {
 
 				asdata.Add("AssetObjectData", jdata);
 				ja.Add("AssetSerializedData", asdata);
-				ja.Add(ObjectHierarchy(Utils.Asset));
+				ja.Add(ObjectHierarchy(System.Asset));
 				File.WriteAllText(path1, ja.ToString());
 
 			}
