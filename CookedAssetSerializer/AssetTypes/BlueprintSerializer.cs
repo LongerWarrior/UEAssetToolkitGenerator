@@ -85,7 +85,7 @@ namespace CookedAssetSerializer.AssetTypes
             GeneratedVariables = CollectGeneratedVariables(ClassExport, AssetInfo);
             AssetData.Add("GeneratedVariableNames", !dummy ? JArray.FromObject(GeneratedVariables) : new JArray());
             
-            WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
+            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
         
         private void FixMovieSceneSections()

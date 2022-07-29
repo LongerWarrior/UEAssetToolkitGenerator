@@ -158,7 +158,7 @@ namespace CookedAssetSerializer
                             bps.SerializeAsset(false);
                             break;
                         case EAssetType.DataTable:
-                            SerializeDataTable();
+                            new DataTableSerializer(Settings);
                             break;
                         case EAssetType.StringTable:
                             SerializeStringTable();
@@ -176,8 +176,8 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaPlayer:
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
-                            var sas = new SimpleAssetSerializer(Settings);
-                            sas.SerializeAsset(false);
+                            var sas = new SimpleAssetSerializer<NormalExport>(Settings);
+                            sas.SerializeAsset(null, null, null, false, false);
                             break;
                         case EAssetType.Skeleton:
                             SerializeSkeleton();
@@ -198,7 +198,7 @@ namespace CookedAssetSerializer
                             SerializeUserDefinedEnum();
                             break;
                         case EAssetType.SoundCue:
-                            SerializeSoundCue();
+                            new SoundCueSerializer(Settings);
                             break;
                         case EAssetType.Font:
                             SerializeFont();
@@ -207,7 +207,7 @@ namespace CookedAssetSerializer
                             SerializeFontFace();
                             break;
                         case EAssetType.CurveBase:
-                            SerializeCurveBase();
+                            new CurveBaseSerializer(Settings);
                             break;
                         case EAssetType.Texture2D:
                             SerializeTexture();
@@ -215,7 +215,7 @@ namespace CookedAssetSerializer
                         case EAssetType.SkeletalMesh:
                             break;
                         case EAssetType.FileMediaSource:
-                            SerializeFileMediaSource();
+                            new FileMediaSourceSerializer(Settings);
                             break;
                         case EAssetType.StaticMesh:
                             SerializeStaticMesh();
@@ -226,7 +226,7 @@ namespace CookedAssetSerializer
                 {
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
                     if (!Settings.SimpleAssets.Contains(aType)) continue;
-                    var sas = new SimpleAssetSerializer(Settings);
+                    var sas = new SimpleAssetSerializer<NormalExport>(Settings);
                     sas.SerializeAsset();
                 }
             }

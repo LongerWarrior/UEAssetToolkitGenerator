@@ -63,7 +63,7 @@ namespace CookedAssetSerializer.AssetTypes
             
             AssignAssetSerializedData();
 
-            WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
+            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
 
         private void PopulateParameters(ref List<PropertyData> data, ParameterNames pm, int v = 3)

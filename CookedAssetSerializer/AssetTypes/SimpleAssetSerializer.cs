@@ -1,36 +1,34 @@
-﻿using System;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
 using System.Linq;
 using UAssetAPI;
 using UAssetAPI.Kismet;
 using UAssetAPI.PropertyTypes;
-using UAssetAPI.StructTypes;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer.AssetTypes
 {
-    public class SimpleAssetSerializer : Serializer<NormalExport>
+    public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
     {
         public SimpleAssetSerializer(Settings assetSettings)
         {
             Settings = assetSettings;
         }
 
-        public void SerializeAsset(bool isSimple = true)
+        public void SerializeAsset(JProperty preSlopAssetData = null, JProperty postSlopAssetData = null, 
+            JProperty extraAssetData = null, bool skipRefs = false, bool isSimple = true)
         {
             if (!SetupSerialization()) return;
 
             if (!SetupAssetInfo()) return;
             
-            if (isSimple)
-            {
-                ClassName = "SimpleAsset";
-            }
-            
+            if (isSimple) ClassName = "SimpleAsset";
+
             SerializeHeaders();
             
+            if (preSlopAssetData != null) AssetData.Add(preSlopAssetData);
+
             var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+            
             if (GetFullName(ClassExport.ClassIndex.Index, Asset) == "/Script/Paper2D.PaperSprite") 
             {
                 if (KismetSerializer.FindPropertyData(ClassExport, "BakedSourceTexture", out var _source))
@@ -52,12 +50,18 @@ namespace CookedAssetSerializer.AssetTypes
                     }
                 }
             }
-            properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
+            
+            if (postSlopAssetData != null) AssetData.Add(postSlopAssetData);
+            
+            if (!skipRefs) properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
+            
             AssetData.Add("AssetObjectData", properties);
+            
+            if (extraAssetData != null) AssetData.Add(extraAssetData);
             
             AssignAssetSerializedData();
 
-            WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
+            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
     }
 }

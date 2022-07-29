@@ -80,7 +80,7 @@ namespace CookedAssetSerializer.AssetTypes
             JsonOut.Add("AssetSerializedData", AssetData);
         }
 
-        protected void WriteJSONOut(JProperty objHierarchy)
+        protected void WriteJsonOut(JProperty objHierarchy)
         {
             JsonOut.Add(objHierarchy);
             File.WriteAllText(OutPath, JsonOut.ToString());

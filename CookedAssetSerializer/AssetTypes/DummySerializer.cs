@@ -26,7 +26,7 @@ namespace CookedAssetSerializer.AssetTypes
             
             AssignAssetSerializedData();
 
-            WriteJSONOut(new JProperty("ObjectHierarchy", new JArray()));
+            WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
         }
     }
     
@@ -63,9 +63,9 @@ namespace CookedAssetSerializer.AssetTypes
             if (RefObjects.Count > 0) 
             {
                 Console.WriteLine(Asset.FilePath);
-                WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
+                WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
             } 
-            else WriteJSONOut(new JProperty("ObjectHierarchy", new JArray()));
+            else WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
         }
     }
 }
