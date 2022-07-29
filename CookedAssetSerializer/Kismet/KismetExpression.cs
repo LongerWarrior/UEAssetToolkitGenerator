@@ -312,7 +312,7 @@ namespace CookedAssetSerializer
             FProperty property;
             if (pointer != null && pointer.New.ResolvedOwner.Index != 0)
             {
-                if (FindProperty(pointer.New.ResolvedOwner.Index, pointer.New.Path[0], out property, asset, importVariables))
+                if (FindProperty(pointer.New.ResolvedOwner.Index, pointer.New.Path[0], out property, asset, ref importVariables))
                 {
                     var PropertyType = ConvertPropertyToPinType(property, asset);
                     jproparray[0] = new JProperty(names[0], SerializeGraphPinType(PropertyType));

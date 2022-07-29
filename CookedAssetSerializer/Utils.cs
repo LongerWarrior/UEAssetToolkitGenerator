@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.Serializers;
@@ -10,32 +11,17 @@ namespace CookedAssetSerializer
 {
     public class Utils
     {
-        public string ContentDir;
-        public string JSONDir;
-        public string OutputDir;
-        public UE4Version GlobalUEVersion;
-        public bool RefreshAssets;
-        public List<EAssetType> SkipSerialization;
-        public List<string> CircularDependency;
-        public List<string> SimpleAssets;
-        public List<string> TypesToCopy;
-        
-        public int AssetTotal;
-        public int AssetCount;
+        private readonly Settings Settings;
 
-        public Utils(string contentDir, string jsonDir, string outputDir, UE4Version ueVersion, bool refreshAssets,
-            List<EAssetType> skipSerialization, List<string> circularDeps, List<string> simpleAssets,
-            List<string> cookedAssets)
+        [JsonProperty] public int SelectedIndex;
+
+        private int AssetTotal;
+        private int AssetCount;
+
+        public Utils(Settings settings, int selectedIndex)
         {
-            ContentDir = contentDir;
-            JSONDir = jsonDir;
-            OutputDir = outputDir;
-            GlobalUEVersion = ueVersion;
-            RefreshAssets = refreshAssets;
-            SkipSerialization = skipSerialization;
-            CircularDependency = circularDeps;
-            SimpleAssets = simpleAssets;
-            TypesToCopy = cookedAssets;
+            Settings = settings;
+            SelectedIndex = selectedIndex;
         }
 
         public int GetAssetTotal()
@@ -47,20 +33,37 @@ namespace CookedAssetSerializer
         {
             return AssetCount;
         }
+        
+        public int GetSelectedIndex()
+        {
+            return SelectedIndex;
+        }
+        
+        public Settings GetSettings()
+        {
+            return Settings;
+        }
+
+        public void ClearLists()
+        {
+            Settings.CircularDependency.Clear();
+            Settings.SimpleAssets.Clear();
+            Settings.TypesToCopy.Clear();
+        }
 
         public void ScanAssetTypes(string typeToFind = "")
         {
             Dictionary<string, List<string>> types = new();
             List<string> allTypes = new();
 
-            var files = Directory.GetFiles(ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
             foreach (var file in files)
             {
-                var type = GetAssetType(file, GlobalUEVersion);
-                var path = "/" + Path.GetRelativePath(ContentDir, file).Replace("\\", "/");
+                var type = GetAssetType(file, Settings.GlobalUEVersion);
+                var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
                 PrintOutput(path, "Scan");
                 AssetCount++;
@@ -80,13 +83,13 @@ namespace CookedAssetSerializer
                 allTypes.Add("\"" + entry.Key + "\",");
             }
 
-            File.WriteAllText(JSONDir + "\\AssetTypes.json", jTypes.ToString());
-            File.WriteAllText(JSONDir + "\\AllTypes.txt", string.Join("\n", allTypes));
+            File.WriteAllText(Settings.JSONDir + "\\AssetTypes.json", jTypes.ToString());
+            File.WriteAllText(Settings.JSONDir + "\\AllTypes.txt", string.Join("\n", allTypes));
         }
         
         public void GetCookedAssets(bool copy = true)
         {
-            var files = Directory.GetFiles(ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
@@ -94,17 +97,17 @@ namespace CookedAssetSerializer
             {
                 var uexpFile = Path.ChangeExtension(file, "uexp");
                 var ubulkFile = Path.ChangeExtension(file, "ubulk");
-                var type = GetAssetType(file, GlobalUEVersion);
+                var type = GetAssetType(file, Settings.GlobalUEVersion);
 
                 AssetCount++;
-                if (!TypesToCopy.Contains(type))
+                if (!Settings.TypesToCopy.Contains(type))
                 {
                     PrintOutput("Skipped operation on " + file, "GetCookedAssets");
                     continue;
                 }
 
-                var relativePath = Path.GetRelativePath(ContentDir, file);
-                var newPath = Path.Combine(OutputDir, relativePath);
+                var relativePath = Path.GetRelativePath(Settings.ContentDir, file);
+                var newPath = Path.Combine(Settings.OutputDir, relativePath);
 
                 PrintOutput(newPath, "GetCookedAssets");
 
@@ -126,16 +129,16 @@ namespace CookedAssetSerializer
         
         public void SerializeAssets()
         {
-            var files = Directory.GetFiles(ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
             foreach (var file in files)
             {
-                UAsset asset = new UAsset(file, GlobalUEVersion, true);
+                UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
                 AssetCount++;
 
-                if (SkipSerialization.Contains(asset.assetType))
+                if (Settings.SkipSerialization.Contains(asset.assetType))
                 {
                     PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                     continue;
@@ -218,7 +221,7 @@ namespace CookedAssetSerializer
                 else
                 {
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
-                    if (SimpleAssets.Contains(aType)) SerializeSimpleAsset();
+                    if (Settings.SimpleAssets.Contains(aType)) SerializeSimpleAsset();
                 }
             }
         }
@@ -227,7 +230,7 @@ namespace CookedAssetSerializer
         {
             Console.WriteLine(output);
             var filename = type == "debug" ? "debug" : "output";
-            using var sw = File.AppendText(Path.Combine(JSONDir, filename + "_log.txt"));
+            using var sw = File.AppendText(Path.Combine(Settings.JSONDir, filename + "_log.txt"));
             sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
         }
 

@@ -8,80 +8,86 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class Serializer<T> where T: NormalExport
     {
-        public string ContentDir;
-        public string JSONDir;
-        public UE4Version GlobalUEVersion;
-        public bool RefreshAssets;
-        public List<string> CircularDependency;
+        protected Settings Settings;
         
-        public UAsset Asset;
-        public string AssetName;
-        public string AssetPath;
-        public string OutPath;
+        protected UAsset Asset;
+        protected string AssetName;
+        protected string AssetPath;
+        private string OutPath;
 
-        public JObject JsonOut = new JObject();
-        public JObject AssetData = new JObject();
+        protected readonly JObject JsonOut = new JObject();
+        protected JObject AssetData = new JObject();
         
-        private T ClassExport;
+        protected T ClassExport;
+        protected string ClassName;
 
-        public Dictionary<int, int> Dict = new();
-        public List<int> RefObjects = new();
-        public List<string> GeneratedVariables = new();
-        public List<string> DisableGeneration = new();
+        protected Dictionary<int, int> Dict = new();
+        protected List<int> RefObjects = new();
+        protected List<string> GeneratedVariables = new();
+        protected readonly List<string> DisableGeneration = new();
 
-        public void SerializeAssets(List<string> disableGeneration)
-        {
-            DisableGeneration = disableGeneration;
+        protected AssetInfo AssetInfo;
 
-            ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
-            if (ClassExport != null) Serialize();
-        }
-
-        private void SetupSerialization()
+        protected bool SetupSerialization()
         {
             Dict = new Dictionary<int, int>();
-            DisableGeneration = new List<string>();
-            GeneratedVariables = new List<string>();
-            RefObjects = new List<int>();
 
             var fullAssetPath = Asset.FilePath;
             AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
             var directory = Path.GetDirectoryName(fullAssetPath);
-            var relativeAssetPath = Path.GetRelativePath(ContentDir, directory);
+            var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
             if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
             AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/");
-            OutPath = Path.Join(JSONDir, AssetPath) + ".json";
+            OutPath = Path.Join(Settings.JSONDir, AssetPath) + ".json";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(OutPath));
-            if (!RefreshAssets && File.Exists(OutPath)) return;
+            Directory.CreateDirectory(Path.GetDirectoryName(OutPath) ?? string.Empty);
+            if (!Settings.RefreshAssets && File.Exists(OutPath)) return false;
 
-            Asset = new UAsset(fullAssetPath, GlobalUEVersion, false);
+            Asset = new UAsset(fullAssetPath, Settings.GlobalUEVersion, false);
 
             FixIndexes(Dict, Asset);
-        }
 
-        private void Serialize()
+            return true;
+        }
+        
+        protected void SetupAssetInfo()
+        {
+            ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
+            if (ClassExport == null) return;
+            ClassName = ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName();
+
+            AssetInfo.Asset = Asset;
+            AssetInfo.Dict = Dict;
+            AssetInfo.DisableGeneration = DisableGeneration;
+            AssetInfo.GeneratedVariables = GeneratedVariables;
+        }
+        
+        protected void SerializeHeaders(JObject extra = null)
         {
             // Add the required header data
-            JsonOut.Add("AssetClass", ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName());
+            JsonOut.Add("AssetClass", ClassName);
             JsonOut.Add("AssetPackage", AssetPath);
             JsonOut.Add("AssetName", AssetName);
-            
-            // Check for circular dependency
-            if (CircularDependency.Contains(GetFullName(ClassExport.ClassIndex.Index, Asset))) {
-                AssetData.Add("SkipDependecies", true);
+
+            if (extra != null)
+            {
+                JsonOut.Add(extra);
             }
-            
-            AssetData.Add("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset));
-            JsonOut.Add("AssetObjectData", new JObject(new JProperty("$ReferencedObjects", new JArray())));
-            
-            // Add asset data to Json output
+
+            if (Settings.CircularDependency.Contains(GetFullName(ClassExport.ClassIndex.Index, Asset)))
+            {
+                AssetData.Add("SkipDependecies", true);   
+            }
+        }
+
+        protected void AssignAssetSerializedData()
+        {
             JsonOut.Add("AssetSerializedData", AssetData);
-            
-            // Add object hierarchy data to Json output
-            JsonOut.Add(new JProperty("ObjectHierarchy", new JArray()));
-            
-            // Write Json output to the output path
+        }
+
+        protected void WriteJSONOut(JProperty objHierarchy)
+        {
+            JsonOut.Add(objHierarchy);
             File.WriteAllText(OutPath, JsonOut.ToString());
         }
     }

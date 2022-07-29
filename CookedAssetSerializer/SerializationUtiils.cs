@@ -19,7 +19,7 @@ namespace CookedAssetSerializer
         public List<string> GeneratedVariables;
         public List<string> ImportVariables;
     }
-    
+
     public static class SerializationUtils
     {
         public static List<string> VariableWidgets = new()
@@ -793,7 +793,7 @@ namespace CookedAssetSerializer
             ref List<int> refObjects, bool mainobject = true)
         {
             JProperty jdata;
-            refObjects = new List<int>(); // TODO: This doesn't seem right, as surely the $ReferencedObjects is then always going to empty?
+            refObjects = new List<int>();
 
             if (mainobject)
                 jdata = new JProperty("AssetObjectData");
@@ -821,8 +821,12 @@ namespace CookedAssetSerializer
 
                 if (!hasSCS) jdatavalue.Add("SimpleConstructionScript", -1);
                 if (assetInfo.Asset.assetType == EAssetType.WidgetBlueprint)
+                {
                     if (!FindPropertyData(data, "Animations", out PropertyData _animations))
+                    {
                         jdatavalue.Add("Animations", new JArray());
+                    }
+                }
             }
 
             jdatavalue.Add("$ReferencedObjects", JArray.FromObject(refObjects.Distinct<int>()));
@@ -1109,7 +1113,7 @@ namespace CookedAssetSerializer
             return "";
         }
 
-        public static bool FindProperty(int index, FName propname, out FProperty property, UAsset asset, List<string> importVariables)
+        public static bool FindProperty(int index, FName propname, out FProperty property, UAsset asset, ref List<string> importVariables)
         {
             if (index < 0)
             {
@@ -1135,8 +1139,7 @@ namespace CookedAssetSerializer
                         Console.WriteLine("No such file on disk "+"Class "+klass+ " Path " +path);
                     }
                 }*/
-
-
+                
                 importVariables.Add(asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index, asset) + " " +
                                     propname.ToName());
 

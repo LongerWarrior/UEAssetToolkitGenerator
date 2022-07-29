@@ -87,7 +87,6 @@ partial class Form1 {
             this.rtxtContentDir.Size = new System.Drawing.Size(630, 40);
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
-            this.rtxtContentDir.TextChanged += new System.EventHandler(this.rtxtContentDir_TextChanged);
             // 
             // rtxtJSONDir
             // 
@@ -102,7 +101,6 @@ partial class Form1 {
             this.rtxtJSONDir.Size = new System.Drawing.Size(630, 40);
             this.rtxtJSONDir.TabIndex = 3;
             this.rtxtJSONDir.Text = "C:\\ExamplePath\\JSON";
-            this.rtxtJSONDir.TextChanged += new System.EventHandler(this.rtxtJSONDir_TextChanged);
             // 
             // btnSelectJSONDir
             // 
@@ -132,7 +130,6 @@ partial class Form1 {
             this.rtxtOutputDir.Size = new System.Drawing.Size(630, 40);
             this.rtxtOutputDir.TabIndex = 5;
             this.rtxtOutputDir.Text = "C:\\ExamplePath\\Output";
-            this.rtxtOutputDir.TextChanged += new System.EventHandler(this.rtxtOutputDir_TextChanged);
             // 
             // btnSelectOutputDir
             // 
@@ -171,7 +168,6 @@ partial class Form1 {
             this.cbUEVersion.Name = "cbUEVersion";
             this.cbUEVersion.Size = new System.Drawing.Size(323, 36);
             this.cbUEVersion.TabIndex = 7;
-            this.cbUEVersion.SelectedIndexChanged += new System.EventHandler(this.cbUEVersion_SelectedIndexChanged);
             // 
             // chkRefreshAssets
             // 
@@ -184,7 +180,6 @@ partial class Form1 {
             this.chkRefreshAssets.TabIndex = 8;
             this.chkRefreshAssets.Text = "Refresh Assets";
             this.chkRefreshAssets.UseVisualStyleBackColor = true;
-            this.chkRefreshAssets.CheckedChanged += new System.EventHandler(this.chkRefreshAssets_CheckedChanged);
             // 
             // label2
             // 
@@ -221,7 +216,6 @@ partial class Form1 {
             this.lbAssetsToSkipSerialization.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(482, 336);
             this.lbAssetsToSkipSerialization.TabIndex = 11;
-            this.lbAssetsToSkipSerialization.SelectedIndexChanged += new System.EventHandler(this.lbAssetsToSkipSerialization_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -245,7 +239,6 @@ partial class Form1 {
             this.rtxtCookedAssets.Size = new System.Drawing.Size(521, 166);
             this.rtxtCookedAssets.TabIndex = 13;
             this.rtxtCookedAssets.Text = resources.GetString("rtxtCookedAssets.Text");
-            this.rtxtCookedAssets.TextChanged += new System.EventHandler(this.rtxtCookedAssets_TextChanged);
             // 
             // rtxtSimpleAssets
             // 
@@ -259,7 +252,6 @@ partial class Form1 {
             this.rtxtSimpleAssets.TabIndex = 15;
             this.rtxtSimpleAssets.Text = resources.GetString("rtxtSimpleAssets.Text");
             this.rtxtSimpleAssets.WordWrap = false;
-            this.rtxtSimpleAssets.TextChanged += new System.EventHandler(this.rtxtSimpleAssets_TextChanged);
             // 
             // label5
             // 
@@ -329,7 +321,6 @@ partial class Form1 {
             this.rtxtCircularDependancy.TabIndex = 20;
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
-            this.rtxtCircularDependancy.TextChanged += new System.EventHandler(this.rtxtCircularDependancy_TextChanged);
             // 
             // label6
             // 
