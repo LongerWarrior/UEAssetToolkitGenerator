@@ -15,8 +15,8 @@ namespace CookedAssetSerializer.AssetTypes
         protected string AssetPath;
         private string OutPath;
 
-        protected readonly JObject JsonOut = new JObject();
-        protected JObject AssetData = new JObject();
+        private readonly JObject JsonOut = new JObject();
+        protected readonly JObject AssetData = new JObject();
         
         protected T ClassExport;
         protected string ClassName;
@@ -71,10 +71,8 @@ namespace CookedAssetSerializer.AssetTypes
             JsonOut.Add("AssetPackage", AssetPath);
             JsonOut.Add("AssetName", AssetName);
 
-            if (Settings.CircularDependency.Contains(GetFullName(ClassExport.ClassIndex.Index, Asset)))
-            {
-                AssetData.Add("SkipDependecies", true);   
-            }
+            AssetData.Add("SkipDependecies",
+                Settings.CircularDependency.Contains(GetFullName(ClassExport.ClassIndex.Index, Asset)));
         }
 
         protected void AssignAssetSerializedData()

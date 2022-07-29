@@ -167,7 +167,8 @@ namespace CookedAssetSerializer
                             SerializeUserDefinedStruct();
                             break;
                         case EAssetType.BlendSpaceBase:
-                            SerializeBlendSpace();
+                            var bsb = new BlendSpaceSerializer(Settings);
+                            bsb.SerializeAsset();
                             break;
                         case EAssetType.AnimMontage:
                         case EAssetType.CameraAnim:

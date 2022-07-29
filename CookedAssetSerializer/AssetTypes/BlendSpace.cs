@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 using UAssetAPI;
+using static CookedAssetSerializer.SerializationUtils;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
-using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer {
 
@@ -26,6 +26,8 @@ namespace CookedAssetSerializer {
 
 
 				PopulateBlendParameters(ref blendSpace.Data);
+				PopulateInterpolationParameters(ref blendSpace.Data);
+
 
 				JObject jdata = SerializaListOfProperties(blendSpace.Data);
 				asdata.Add("AssetClass", GetFullName(blendSpace.ClassIndex.Index));
@@ -70,7 +72,37 @@ namespace CookedAssetSerializer {
 			}
 
 		}
-    }
+
+		private static void PopulateInterpolationParameters(ref List<PropertyData> data, int v = 3) {
+
+			List<int> fullentries = Enumerable.Range(0, v).ToList();
+			List<int> entries = new List<int>();
+			for (int i = 0; i < data.Count; i++) {
+				if (data[i].Name.ToName() == "InterpolationParam") {
+					entries.Add(data[i].DuplicationIndex);
+				}
+			}
+
+			if (entries.Count > 0) {
+				var missing = fullentries.Except(entries).ToList();
+				foreach (int missed in missing) {
+
+					data.Add(new StructPropertyData(new FName("InterpolationParam"), new FName("InterpolationParameter"), missed) {
+						Value = new List<PropertyData> {
+							new FloatPropertyData(new FName("InterpolationTime")){ Value = 0.0f},
+							new StrPropertyData(new FName("InterpolationType")){ Value = new FString("BSIT_Average")}
+						}
+					});
+				}
+				data.Sort((x, y) => {
+					var ret = x.Name.ToName().CompareTo(y.Name.ToName());
+					if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+					return ret;
+				});
+			}
+
+		}
+	}
 
 
 }

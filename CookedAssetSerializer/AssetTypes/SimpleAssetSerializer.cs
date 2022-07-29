@@ -52,7 +52,7 @@ namespace CookedAssetSerializer.AssetTypes
                     }
                 }
             }
-            properties.Add("$ReferencedObjects",JArray.FromObject(RefObjects.Distinct()));
+            properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
             AssetData.Add("AssetObjectData", properties);
             
             AssignAssetSerializedData();
