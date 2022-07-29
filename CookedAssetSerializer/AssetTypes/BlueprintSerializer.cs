@@ -43,13 +43,7 @@ namespace CookedAssetSerializer.AssetTypes
                 default: ClassName = "UknownType"; break;
             }
             
-            // Generate the extra header info required by blueprints
-            var extraHeaderInfo = new JObject
-            {
-                {"AssetPackage", AssetPath},
-                {"AssetName", AssetName}
-            };
-            SerializeHeaders(extraHeaderInfo);
+            SerializeHeaders();
 
             // Start the AssetSerializedData object with blueprint's required SuperStruct field
             AssetData.Add("SuperStruct", Index(ClassExport.SuperIndex.Index, Dict));
@@ -94,9 +88,10 @@ namespace CookedAssetSerializer.AssetTypes
             WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
         
-        private void FixMovieSceneSections() {
-            foreach(var export in Asset.Exports) {
-                var normal = (NormalExport) export;
+        private void FixMovieSceneSections()
+        {
+            foreach (var normal in Asset.Exports.Cast<NormalExport>())
+            {
                 if (normal.ClassIndex.Index < 0 && normal.ClassIndex.ToImport(Asset).ObjectName.ToName() == "MovieScene2DTransformSection") {
                     PopulateMovieScene2DTransformSection(ref normal.Data, "Translation");
                     PopulateMovieScene2DTransformSection(ref normal.Data, "Scale");
@@ -112,8 +107,8 @@ namespace CookedAssetSerializer.AssetTypes
         {
             if (!FindPropertyData(data, propName, out PropertyData[] parameters)) return;
             
-            List<int> fullEntries = Enumerable.Range(0, v).ToList();
-            List<int> entries = parameters.Select(t => t.DuplicationIndex).ToList();
+            var fullEntries = Enumerable.Range(0, v).ToList();
+            var entries = parameters.Select(t => t.DuplicationIndex).ToList();
             var missing = fullEntries.Except(entries).ToList();
             data.AddRange(missing.Select(missed => new StructPropertyData(new FName(propName), 
                 new FName("MovieSceneFloatChannel"), missed) 

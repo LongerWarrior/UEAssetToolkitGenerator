@@ -64,17 +64,12 @@ namespace CookedAssetSerializer.AssetTypes
             return true;
         }
         
-        protected void SerializeHeaders(JObject extra = null)
+        protected void SerializeHeaders()
         {
             // Add the required header data
             JsonOut.Add("AssetClass", ClassName);
             JsonOut.Add("AssetPackage", AssetPath);
             JsonOut.Add("AssetName", AssetName);
-
-            if (extra != null)
-            {
-                JsonOut.Add(extra);
-            }
 
             if (Settings.CircularDependency.Contains(GetFullName(ClassExport.ClassIndex.Index, Asset)))
             {

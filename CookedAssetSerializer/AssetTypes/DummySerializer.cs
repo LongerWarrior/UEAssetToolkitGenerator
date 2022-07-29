@@ -55,9 +55,7 @@ namespace CookedAssetSerializer.AssetTypes
                     waveProps.Add(prop.Name);
                 }
             }
-            
             properties.Add("$ReferencedObjects", new JArray());
-
             AssetData.Add("AssetObjectData", properties);
             
             AssignAssetSerializedData();
@@ -68,8 +66,6 @@ namespace CookedAssetSerializer.AssetTypes
                 WriteJSONOut(ObjectHierarchy(AssetInfo, ref RefObjects));
             } 
             else WriteJSONOut(new JProperty("ObjectHierarchy", new JArray()));
-
-            WriteJSONOut(new JProperty("ObjectHierarchy", new JArray()));
         }
     }
 }

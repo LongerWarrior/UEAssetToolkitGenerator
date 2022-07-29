@@ -154,8 +154,8 @@ namespace CookedAssetSerializer
                         case EAssetType.Blueprint:
                         case EAssetType.WidgetBlueprint:
                         case EAssetType.AnimBlueprint:
-                            BlueprintSerializer bs = new BlueprintSerializer(Settings);
-                            bs.SerializeAsset(false);
+                            var bps = new BlueprintSerializer(Settings);
+                            bps.SerializeAsset(false);
                             break;
                         case EAssetType.DataTable:
                             SerializeDataTable();
@@ -175,7 +175,8 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaPlayer:
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
-                            SerializeSimpleAsset(false);
+                            var sas = new SimpleAssetSerializer(Settings);
+                            sas.SerializeAsset(false);
                             break;
                         case EAssetType.Skeleton:
                             SerializeSkeleton();
@@ -223,7 +224,9 @@ namespace CookedAssetSerializer
                 else
                 {
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
-                    if (Settings.SimpleAssets.Contains(aType)) SerializeSimpleAsset();
+                    if (!Settings.SimpleAssets.Contains(aType)) continue;
+                    var sas = new SimpleAssetSerializer(Settings);
+                    sas.SerializeAsset();
                 }
             }
         }
