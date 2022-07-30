@@ -7,7 +7,7 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public FileMediaSourceSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
-            Setup();
+            Setup(true);
             SerializeAsset(null, null, new JProperty("PlayerName", 
                 ClassExport.PlayerName.ToName()));
         }

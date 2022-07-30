@@ -166,7 +166,7 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
                             var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                            if (!sas.Setup(false)) break;
+                            if (!sas.Setup(false, false)) break;
                             sas.SerializeAsset();
                             break;
                         case EAssetType.Skeleton:

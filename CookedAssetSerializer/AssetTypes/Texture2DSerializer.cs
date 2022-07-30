@@ -27,12 +27,7 @@ namespace CookedAssetSerializer.AssetTypes
             DisableGeneration.Add("LightingGuid");
             DisableGeneration.Add("ImportedSize");
             var path2 = Path.ChangeExtension(OutPath, "png");
-            if (!File.Exists(path2)) 
-            {
-                Console.WriteLine("Error. File doesn't exist: " + path2);
-                return;
-            }
-            
+
             if (!SetupAssetInfo()) return;
 
             SerializeHeaders();

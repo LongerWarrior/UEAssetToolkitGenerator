@@ -15,15 +15,17 @@ namespace CookedAssetSerializer.AssetTypes
             Asset = asset;
         }
 
-        public bool Setup(bool isSimple = true)
+        public bool Setup(bool isInheritor = false, bool isSimple = true)
         {
             if (!SetupSerialization()) return false;
 
             if (!SetupAssetInfo()) return false;
             
-            if (isSimple) ClassName = "SimpleAsset";
+            if (isSimple && !isInheritor) ClassName = "SimpleAsset";
 
             SerializeHeaders();
+            
+            if (!isInheritor) AssetData.Add("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset));
 
             return true;
         }

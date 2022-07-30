@@ -9,7 +9,7 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public MaterialInstanceConstantSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
-            Setup();
+            Setup(true);
 
             JProperty property = null;
             

@@ -8,7 +8,7 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public CurveBaseSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
-            Setup();
+            Setup(true);
             SerializeAsset(new JProperty("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset)));
         }
     }

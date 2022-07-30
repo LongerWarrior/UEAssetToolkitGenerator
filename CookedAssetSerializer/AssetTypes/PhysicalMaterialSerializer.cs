@@ -6,7 +6,7 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public PhysicalMaterialSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
-            Setup();
+            Setup(true);
             SerializeAsset();
         }
     }

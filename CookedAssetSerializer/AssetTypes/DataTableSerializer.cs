@@ -9,7 +9,7 @@ namespace CookedAssetSerializer.AssetTypes
     {
         public DataTableSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
-            Setup();
+            Setup(true);
             SerializeAsset(null, SerializeDataTable(ClassExport.Table));
         }
 
