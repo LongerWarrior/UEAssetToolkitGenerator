@@ -11,9 +11,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class FontSerializer : Serializer<FontExport>
     {
-        public FontSerializer(Settings assetSettings)
+        public FontSerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
             SerializeAsset();
         }
 

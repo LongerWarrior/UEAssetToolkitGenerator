@@ -7,7 +7,7 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class MaterialInstanceConstantSerializer : SimpleAssetSerializer<NormalExport>
     {
-        public MaterialInstanceConstantSerializer(Settings settings) : base(settings)
+        public MaterialInstanceConstantSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
             Setup();
 

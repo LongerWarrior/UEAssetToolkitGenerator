@@ -8,9 +8,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class FontFaceSerializer : Serializer<FontFaceExport>
     {
-        public FontFaceSerializer(Settings settings)
+        public FontFaceSerializer(Settings settings, UAsset asset)
         {
             Settings = settings;
+            Asset = asset;
             SerializeAsset();
         }
 

@@ -31,7 +31,7 @@ namespace CookedAssetSerializer
         protected bool SetupSerialization()
         {
             Dict = new Dictionary<int, int>();
-
+            
             var fullAssetPath = Asset.FilePath;
             AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
             var directory = Path.GetDirectoryName(fullAssetPath);

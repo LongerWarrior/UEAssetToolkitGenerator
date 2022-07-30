@@ -9,9 +9,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
     {
-        public SimpleAssetSerializer(Settings assetSettings)
+        public SimpleAssetSerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
         }
 
         public void Setup(bool isSimple = true)

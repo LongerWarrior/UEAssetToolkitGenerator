@@ -8,7 +8,7 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class SoundCueSerializer : SimpleAssetSerializer<SoundCueExport>
     {
-        public SoundCueSerializer(Settings settings) : base(settings)
+        public SoundCueSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
             DisableGeneration.Add("FirstNode");
             Setup();

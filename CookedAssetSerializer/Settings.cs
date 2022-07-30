@@ -15,5 +15,6 @@ namespace CookedAssetSerializer
         [JsonProperty] public List<string> CircularDependency;
         [JsonProperty] public List<string> SimpleAssets;
         [JsonProperty] public List<string> TypesToCopy;
+        [JsonProperty] public int SelectedIndex;
     }
 }

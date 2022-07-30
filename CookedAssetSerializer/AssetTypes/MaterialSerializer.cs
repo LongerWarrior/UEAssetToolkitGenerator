@@ -10,9 +10,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class MaterialSerializer : Serializer<NormalExport>
     {
-        public MaterialSerializer(Settings settings)
+        public MaterialSerializer(Settings settings, UAsset asset)
         {
             Settings = settings;
+            Asset = asset;
             SerializeAsset();
         }
 

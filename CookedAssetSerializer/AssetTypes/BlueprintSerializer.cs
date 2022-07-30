@@ -11,12 +11,14 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class BlueprintSerializer : Serializer<ClassExport>
     {
-        public BlueprintSerializer(Settings assetSettings)
+        public BlueprintSerializer(Settings assetSettings, UAsset asset, bool dummy)
         {
             Settings = assetSettings;
+            Asset = asset;
+            SerializeAsset(dummy);
         }
         
-        public void SerializeAsset(bool dummy)
+        private void SerializeAsset(bool dummy)
         {
             if (!SetupSerialization()) return;
             

@@ -9,9 +9,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class SkeletonSerializer : Serializer<SkeletonExport>
     {
-        public SkeletonSerializer(Settings settings)
+        public SkeletonSerializer(Settings settings, UAsset asset)
         {
             Settings = settings;
+            Asset = asset;
             SerializeAsset();
         }
 

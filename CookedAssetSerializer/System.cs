@@ -13,15 +13,12 @@ namespace CookedAssetSerializer
     {
         private readonly Settings Settings;
 
-        [JsonProperty] public int SelectedIndex;
-
         private int AssetTotal;
         private int AssetCount;
 
-        public System(Settings settings, int selectedIndex)
+        public System(Settings settings)
         {
             Settings = settings;
-            SelectedIndex = selectedIndex;
         }
 
         public int GetAssetTotal()
@@ -32,11 +29,6 @@ namespace CookedAssetSerializer
         public int GetAssetCount()
         {
             return AssetCount;
-        }
-        
-        public int GetSelectedIndex()
-        {
-            return SelectedIndex;
         }
         
         public Settings GetSettings()
@@ -71,7 +63,7 @@ namespace CookedAssetSerializer
                 if (types.ContainsKey(type)) types[type].Add(path);
                 else types[type] = new List<string> { path };
 
-                if (type == typeToFind) PrintOutput(type + " : " + path, "Scan");
+                if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
             }
 
             PrintOutput("Find all files " + files.Length, "Scan");
@@ -153,20 +145,19 @@ namespace CookedAssetSerializer
                         case EAssetType.Blueprint:
                         case EAssetType.WidgetBlueprint:
                         case EAssetType.AnimBlueprint:
-                            var bps = new BlueprintSerializer(Settings);
-                            bps.SerializeAsset(false);
+                            new BlueprintSerializer(Settings, asset, false);
                             break;
                         case EAssetType.DataTable:
-                            new DataTableSerializer(Settings);
+                            new DataTableSerializer(Settings, asset);
                             break;
                         case EAssetType.StringTable:
-                            new StringTableSerializer(Settings);
+                            new StringTableSerializer(Settings, asset);
                             break;
                         case EAssetType.UserDefinedStruct:
-                            new UserDefinedStructSerializer(Settings);
+                            new UserDefinedStructSerializer(Settings, asset);
                             break;
                         case EAssetType.BlendSpaceBase:
-                            new BlendSpaceSerializer(Settings);
+                            new BlendSpaceSerializer(Settings, asset);
                             break;
                         case EAssetType.AnimMontage:
                         case EAssetType.CameraAnim:
@@ -174,50 +165,50 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaPlayer:
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
-                            var sas = new SimpleAssetSerializer<NormalExport>(Settings);
+                            var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
                             sas.Setup(false);
                             sas.SerializeAsset();
                             break;
                         case EAssetType.Skeleton:
-                            new SkeletonSerializer(Settings);
+                            new SkeletonSerializer(Settings, asset);
                             break;
                         case EAssetType.MaterialParameterCollection:
-                            new MaterialParameterCollectionSerializer(Settings);
+                            new MaterialParameterCollectionSerializer(Settings, asset);
                             break;
                         case EAssetType.PhycialMaterial:
-                            new PhysicalMaterialSerializer(Settings);
+                            new PhysicalMaterialSerializer(Settings, asset);
                             break;
                         case EAssetType.Material:
-                            new MaterialSerializer(Settings);
+                            new MaterialSerializer(Settings, asset);
                             break;
                         case EAssetType.MaterialInstanceConstant:
-                            new MaterialInstanceConstantSerializer(Settings);
+                            new MaterialInstanceConstantSerializer(Settings, asset);
                             break;
                         case EAssetType.UserDefinedEnum:
-                            new UserDefinedEnumSerializer(Settings);
+                            new UserDefinedEnumSerializer(Settings, asset);
                             break;
                         case EAssetType.SoundCue:
-                            new SoundCueSerializer(Settings);
+                            new SoundCueSerializer(Settings, asset);
                             break;
                         case EAssetType.Font:
-                            new FontSerializer(Settings);
+                            new FontSerializer(Settings, asset);
                             break;
                         case EAssetType.FontFace:
-                            new FontFaceSerializer(Settings);
+                            new FontFaceSerializer(Settings, asset);
                             break;
                         case EAssetType.CurveBase:
-                            new CurveBaseSerializer(Settings);
+                            new CurveBaseSerializer(Settings, asset);
                             break;
                         case EAssetType.Texture2D:
-                            new Texture2DSerializer(Settings);
+                            new Texture2DSerializer(Settings, asset);
                             break;
                         case EAssetType.SkeletalMesh:
                             break;
                         case EAssetType.FileMediaSource:
-                            new FileMediaSourceSerializer(Settings);
+                            new FileMediaSourceSerializer(Settings, asset);
                             break;
                         case EAssetType.StaticMesh:
-                            new StaticMeshSerializer(Settings);
+                            new StaticMeshSerializer(Settings, asset);
                             break;
                     }
                 }
@@ -225,7 +216,7 @@ namespace CookedAssetSerializer
                 {
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
                     if (!Settings.SimpleAssets.Contains(aType)) continue;
-                    var sas = new SimpleAssetSerializer<NormalExport>(Settings);
+                    var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
                     sas.Setup();
                     sas.SerializeAsset();
                 }
@@ -257,12 +248,13 @@ namespace CookedAssetSerializer
                 if (exp.bIsAsset) isasset.Add(exp);
             }
 
-            if (exportnames.Count == 0)
-                foreach (var exp in asset.Exports)
+            if (exportnames.Count == 0) 
+            {
+                foreach (var exp in asset.Exports) 
                 {
-                    if (exp.ObjectName.ToName().ToLower() == name)
-                        exportnames.Add(exp);
+                    if (exp.ObjectName.ToName().ToLower() == name) exportnames.Add(exp);
                 }
+            }
 
             if (exportnames.Count == 1)
             {

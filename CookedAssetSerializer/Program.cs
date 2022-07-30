@@ -590,10 +590,11 @@ namespace CookedAssetSerializer {
                 SkipSerialization = skipSerialization,
                 CircularDependency = circularDependency,
                 SimpleAssets = simpleAssets,
-                TypesToCopy = typesToCopy
+                TypesToCopy = typesToCopy,
+                SelectedIndex = 0
             };
 
-            System program = new System(settings, 0);
+            System program = new System(settings);
             /*program.ScanAssetTypes();
             program.GetCookedAssets();*/
             program.SerializeAssets();

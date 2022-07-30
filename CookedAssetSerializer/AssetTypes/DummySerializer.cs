@@ -8,9 +8,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class DummySerializer : Serializer<Export>
     {
-        public DummySerializer(Settings assetSettings)
+        public DummySerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
             SerializeAsset();
         }
         

@@ -21,9 +21,10 @@ namespace CookedAssetSerializer.AssetTypes
     
     public class BlendSpaceSerializer : Serializer<BlendSpaceBaseExport>
     {
-        public BlendSpaceSerializer(Settings assetSettings)
+        public BlendSpaceSerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
             SerializeAsset();
         }
 

@@ -4,7 +4,7 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class PhysicalMaterialSerializer : SimpleAssetSerializer<NormalExport>
     {
-        public PhysicalMaterialSerializer(Settings settings) : base(settings)
+        public PhysicalMaterialSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
             Setup();
             SerializeAsset();

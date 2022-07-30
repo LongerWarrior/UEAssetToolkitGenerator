@@ -8,9 +8,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class UserDefinedEnumSerializer : Serializer<EnumExport>
     {
-        public UserDefinedEnumSerializer(Settings assetSettings)
+        public UserDefinedEnumSerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
             SerializeAsset();
         }
 

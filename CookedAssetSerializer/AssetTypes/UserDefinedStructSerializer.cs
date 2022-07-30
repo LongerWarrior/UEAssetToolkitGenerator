@@ -10,9 +10,10 @@ namespace CookedAssetSerializer.AssetTypes
 {
     public class UserDefinedStructSerializer : Serializer<UserDefinedStructExport>
     {
-        public UserDefinedStructSerializer(Settings assetSettings)
+        public UserDefinedStructSerializer(Settings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
+            Asset = asset;
             SerializeAsset();
         }
 
