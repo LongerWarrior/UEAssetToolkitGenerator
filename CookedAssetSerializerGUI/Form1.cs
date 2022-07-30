@@ -389,23 +389,24 @@ public partial class Form1 : Form
     {
         SetupGlobals();
 
-        Task.Run(() =>
-        {
+        //Task.Run(() =>
+        //{
             DisableButtons();
-            try
-            {
-                system.SerializeAssets();
-            }
-            catch (Exception exception)
-            {
-                rtxtOutput.Text += Environment.NewLine + exception;
-                return;
-            }
+            system.SerializeAssets();
+            // try
+            // {
+            //     system.SerializeAssets();
+            // }
+            // catch (Exception exception)
+            // {
+            //     rtxtOutput.Text += Environment.NewLine + exception;
+            //     return;
+            // }
 
             EnableButtons();
 
             OutputText("Serialized assets!");
-        });
+        //});
     }
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e)

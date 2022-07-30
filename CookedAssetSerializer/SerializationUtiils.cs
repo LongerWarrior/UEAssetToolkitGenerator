@@ -1122,6 +1122,7 @@ namespace CookedAssetSerializer
                 var klass = asset.Imports[-index - 1].ClassName.ToName();
                 var owner = GetName(index, asset);
                 var parent = GetParentName(index, asset);
+                var propString = propname.ToName();
                 /*if (parent.StartsWith("/Game")) {
                     string path = ContentDir + parent.Substring(5).Replace("/","\\")+".uasset";
                     if (File.Exists(path)) {
@@ -1139,9 +1140,8 @@ namespace CookedAssetSerializer
                         Console.WriteLine("No such file on disk "+"Class "+klass+ " Path " +path);
                     }
                 }*/
-                
-                importVariables.Add(asset.Imports[-index - 1].ClassName.ToName() + " " + GetFullName(index, asset) + " " +
-                                    propname.ToName());
+
+                importVariables.Add(klass + " " + owner + " " + propname.ToName());
 
                 property = new FObjectProperty();
                 return false;

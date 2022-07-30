@@ -166,7 +166,7 @@ namespace CookedAssetSerializer
                         case EAssetType.MediaTexture:
                         case EAssetType.SubsurfaceProfile:
                             var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                            sas.Setup(false);
+                            if (!sas.Setup(false)) break;
                             sas.SerializeAsset();
                             break;
                         case EAssetType.Skeleton:
@@ -217,7 +217,7 @@ namespace CookedAssetSerializer
                     var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
                     if (!Settings.SimpleAssets.Contains(aType)) continue;
                     var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                    sas.Setup();
+                    if (!sas.Setup()) continue;
                     sas.SerializeAsset();
                 }
             }

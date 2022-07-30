@@ -52,6 +52,7 @@ namespace CookedAssetSerializer
         
         protected bool SetupAssetInfo()
         {
+            if (Asset.Exports[Asset.mainExport - 1] is RawExport) return false;
             ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
             if (ClassExport == null) return false;
             ClassName = ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName();
@@ -60,6 +61,7 @@ namespace CookedAssetSerializer
             AssetInfo.Dict = Dict;
             AssetInfo.DisableGeneration = DisableGeneration;
             AssetInfo.GeneratedVariables = GeneratedVariables;
+            AssetInfo.ImportVariables = new List<string>();
 
             return true;
         }

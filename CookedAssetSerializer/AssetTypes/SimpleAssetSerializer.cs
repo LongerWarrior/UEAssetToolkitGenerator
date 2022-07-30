@@ -15,15 +15,17 @@ namespace CookedAssetSerializer.AssetTypes
             Asset = asset;
         }
 
-        public void Setup(bool isSimple = true)
+        public bool Setup(bool isSimple = true)
         {
-            if (!SetupSerialization()) return;
+            if (!SetupSerialization()) return false;
 
-            if (!SetupAssetInfo()) return;
+            if (!SetupAssetInfo()) return false;
             
             if (isSimple) ClassName = "SimpleAsset";
 
             SerializeHeaders();
+
+            return true;
         }
 
         public void SerializeAsset(JProperty preSlopAssetData = null, JProperty postSlopAssetData = null, 
