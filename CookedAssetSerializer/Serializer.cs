@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using UAssetAPI;
 using static CookedAssetSerializer.SerializationUtils;
 
-namespace CookedAssetSerializer.AssetTypes
+namespace CookedAssetSerializer
 {
     public class Serializer<T> where T: Export
     {

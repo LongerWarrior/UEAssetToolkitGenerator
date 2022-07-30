@@ -119,5 +119,31 @@ namespace CookedAssetSerializer.AssetTypes
                 return ret;
             });
         }
+        
+        //	//Serialize mapping of movie scene events to their bound functions
+//	//Since we cannot serialize raw compiled function pointers, we need to just record function names
+//	TSharedPtr<FJsonObject> MovieSceneEventTriggerSectionFunctions = MakeShareable(new FJsonObject);
+    
+//    for (const UWidgetAnimation* Animation : Asset->Animations) {
+//        ForEachObjectWithOuter(Animation, [&] (UObject* Object){
+//		if (UMovieSceneEventTriggerSection * EventSection = Cast<UMovieSceneEventTriggerSection>(Object)) {
+//			FMovieSceneEventChannel & EventChannel = EventSection->EventChannel;
+//			TArray<TSharedPtr<FJsonValue>> EventChannelValues;
+
+//			for (int32 i = 0; i < EventChannel.GetNumKeys(); i++) {
+//				const FMovieSceneEvent&MovieSceneEvent = EventChannel.GetData().GetValues()[i];
+
+//				const TSharedPtr<FJsonObject> Value = MakeShareable(new FJsonObject);
+//				Value->SetNumberField(TEXT("KeyIndex"), i);
+//				Value->SetStringField(TEXT("FunctionName"), MovieSceneEvent.Ptrs.Function->GetName());
+//				Value->SetStringField(TEXT("BoundObjectProperty"), MovieSceneEvent.Ptrs.BoundObjectProperty.ToString());
+
+//				EventChannelValues.Add(MakeShareable(new FJsonValueObject(Value)));
+//			}
+//			MovieSceneEventTriggerSectionFunctions->SetArrayField(EventSection->GetName(), EventChannelValues);
+//		}
+//	});
+//    }
+//Data->SetObjectField(TEXT("MovieSceneEventTriggerSectionFunctions"), MovieSceneEventTriggerSectionFunctions);
     }
 }

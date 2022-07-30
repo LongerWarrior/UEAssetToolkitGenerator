@@ -79,5 +79,51 @@ namespace CookedAssetSerializer.AssetTypes
             
             WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
+        
+        //public static JProperty SerializeSkeletonData(List<PropertyData> Data) {
+        //	JProperty jdata;
+        //	refobjects = new List<int>();
+        //	jdata = new JProperty("AssetObjectData");
+
+
+        //	JObject jdatavalue = new JObject();
+        //	foreach (PropertyData property in Data) {
+        //		if (property.Name.ToName() != "BoneTree") {
+        //			jdatavalue.Add(SerializePropertyData(property));
+        //		} else {
+        //			JArray newbonetree = new JArray();
+        //			JArray oldbonetree = (JArray)SerializePropertyData(property)[0].Value;
+        //			foreach (JObject obj in oldbonetree) {
+
+        //				if (Enum.TryParse<EBoneTranslationRetargetingMode>(obj.Properties().First().Value.ToString().Split("::")[1], out EBoneTranslationRetargetingMode res)) {
+        //					newbonetree.Add(res);
+        //				} else {
+        //					throw new NotImplementedException("EBoneTranslationRetargetingMode unknow value");
+        //				}
+
+        //			}
+
+        //			jdatavalue.Add("BoneTree", newbonetree);
+        //		}
+        //	}
+        //	bool hasVB = false;
+        //	bool hasBP = false;
+
+        //	foreach (JProperty jprop in jdatavalue.Properties()) {
+        //		if (jprop.Name == "VirtualBones") { hasVB = true; }
+        //		if (jprop.Name == "BlendProfiles") { hasBP = true; }
+        //	}
+        //	if (!hasVB) { jdatavalue.Add("VirtualBones", new JArray()); }
+        //	if (!hasBP) { jdatavalue.Add("BlendProfiles", new JArray()); }
+
+        //	jdatavalue.Add("SmartNames", new JObject());
+        //	jdatavalue.Add("AssetUserData", new JArray());
+        //	jdatavalue.Add("$ReferencedObjects", JArray.FromObject(refobjects.Distinct<int>()));
+        //	refobjects = new List<int>();
+        //	jdata.Value = jdatavalue;
+
+        //	return jdata;
+
+        //}
     }
 }
