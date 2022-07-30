@@ -180,7 +180,7 @@ namespace CookedAssetSerializer
                             sas.SerializeAsset();
                             break;
                         case EAssetType.Skeleton:
-                            SerializeSkeleton();
+                            new SkeletonSerializer(Settings);
                             break;
                         case EAssetType.MaterialParameterCollection:
                             new MaterialParameterCollectionSerializer(Settings);
@@ -189,7 +189,7 @@ namespace CookedAssetSerializer
                             new PhysicalMaterialSerializer(Settings);
                             break;
                         case EAssetType.Material:
-                            SerializeMaterial();
+                            new MaterialSerializer(Settings);
                             break;
                         case EAssetType.MaterialInstanceConstant:
                             new MaterialInstanceConstantSerializer(Settings);
