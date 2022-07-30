@@ -5,7 +5,6 @@ using CookedAssetSerializer.AssetTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAssetAPI;
-using static CookedAssetSerializer.Serializers;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer
@@ -161,10 +160,10 @@ namespace CookedAssetSerializer
                             new DataTableSerializer(Settings);
                             break;
                         case EAssetType.StringTable:
-                            SerializeStringTable();
+                            new StringTableSerializer(Settings);
                             break;
                         case EAssetType.UserDefinedStruct:
-                            SerializeUserDefinedStruct();
+                            new UserDefinedStructSerializer(Settings);
                             break;
                         case EAssetType.BlendSpaceBase:
                             new BlendSpaceSerializer(Settings);
@@ -195,7 +194,7 @@ namespace CookedAssetSerializer
                             new MaterialInstanceConstantSerializer(Settings);
                             break;
                         case EAssetType.UserDefinedEnum:
-                            SerializeUserDefinedEnum();
+                            new UserDefinedEnumSerializer(Settings);
                             break;
                         case EAssetType.SoundCue:
                             new SoundCueSerializer(Settings);
@@ -210,7 +209,7 @@ namespace CookedAssetSerializer
                             new CurveBaseSerializer(Settings);
                             break;
                         case EAssetType.Texture2D:
-                            SerializeTexture();
+                            new Texture2DSerializer(Settings);
                             break;
                         case EAssetType.SkeletalMesh:
                             break;
@@ -218,7 +217,7 @@ namespace CookedAssetSerializer
                             new FileMediaSourceSerializer(Settings);
                             break;
                         case EAssetType.StaticMesh:
-                            SerializeStaticMesh();
+                            new StaticMeshSerializer(Settings);
                             break;
                     }
                 }
@@ -233,7 +232,7 @@ namespace CookedAssetSerializer
             }
         }
 
-        public void PrintOutput(string output, string type = "debug")
+        private void PrintOutput(string output, string type = "debug")
         {
             Console.WriteLine(output);
             var filename = type == "debug" ? "debug" : "output";
@@ -241,7 +240,7 @@ namespace CookedAssetSerializer
             sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
         }
 
-        public string GetAssetType(string file, UE4Version version)
+        private string GetAssetType(string file, UE4Version version)
         {
             var name = Path.GetFileNameWithoutExtension(file).ToLower();
             UAsset asset = new UAsset(file, version, true);

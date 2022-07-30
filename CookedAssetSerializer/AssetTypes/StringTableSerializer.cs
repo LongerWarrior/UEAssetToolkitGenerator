@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Linq;
 using UAssetAPI;
-using UAssetAPI.Kismet;
-using UAssetAPI.PropertyTypes;
 using static CookedAssetSerializer.SerializationUtils;
 
 namespace CookedAssetSerializer.AssetTypes
@@ -22,6 +19,23 @@ namespace CookedAssetSerializer.AssetTypes
             if (!SetupAssetInfo()) return;
 
             SerializeHeaders();
+            
+            //AssignAssetSerializedData();
+
+            AssetData.Add("TableNamespace", 
+                ClassExport.Table.TableNamespace == null ? "" : ClassExport.Table.TableNamespace.ToString());
+            var strings = new JObject();
+            foreach (var key in ClassExport.Table.Keys) 
+            {
+                ClassExport.Table.TryGetValue(key, out var value);
+                strings.Add(key.ToString(), value.ToString());
+            }
+            AssetData.Add("SourceStrings", strings);
+            AssetData.Add("MetaData", new JObject());
+            
+            AssignAssetSerializedData();
+            
+            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         }
     }
 }
