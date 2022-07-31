@@ -24,6 +24,8 @@ public partial class Form1 : Form
     private Settings settings;
 
     private volatile bool isRunning;
+    
+    private object boolLock = new object();
 
     private readonly object[] versionOptionsKeys =
     {
@@ -129,13 +131,15 @@ public partial class Form1 : Form
     {
         while (true)
         {
-            if (isRunning)
+            lock(boolLock) if (isRunning)
             {
-                rtxtOutput.Text += system.GetAssetCount();
                 lblProgress.Text = system.GetAssetCount() / system.GetAssetTotal() * 100 + @"%";
             }
 
-            await Task.Delay(500);
+            await using var sw = File.AppendText(Path.Combine(settings.JSONDir, "thread_log.txt"));
+            await sw.WriteLineAsync($"[{isRunning}]");
+
+            await Task.Delay(1000);
         }
     }
 
@@ -346,17 +350,17 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
-                isRunning = true;
+                lock(boolLock) isRunning = true;
                 system.ScanAssetTypes();
-                isRunning = false;
+                lock(boolLock) isRunning = false;
+                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
+                EnableButtons();
                 return;
             }
-
-            EnableButtons();
 
             OutputText("Scanned assets!");
         });
@@ -371,15 +375,17 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
+                lock(boolLock) isRunning = true;
                 system.GetCookedAssets();
+                lock(boolLock) isRunning = false;
+                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
+                EnableButtons();
                 return;
             }
-
-            EnableButtons();
 
             OutputText("Moved assets!");
         });
@@ -394,15 +400,17 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
+                lock(boolLock) isRunning = true;
                 system.SerializeAssets();
+                lock(boolLock) isRunning = false;
+                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
+                EnableButtons();
                 return;
             }
-
-            EnableButtons();
 
             OutputText("Serialized assets!");
         });

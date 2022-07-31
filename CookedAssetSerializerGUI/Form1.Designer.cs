@@ -148,7 +148,7 @@ partial class Form1 {
             this.btnSelectOutputDir.Name = "btnSelectOutputDir";
             this.btnSelectOutputDir.Size = new System.Drawing.Size(122, 30);
             this.btnSelectOutputDir.TabIndex = 4;
-            this.btnSelectOutputDir.Text = "Output Dir";
+            this.btnSelectOutputDir.Text = "Cooked Dir";
             this.btnSelectOutputDir.UseVisualStyleBackColor = true;
             this.btnSelectOutputDir.Click += new System.EventHandler(this.btnSelectOutputDir_Click);
             // 

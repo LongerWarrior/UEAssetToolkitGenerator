@@ -30,11 +30,6 @@ namespace CookedAssetSerializer
         {
             return AssetCount;
         }
-        
-        public Settings GetSettings()
-        {
-            return Settings;
-        }
 
         public void ClearLists()
         {
