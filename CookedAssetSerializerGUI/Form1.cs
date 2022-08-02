@@ -14,7 +14,7 @@ public partial class Form1 : Form
         SetupForm();
         SetupGlobals();
 
-        Task.Run(EventLoop);
+        //Task.Run(EventLoop);
     }
 
     #region Vars
@@ -350,9 +350,9 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
-                lock(boolLock) isRunning = true;
+                //lock(boolLock) isRunning = true;
                 system.ScanAssetTypes();
-                lock(boolLock) isRunning = false;
+                //lock(boolLock) isRunning = false;
                 EnableButtons();
             }
             catch (Exception exception)
@@ -375,9 +375,9 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
-                lock(boolLock) isRunning = true;
+                //lock(boolLock) isRunning = true;
                 system.GetCookedAssets();
-                lock(boolLock) isRunning = false;
+                //lock(boolLock) isRunning = false;
                 EnableButtons();
             }
             catch (Exception exception)
@@ -400,9 +400,9 @@ public partial class Form1 : Form
             DisableButtons();
             try
             {
-                lock(boolLock) isRunning = true;
+                //lock(boolLock) isRunning = true;
                 system.SerializeAssets();
-                lock(boolLock) isRunning = false;
+                //lock(boolLock) isRunning = false;
                 EnableButtons();
             }
             catch (Exception exception)
