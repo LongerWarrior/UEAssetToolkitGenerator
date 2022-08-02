@@ -344,24 +344,23 @@ public partial class Form1 : Form
     private void btnScanAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
+        DisableButtons();
 
         Task.Run(() =>
         {
-            DisableButtons();
             try
             {
                 //lock(boolLock) isRunning = true;
                 system.ScanAssetTypes();
                 //lock(boolLock) isRunning = false;
-                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
-                EnableButtons();
                 return;
             }
 
+            EnableButtons();
             OutputText("Scanned assets!");
         });
     }
@@ -369,24 +368,23 @@ public partial class Form1 : Form
     private void btnMoveCookedAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
+        DisableButtons();
 
         Task.Run(() =>
         {
-            DisableButtons();
             try
             {
                 //lock(boolLock) isRunning = true;
                 system.GetCookedAssets();
                 //lock(boolLock) isRunning = false;
-                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
-                EnableButtons();
                 return;
             }
-
+            
+            EnableButtons();
             OutputText("Moved assets!");
         });
     }
@@ -394,24 +392,23 @@ public partial class Form1 : Form
     private void btnSerializeAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
-
+        DisableButtons();
+        
         Task.Run(() =>
         {
-            DisableButtons();
             try
             {
                 //lock(boolLock) isRunning = true;
                 system.SerializeAssets();
                 //lock(boolLock) isRunning = false;
-                EnableButtons();
             }
             catch (Exception exception)
             {
                 rtxtOutput.Text += Environment.NewLine + exception;
-                EnableButtons();
                 return;
             }
 
+            EnableButtons();
             OutputText("Serialized assets!");
         });
     }
