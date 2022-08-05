@@ -13,7 +13,7 @@ namespace CookedAssetSerializer.AssetTypes
             DisableGeneration.Add("FirstNode");
             Setup(true);
             SoundGraphData = new Dictionary<int, List<int>>();
-            SerializeAsset(new JProperty("SoundGraphData", string.Join(Environment.NewLine, ClassExport.GetCueGraph())));
+            SerializeAsset(new JProperty("SoundCueGraph", string.Join(Environment.NewLine, ClassExport.GetCueGraph())));
         }
     }
 }
