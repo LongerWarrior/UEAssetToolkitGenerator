@@ -1,16 +1,16 @@
 .vs
 CookedAssetSerializer/bin
 CookedAssetSerializer/obj
-CookedAssetSerializerGUI/bin
-CookedAssetSerializerGUI/obj
 UAssetAPI/bin
 UAssetAPI/obj
 UAssetGUI/bin
 UAssetGUI/obj
-.idea/
-
 UpgradeLog.htm
 
-Backup/
-
 UEAssetToolkitGenerator.sln.DotSettings.user
+
+.idea/
+
+CookedAssetSerializerGUI/bin/
+
+CookedAssetSerializerGUI/obj/

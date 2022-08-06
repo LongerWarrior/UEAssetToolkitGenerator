@@ -1,93 +1,106 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using UAssetAPI.StructTypes;
-using UAssetAPI;
-using static Utils.TypeConversionUtils;
-using static System.MathF;
+using System.Security.Cryptography;
+using SkiaSharp;
 using Textures.ASTC;
 using Textures.BC;
 using Textures.DXT;
-using SkiaSharp;
-using System.Security.Cryptography;
-using System.Linq;
+using UAssetAPI;
+using UAssetAPI.StructTypes;
+using static Utils.TypeConversionUtils;
+using static System.MathF;
 
-namespace Textures {
-    public static class TextureDecoder {
-        public static SKBitmap Decode(this Texture2DExport texture, FTexture2DMipMap mip, int slices, out string hash,
-            bool srgb, bool isCube = false) {
+namespace Textures
+{
+    public static class TextureDecoder
+    {
+
+        public static SKBitmap Decode(this Texture2DExport texture, FTexture2DMipMap mip, int slices,out string hash,bool srgb,bool iscube = false) {
             hash = "";
+            if (!texture.IsVirtual && mip != null) {
+                byte[] data;
+                SKColorType colorType;
+                
+                DecodeTexture(mip, texture.Format, texture.isNormalMap, out data, out colorType,srgb);
 
-            if (texture.IsVirtual || mip == null) return null;
-
-            DecodeTexture(mip, texture.Format, texture.isNormalMap, out var data, out var colorType, srgb);
-
-            switch (colorType) {
-                case SKColorType.Rgba8888:
-                case SKColorType.Rgb888x: {
-                    for (var i = 0; i < data.Length / 4; i++) {
-                        (data[i * 4], data[i * 4 + 2]) = (data[i * 4 + 2], data[i * 4]);
-                        if (isCube) data[i * 4 + 3] = 255;
-                        if (texture.isNormalMap) data[i * 4] = 0;
+                if (colorType == SKColorType.Rgba8888 || colorType == SKColorType.Rgb888x) {
+                    for (int i = 0; i < data.Length / 4; i++) {
+                        var temp = data[i * 4];
+                        data[i * 4] = data[i * 4 + 2];
+                        data[i * 4 + 2] = temp;
+                        if (iscube) {
+                            data[i * 4 + 3] = 255;
+                        }
+                        if (texture.isNormalMap) {
+                            data[i * 4] = 0;
+                        }
                     }
+                    
 
                     var md5 = MD5.Create();
-                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 4).Select(x => x.ToString("x2"))
-                        .Aggregate((a, b) => a + b);
+                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 4).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
 
-                    for (var i = 0; i < data.Length / 4; i++)
-                        (data[i * 4], data[i * 4 + 2]) = (data[i * 4 + 2], data[i * 4]);
-                    break;
-                }
-                case SKColorType.Bgra8888: {
-                    for (var i = 0; i < data.Length / 4; i++) {
-                        if (isCube) data[i * 4 + 3] = 255;
-                        if (texture.isNormalMap) data[i * 4] = 0;
+                    for (int i = 0; i < data.Length / 4; i++) {
+                        var temp = data[i * 4];
+                        data[i * 4] = data[i * 4 + 2];
+                        data[i * 4 + 2] = temp;
                     }
+                }
+                if (colorType == SKColorType.Bgra8888) {
+                    for (int i = 0; i < data.Length / 4; i++) {
+                        if (iscube) {
+                            data[i * 4 + 3] = 255;
+                        }
+                        if (texture.isNormalMap) {
+                            data[i * 4] = 0;
+                        }
+                    }
+                    var md5 = MD5.Create();
+                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 4).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
+                }
 
+                if (colorType == SKColorType.Rgb565) {
                     var md5 = MD5.Create();
-                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 4).Select(x => x.ToString("x2"))
-                        .Aggregate((a, b) => a + b);
-                    break;
+                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY*2).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
                 }
-                case SKColorType.Rgb565: {
+
+                if (colorType == SKColorType.Gray8) {
                     var md5 = MD5.Create();
-                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY * 2).Select(x => x.ToString("x2"))
-                        .Aggregate((a, b) => a + b);
-                    break;
+                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
                 }
-                case SKColorType.Gray8: {
-                    var md5 = MD5.Create();
-                    hash = md5.ComputeHash(data, 0, mip.SizeX * mip.SizeY).Select(x => x.ToString("x2"))
-                        .Aggregate((a, b) => a + b);
-                    break;
+
+
+                var width = mip.SizeX;
+                var height = mip.SizeY;
+                //if (!iscube) {
+                //    height *= slices;
+                //}
+                
+                var info = new SKImageInfo(width, height, colorType, SKAlphaType.Unpremul);
+                var bitmap = new SKBitmap(info);
+
+                unsafe {
+                    fixed (byte* p = data) {
+                        bitmap.SetPixels(new IntPtr(p));
+                    }
                 }
+
+                if (!texture.bRenderNearestNeighbor) {
+                    return bitmap;
+                }
+
+                var resized = bitmap.Resize(new SKImageInfo(width, height), SKFilterQuality.None);
+                bitmap.Dispose();
+                return resized;
             }
-
-            var width = mip.SizeX;
-            var height = mip.SizeY;
-            //if (!isCube) {
-            //    height *= slices;
-            //}
-
-            var info = new SKImageInfo(width, height, colorType, SKAlphaType.Unpremul);
-            var bitmap = new SKBitmap(info);
-
-            unsafe {
-                fixed (byte* p = data) {
-                    bitmap.SetPixels(new IntPtr(p));
-                }
-            }
-
-            if (!texture.bRenderNearestNeighbor) return bitmap;
-
-            var resized = bitmap.Resize(new SKImageInfo(width, height), SKFilterQuality.None);
-            bitmap.Dispose();
-            return resized;
+            return null;
         }
 
-        public static void DecodeTexture(FTexture2DMipMap mip, EPixelFormat format, bool isNormalMap, out byte[] data,
-            out SKColorType colorType, bool srgb) {
-            switch (format) {
+        public static void DecodeTexture(FTexture2DMipMap mip, EPixelFormat format, bool isNormalMap, out byte[] data, out SKColorType colorType, bool srgb)
+        {
+            switch (format)
+            {
                 case EPixelFormat.PF_DXT1:
                     data = DXTDecoder.DXT1(mip.Data.Data, mip.SizeX, mip.SizeY, mip.SizeZ);
                     colorType = SKColorType.Rgba8888;
@@ -110,16 +123,21 @@ namespace Textures {
                     colorType = SKColorType.Rgba8888;
 
                     if (isNormalMap)
+                    {
                         // UE4 drops blue channel for normal maps before encoding, restore it
-                        unsafe {
+                        unsafe
+                        {
                             var offset = 0;
-                            fixed (byte* d = data) {
-                                for (var i = 0; i < mip.SizeX * mip.SizeY; i++) {
+                            fixed (byte* d = data)
+                            {
+                                for (var i = 0; i < mip.SizeX * mip.SizeY; i++)
+                                {
                                     d[offset + 2] = BCDecoder.GetZNormal(d[offset], d[offset + 1]);
                                     offset += 4;
                                 }
                             }
                         }
+                    }
 
                     break;
                 case EPixelFormat.PF_BC4:
@@ -165,8 +183,10 @@ namespace Textures {
                     break;
                 case EPixelFormat.PF_R16F:
                 case EPixelFormat.PF_R16F_FILTER:
-                    unsafe {
-                        fixed (byte* d = mip.Data.Data) {
+                    unsafe
+                    {
+                        fixed (byte* d = mip.Data.Data)
+                        {
                             data = ConvertRawR16DataToRGB888X(mip.SizeX, mip.SizeY, d, mip.SizeX * 2); // 2 BPP
                         }
                     }
@@ -182,10 +202,11 @@ namespace Textures {
                     colorType = SKColorType.Gray8;
                     break;
                 case EPixelFormat.PF_FloatRGBA:
-                    unsafe {
-                        fixed (byte* d = mip.Data.Data) {
-                            data = ConvertRawR16G16B16A16FDataToRGBA8888(mip.SizeX, mip.SizeY, d, mip.SizeX * 8, true,
-                                srgb); // 8 BPP
+                    unsafe
+                    {
+                        fixed (byte* d = mip.Data.Data)
+                        {
+                            data = ConvertRawR16G16B16A16FDataToRGBA8888(mip.SizeX, mip.SizeY, d, mip.SizeX * 8, true, srgb); // 8 BPP
                         }
                     }
 
@@ -196,13 +217,16 @@ namespace Textures {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe byte[] ConvertRawR16DataToRGB888X(int width, int height, byte* inp, int srcPitch) {
+        private static unsafe byte[] ConvertRawR16DataToRGB888X(int width, int height, byte* inp, int srcPitch)
+        {
             // e.g. shadow maps
             var ret = new byte[width * height * 4];
-            for (var y = 0; y < height; y++) {
-                var srcPtr = (ushort*)(inp + y * srcPitch);
+            for (int y = 0; y < height; y++)
+            {
+                var srcPtr = (ushort*) (inp + y * srcPitch);
                 var destPtr = y * width * 4;
-                for (var x = 0; x < width; x++) {
+                for (int x = 0; x < width; x++)
+                {
                     var value16 = *srcPtr++;
                     var value = Requantize16to8(value16);
 
@@ -216,7 +240,7 @@ namespace Textures {
             return ret;
         }
 
-        public readonly struct FColor {
+        public readonly struct FColor  {
             public readonly byte B;
             public readonly byte G;
             public readonly byte R;
@@ -230,8 +254,7 @@ namespace Textures {
                 A = a;
             }
         }
-
-        public struct FLinearColor {
+        public struct FLinearColor  {
             public float R;
             public float G;
             public float B;
@@ -244,7 +267,6 @@ namespace Textures {
                 B = b;
                 A = a;
             }
-
             public FColor ToFColor(bool sRGB) {
                 var floatR = R.Clamp(0.0f, 1.0f);
                 var floatG = G.Clamp(0.0f, 1.0f);
@@ -267,15 +289,17 @@ namespace Textures {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe byte[] ConvertRawR16G16B16A16FDataToRGBA8888(int width, int height, byte* inp,
-            int srcPitch, bool linearToGamma, bool srgb) {
+        private static unsafe byte[] ConvertRawR16G16B16A16FDataToRGBA8888(int width, int height, byte* inp, int srcPitch, bool linearToGamma, bool srgb)
+        {
             float minR = 0.0f, minG = 0.0f, minB = 0.0f, minA = 0.0f;
             float maxR = 1.0f, maxG = 1.0f, maxB = 1.0f, maxA = 1.0f;
 
-            for (var y = 0; y < height; y++) {
-                var srcPtr = (ushort*)(inp + y * srcPitch);
+            for (int y = 0; y < height; y++)
+            {
+                var srcPtr = (ushort*) (inp + y * srcPitch);
 
-                for (var x = 0; x < width; x++) {
+                for (int x = 0; x < width; x++)
+                {
                     minR = Min(HalfToFloat(srcPtr[0]), minR);
                     minG = Min(HalfToFloat(srcPtr[1]), minG);
                     minB = Min(HalfToFloat(srcPtr[2]), minB);
@@ -289,11 +313,13 @@ namespace Textures {
             }
 
             var ret = new byte[width * height * 4];
-            for (var y = 0; y < height; y++) {
-                var srcPtr = (ushort*)(inp + y * srcPitch);
+            for (int y = 0; y < height; y++)
+            {
+                var srcPtr = (ushort*) (inp + y * srcPitch);
                 var destPtr = y * width * 4;
 
-                for (var x = 0; x < width; x++) {
+                for (int x = 0; x < width; x++)
+                {
                     var color = new FLinearColor(
                         (HalfToFloat(*srcPtr++) - minR) / (maxR - minR),
                         (HalfToFloat(*srcPtr++) - minG) / (maxG - minG),
@@ -311,6 +337,7 @@ namespace Textures {
                         ret[destPtr++] = color.B;
                         ret[destPtr++] = color.A;
                     }
+
                 }
             }
 

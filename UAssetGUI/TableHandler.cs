@@ -6,12 +6,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using CookedAssetSerializer;
 using UAssetAPI;
 using UAssetAPI.Kismet.Bytecode;
 using UAssetAPI.PropertyTypes;
 using UAssetAPI.StructTypes;
 using static CookedAssetSerializer.SerializationUtils;
-using static CookedAssetSerializer.Utils;
+using static CookedAssetSerializer.System;
 
 namespace UAssetGUI
 {
@@ -1425,17 +1426,17 @@ namespace UAssetGUI
                                 break;
                             case KismetExpression[] bytecode:
                                 //case PointingTreeNodeType.Bytecode:
-                                CookedAssetSerializer.Utils.Asset = asset;
+                                //CookedAssetSerializer.Serializer<Export> = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
-                                jsonView.Text = new JObject(new JProperty("Script", SerializeScript(bytecode))).ToString();
+                                // TODO: This calling of SerializeScript might cause a problem
+                                //jsonView.Text = new JObject(new JProperty("Script", SerializeScript(bytecode))).ToString();
                                 jsonView.Visible = true;
                                 currentlyFocusedControl.Focus();
                                 origForm.ForceResize();
                                 standardRendering = false;
                                 break;
                             case string[] graph:
-                                CookedAssetSerializer.Utils.Asset = asset;
                                 currentlyFocusedControl = ((Form1)dataGridView1.Parent).ActiveControl;
                                 dataGridView1.Visible = false;
                                 jsonView.Text = "";

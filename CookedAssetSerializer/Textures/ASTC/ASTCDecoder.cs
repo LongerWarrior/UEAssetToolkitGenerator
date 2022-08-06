@@ -127,7 +127,6 @@ namespace Textures.ASTC
                     case 2: ExtraColorEndpointModeBits += 2; break;
                     case 3: ExtraColorEndpointModeBits += 5; break;
                     case 4: ExtraColorEndpointModeBits += 8; break;
-                    default: break;
                 }
             }
 
@@ -183,7 +182,11 @@ namespace Textures.ASTC
                 for (int i = 0; i < NumberPartitions; i++)
                 {
                     ColorEndpointMode[i] = BaseMode;
-                    if (!(C[i])) ColorEndpointMode[i] -= 1;
+                    if (!(C[i]))
+                    {
+                        ColorEndpointMode[i] -= 1;
+                    }
+
                     ColorEndpointMode[i] <<= 2;
                     ColorEndpointMode[i] |= M[i];
                 }
@@ -233,7 +236,10 @@ namespace Textures.ASTC
             TexelWeightData[ClearByteStart - 1] &= (byte)((1 << (TexelParams.GetPackedBitSize() % 8)) - 1);
 
             int cLen = 16 - ClearByteStart;
-            for (int i = ClearByteStart; i < ClearByteStart + cLen; i++) TexelWeightData[i] = 0;
+            for (int i = ClearByteStart; i < ClearByteStart + cLen; i++)
+            {
+                TexelWeightData[i] = 0;
+            }
 
             List<IntegerEncoded> TexelWeightValues = new List<IntegerEncoded>();
             BitArrayStream WeightBitStream = new BitArrayStream(new BitArray(TexelWeightData));
@@ -357,12 +363,31 @@ namespace Textures.ASTC
 
             a &= 0x3F; b &= 0x3F; c &= 0x3F; d &= 0x3F;
 
-            if (PartitionCount < 4) d = 0;
-            if (PartitionCount < 3) c = 0;
+            if (PartitionCount < 4)
+            {
+                d = 0;
+            }
 
-            if (a >= b && a >= c && a >= d) return 0;
-            else if (b >= c && b >= d) return 1;
-            else if (c >= d) return 2;
+            if (PartitionCount < 3)
+            {
+                c = 0;
+            }
+
+            if (a >= b && a >= c && a >= d)
+            {
+                return 0;
+            }
+
+            if (b >= c && b >= d)
+            {
+                return 1;
+            }
+
+            if (c >= d)
+            {
+                return 2;
+            }
+
             return 3;
         }
 
@@ -397,7 +422,10 @@ namespace Textures.ASTC
                     }
                 }
 
-                if (++WeightIndices >= (TexelParams.Width * TexelParams.Height)) break;
+                if (++WeightIndices >= (TexelParams.Width * TexelParams.Height))
+                {
+                    break;
+                }
             }
 
             // Do infill if necessary (Section C.2.18) ...

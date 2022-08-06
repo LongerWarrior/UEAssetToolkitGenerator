@@ -87,32 +87,30 @@ namespace Textures.ASTC
                 // Do nothing
                 return Value;
             }
-            else if (OldDepth == 0 && NewDepth != 0)
+
+            if (OldDepth == 0 && NewDepth != 0)
             {
                 return (short)((1 << NewDepth) - 1);
             }
-            else if (NewDepth > OldDepth)
+
+            if (NewDepth > OldDepth)
             {
                 return (short)BitArrayStream.Replicate(Value, OldDepth, NewDepth);
             }
-            else
+
+            // oldDepth > newDepth
+            if (NewDepth == 0)
             {
-                // oldDepth > newDepth
-                if (NewDepth == 0)
-                {
-                    return 0xFF;
-                }
-                else
-                {
-                    byte BitsWasted = (byte)(OldDepth - NewDepth);
-                    short TempValue = Value;
-
-                    TempValue = (short)((TempValue + (1 << (BitsWasted - 1))) >> BitsWasted);
-                    TempValue = Math.Min(Math.Max((short)0, TempValue), (short)((1 << NewDepth) - 1));
-
-                    return (byte)(TempValue);
-                }
+                return 0xFF;
             }
+
+            byte BitsWasted = (byte)(OldDepth - NewDepth);
+            short TempValue = Value;
+
+            TempValue = (short)((TempValue + (1 << (BitsWasted - 1))) >> BitsWasted);
+            TempValue = Math.Min(Math.Max((short)0, TempValue), (short)((1 << NewDepth) - 1));
+
+            return (byte)(TempValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
