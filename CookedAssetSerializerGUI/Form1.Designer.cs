@@ -57,6 +57,8 @@ partial class Form1 {
             this.btnLoadConfig = new System.Windows.Forms.Button();
             this.btnSaveConfig = new System.Windows.Forms.Button();
             this.lblProgress = new System.Windows.Forms.Label();
+            this.rtxtParseDir = new System.Windows.Forms.RichTextBox();
+            this.btnSelectParseDir = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSelectContentDir
@@ -79,7 +81,7 @@ partial class Form1 {
             // 
             this.rtxtContentDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtContentDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtContentDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtContentDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtContentDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtContentDir.Location = new System.Drawing.Point(167, 58);
             this.rtxtContentDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -89,21 +91,23 @@ partial class Form1 {
             this.rtxtContentDir.Size = new System.Drawing.Size(551, 30);
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
+            this.rtxtContentDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
             // 
             // rtxtJSONDir
             // 
             this.rtxtJSONDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtJSONDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtJSONDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtJSONDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtJSONDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtJSONDir.Location = new System.Drawing.Point(167, 104);
+            this.rtxtJSONDir.Location = new System.Drawing.Point(167, 129);
             this.rtxtJSONDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtJSONDir.Multiline = false;
             this.rtxtJSONDir.Name = "rtxtJSONDir";
             this.rtxtJSONDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.rtxtJSONDir.Size = new System.Drawing.Size(551, 30);
             this.rtxtJSONDir.TabIndex = 3;
-            this.rtxtJSONDir.Text = "C:\\ExamplePath\\JSON";
+            this.rtxtJSONDir.Text = "C:\\ExamplePath\\AssetDump";
+            this.rtxtJSONDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
             // 
             // btnSelectJSONDir
             // 
@@ -112,12 +116,12 @@ partial class Form1 {
             this.btnSelectJSONDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelectJSONDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSelectJSONDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSelectJSONDir.Location = new System.Drawing.Point(31, 104);
+            this.btnSelectJSONDir.Location = new System.Drawing.Point(31, 129);
             this.btnSelectJSONDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnSelectJSONDir.Name = "btnSelectJSONDir";
             this.btnSelectJSONDir.Size = new System.Drawing.Size(122, 30);
             this.btnSelectJSONDir.TabIndex = 2;
-            this.btnSelectJSONDir.Text = "JSON Dir";
+            this.btnSelectJSONDir.Text = "Dump Dir";
             this.btnSelectJSONDir.UseVisualStyleBackColor = true;
             this.btnSelectJSONDir.Click += new System.EventHandler(this.btnSelectJSONDir_Click);
             // 
@@ -125,9 +129,9 @@ partial class Form1 {
             // 
             this.rtxtOutputDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtOutputDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtOutputDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtOutputDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtOutputDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtOutputDir.Location = new System.Drawing.Point(167, 149);
+            this.rtxtOutputDir.Location = new System.Drawing.Point(167, 165);
             this.rtxtOutputDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtOutputDir.Multiline = false;
             this.rtxtOutputDir.Name = "rtxtOutputDir";
@@ -135,6 +139,7 @@ partial class Form1 {
             this.rtxtOutputDir.Size = new System.Drawing.Size(551, 30);
             this.rtxtOutputDir.TabIndex = 5;
             this.rtxtOutputDir.Text = "C:\\ExamplePath\\Output";
+            this.rtxtOutputDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
             // 
             // btnSelectOutputDir
             // 
@@ -143,7 +148,7 @@ partial class Form1 {
             this.btnSelectOutputDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelectOutputDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSelectOutputDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSelectOutputDir.Location = new System.Drawing.Point(31, 149);
+            this.btnSelectOutputDir.Location = new System.Drawing.Point(31, 165);
             this.btnSelectOutputDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnSelectOutputDir.Name = "btnSelectOutputDir";
             this.btnSelectOutputDir.Size = new System.Drawing.Size(122, 30);
@@ -157,7 +162,7 @@ partial class Form1 {
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label1.Location = new System.Drawing.Point(31, 196);
+            this.label1.Location = new System.Drawing.Point(31, 205);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(96, 21);
             this.label1.TabIndex = 6;
@@ -170,7 +175,7 @@ partial class Form1 {
             this.cbUEVersion.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.cbUEVersion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.cbUEVersion.FormattingEnabled = true;
-            this.cbUEVersion.Location = new System.Drawing.Point(167, 196);
+            this.cbUEVersion.Location = new System.Drawing.Point(167, 205);
             this.cbUEVersion.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cbUEVersion.Name = "cbUEVersion";
             this.cbUEVersion.Size = new System.Drawing.Size(283, 29);
@@ -181,7 +186,7 @@ partial class Form1 {
             this.chkRefreshAssets.AutoSize = true;
             this.chkRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkRefreshAssets.Location = new System.Drawing.Point(521, 198);
+            this.chkRefreshAssets.Location = new System.Drawing.Point(521, 207);
             this.chkRefreshAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkRefreshAssets.Name = "chkRefreshAssets";
             this.chkRefreshAssets.Size = new System.Drawing.Size(137, 25);
@@ -215,7 +220,7 @@ partial class Form1 {
             // 
             this.lbAssetsToSkipSerialization.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.lbAssetsToSkipSerialization.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lbAssetsToSkipSerialization.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbAssetsToSkipSerialization.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.lbAssetsToSkipSerialization.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.lbAssetsToSkipSerialization.FormattingEnabled = true;
             this.lbAssetsToSkipSerialization.ItemHeight = 21;
@@ -241,7 +246,7 @@ partial class Form1 {
             // 
             this.rtxtCookedAssets.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtCookedAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtCookedAssets.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtCookedAssets.Location = new System.Drawing.Point(756, 269);
             this.rtxtCookedAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -254,7 +259,7 @@ partial class Form1 {
             // 
             this.rtxtSimpleAssets.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtSimpleAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtSimpleAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtSimpleAssets.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtSimpleAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtSimpleAssets.Location = new System.Drawing.Point(756, 58);
             this.rtxtSimpleAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -327,7 +332,7 @@ partial class Form1 {
             // 
             this.rtxtCircularDependancy.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtCircularDependancy.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtCircularDependancy.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtCircularDependancy.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtCircularDependancy.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtCircularDependancy.Location = new System.Drawing.Point(756, 448);
             this.rtxtCircularDependancy.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -363,7 +368,7 @@ partial class Form1 {
             // 
             this.rtxtOutput.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtOutput.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtOutput.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.rtxtOutput.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtOutput.Location = new System.Drawing.Point(28, 550);
             this.rtxtOutput.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -483,14 +488,46 @@ partial class Form1 {
             // 
             // lblProgress
             // 
-            this.lblProgress.AutoSize = true;
             this.lblProgress.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblProgress.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lblProgress.Location = new System.Drawing.Point(567, 448);
+            this.lblProgress.Location = new System.Drawing.Point(500, 448);
             this.lblProgress.Name = "lblProgress";
-            this.lblProgress.Size = new System.Drawing.Size(45, 30);
+            this.lblProgress.Size = new System.Drawing.Size(198, 30);
             this.lblProgress.TabIndex = 31;
-            this.lblProgress.Text = "0%";
+            this.lblProgress.Text = "0/0";
+            this.lblProgress.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // rtxtParseDir
+            // 
+            this.rtxtParseDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtParseDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtParseDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtParseDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtParseDir.Location = new System.Drawing.Point(167, 92);
+            this.rtxtParseDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.rtxtParseDir.Multiline = false;
+            this.rtxtParseDir.Name = "rtxtParseDir";
+            this.rtxtParseDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtParseDir.Size = new System.Drawing.Size(551, 30);
+            this.rtxtParseDir.TabIndex = 33;
+            this.rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
+            this.rtxtParseDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateParseDir);
+            // 
+            // btnSelectParseDir
+            // 
+            this.btnSelectParseDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnSelectParseDir.FlatAppearance.BorderSize = 2;
+            this.btnSelectParseDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelectParseDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelectParseDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnSelectParseDir.Location = new System.Drawing.Point(31, 93);
+            this.btnSelectParseDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnSelectParseDir.Name = "btnSelectParseDir";
+            this.btnSelectParseDir.Size = new System.Drawing.Size(122, 30);
+            this.btnSelectParseDir.TabIndex = 32;
+            this.btnSelectParseDir.Text = "Parse Dir";
+            this.btnSelectParseDir.UseVisualStyleBackColor = true;
+            this.btnSelectParseDir.Click += new System.EventHandler(this.btnSelectParseDir_Click);
             // 
             // Form1
             // 
@@ -498,7 +535,9 @@ partial class Form1 {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.ClientSize = new System.Drawing.Size(1199, 749);
+            this.ClientSize = new System.Drawing.Size(1199, 809);
+            this.Controls.Add(this.rtxtParseDir);
+            this.Controls.Add(this.btnSelectParseDir);
             this.Controls.Add(this.lblProgress);
             this.Controls.Add(this.btnSaveConfig);
             this.Controls.Add(this.btnLoadConfig);
@@ -573,4 +612,6 @@ partial class Form1 {
     private Button btnLoadConfig;
     private Button btnSaveConfig;
     private Label lblProgress;
+    private RichTextBox rtxtParseDir;
+    private Button btnSelectParseDir;
 }

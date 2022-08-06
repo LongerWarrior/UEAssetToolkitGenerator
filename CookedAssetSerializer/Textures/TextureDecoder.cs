@@ -10,6 +10,7 @@ using UAssetAPI;
 using UAssetAPI.StructTypes;
 using static Utils.TypeConversionUtils;
 using static System.MathF;
+using System.Runtime.InteropServices;
 
 namespace Textures
 {
@@ -80,10 +81,19 @@ namespace Textures
                 var info = new SKImageInfo(width, height, colorType, SKAlphaType.Unpremul);
                 var bitmap = new SKBitmap(info);
 
+                //unsafe {
+                //    fixed (byte* p = data) {
+                //        bitmap.SetPixels(new IntPtr(p));
+                //    }
+                //}
+
                 unsafe {
+                    var pixelsPtr = NativeMemory.Alloc((nuint)data.Length);
                     fixed (byte* p = data) {
-                        bitmap.SetPixels(new IntPtr(p));
+                        Unsafe.CopyBlockUnaligned(pixelsPtr, p, (uint)data.Length);
                     }
+
+                    bitmap.InstallPixels(info, new IntPtr(pixelsPtr), info.RowBytes, (address, _) => NativeMemory.Free(address.ToPointer()));
                 }
 
                 if (!texture.bRenderNearestNeighbor) {

@@ -583,6 +583,7 @@ namespace CookedAssetSerializer {
             Settings settings = new Settings
             {
                 ContentDir = CONTENT_DIR,
+                ParseDir = CONTENT_DIR,
                 JSONDir = JSON_DIR,
                 OutputDir = OUTPUT_DIR,
                 GlobalUEVersion = GLOBAL_UE_VERSION,

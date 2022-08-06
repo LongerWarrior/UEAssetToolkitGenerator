@@ -7,6 +7,7 @@ namespace CookedAssetSerializer
     public struct Settings
     {
         [JsonProperty] public string ContentDir;
+        [JsonProperty] public string ParseDir;
         [JsonProperty] public string JSONDir;
         [JsonProperty] public string OutputDir;
         [JsonProperty] public UE4Version GlobalUEVersion;

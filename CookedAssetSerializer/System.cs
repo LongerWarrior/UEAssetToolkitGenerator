@@ -43,7 +43,7 @@ namespace CookedAssetSerializer
             Dictionary<string, List<string>> types = new();
             List<string> allTypes = new();
 
-            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
@@ -76,7 +76,7 @@ namespace CookedAssetSerializer
         
         public void GetCookedAssets(bool copy = true)
         {
-            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
@@ -116,7 +116,7 @@ namespace CookedAssetSerializer
         
         public void SerializeAssets()
         {
-            var files = Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
             AssetTotal = files.Length;
             AssetCount = 0;
