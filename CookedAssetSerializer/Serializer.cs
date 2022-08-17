@@ -5,6 +5,8 @@ namespace CookedAssetSerializer;
 public class Serializer<T> where T: Export
 {
     protected Settings Settings;
+
+    public bool IsSkipped = false;
     
     protected UAsset Asset;
     private string AssetName;
@@ -37,11 +39,15 @@ public class Serializer<T> where T: Export
         OutPath = Path.Join(Settings.JSONDir, AssetPath) + ".json";
 
         Directory.CreateDirectory(Path.GetDirectoryName(OutPath));
-        if (!Settings.RefreshAssets && File.Exists(OutPath)) return false;
+        if (!Settings.RefreshAssets && File.Exists(OutPath))
+        {
+            IsSkipped = true;
+            return false;
+        }
 
         Asset = new UAsset(fullAssetPath, Settings.GlobalUEVersion, false);
 
-        FixIndexes(Dict, Asset);
+        /*Dict = */FixIndexes(Dict, Asset);
 
         return true;
     }

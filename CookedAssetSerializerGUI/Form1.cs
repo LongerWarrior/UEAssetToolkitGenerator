@@ -9,9 +9,12 @@ namespace CookedAssetSerializerGUI;
 public partial class Form1 : Form
 {
     public Form1() {
-        Singleton.Init(new Dictionary<string, bool> { ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false ,
+        Singleton.Init(new Dictionary<string, bool> 
+        { 
+            ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false,
             ["SkeletalMesh.KeepMobileMinLODSettingOnDesktop"] = false
-            });
+        });
+        
         InitializeComponent();
         SetupForm();
         SetupGlobals();
@@ -22,7 +25,7 @@ public partial class Form1 : Form
     #region Vars
 
     private delegate void SafeCallDelegate();
-    private delegate void SafeCallDelegateBool(bool enable);
+
     private delegate void SafeCallDelegateText(string text);
 
     private CookedAssetSerializer.System system;
@@ -141,15 +144,19 @@ public partial class Form1 : Form
         {
             lock(boolLock) if (isRunning)
             {
-                    if (system.GetAssetTotal() != 0) {
-                        ProgressText(system.GetAssetCount()+ " / " +system.GetAssetTotal());
-                    }
+                if (system.GetAssetTotal() != 0) 
+                {
+                    ProgressText(system.GetAssetCount() + " / " + system.GetAssetTotal());
+                }
             }
-
-            await using var sw = File.AppendText(Path.Combine(settings.JSONDir, "thread_log.txt"));
-            await sw.WriteLineAsync($"[{isRunning}]");
-
             await Task.Delay(50);
+            
+            // Do this in order to make sure that the correct total is outputted when the isRunning is set to false
+            // and the delay is not enough to make the total outputted
+            if ((system.GetAssetTotal() == system.GetAssetCount()) && system.GetAssetTotal() != 0)
+            {
+                ProgressText(system.GetAssetCount() + " / " + system.GetAssetTotal());
+            }
         }
     }
 
@@ -219,12 +226,12 @@ public partial class Form1 : Form
         circularDependencies.AddRange(SanitiseInputs(rtxtCircularDependancy.Lines));
 
         if (string.IsNullOrEmpty(rtxtJSONDir.Text)) {
-            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "AssetDump");
+            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
             Directory.CreateDirectory(rtxtJSONDir.Text);
         }
 
         if (string.IsNullOrEmpty(rtxtOutputDir.Text)) {
-            rtxtOutputDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "Cooked");
+            rtxtOutputDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
             Directory.CreateDirectory(rtxtOutputDir.Text);
         }
 
@@ -281,36 +288,41 @@ public partial class Form1 : Form
         OutputText("Saved settings to: " + dialog.FileName);
     }
 
-    private void EnableButtons()
+    private void ToggleButtons()
     {
-        if (this.InvokeRequired) {
-            var d = new SafeCallDelegate(EnableButtons);
-            this.Invoke(d, new object[] { });
-        } else {
+        if (InvokeRequired)
+        {
+            var d = new SafeCallDelegate(ToggleButtons);
+            Invoke(d, new object[] { });
+        }
+        else
+        {
             btnScanAssets.Enabled = !isRunning;
             btnMoveCookedAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
             btnClearLogs.Enabled = !isRunning;
             btnLoadConfig.Enabled = !isRunning;
         }
-
     }
 
     private void ProgressText(string text) {
-        if (this.InvokeRequired) {
+        if (InvokeRequired)
+        {
             var d = new SafeCallDelegateText(ProgressText);
-            this.Invoke(d, new object[] { text });
-        } else {
-            lblProgress.Text = text;
+            Invoke(d, new object[] { text });
         }
+        else lblProgress.Text = text;
     }
 
     private void OutputText(string text)
     {
-        if (this.InvokeRequired) {
+        if (InvokeRequired)
+        {
             var d = new SafeCallDelegateText(OutputText);
-            this.Invoke(d, new object[] { text });
-        } else {
+            Invoke(d, new object[] { text });
+        }
+        else
+        {
             if (rtxtOutput.TextLength == 0) rtxtOutput.Text += text;
             else rtxtOutput.Text += Environment.NewLine + text;
         }
@@ -329,19 +341,10 @@ public partial class Form1 : Form
         Process.Start("notepad.exe", path);
     }
 
-    private string OpenDirectoryDialog()
-    {
-        var fbd = new FolderBrowserDialog();
-        fbd.ShowDialog();
-        return fbd.SelectedPath;
-    }
-
     private string OpenDirectoryDialog(string path) 
     {
         var fbd = new FolderBrowserDialog();
-        if (Directory.Exists(path)) {
-            fbd.SelectedPath = path+"\\";
-        }
+        if (Directory.Exists(path)) fbd.SelectedPath = path + @"\";
         if (fbd.ShowDialog() == DialogResult.Cancel) return path;
         return fbd.SelectedPath;
     }
@@ -359,7 +362,8 @@ public partial class Form1 : Form
         string[] files =
         {
             "debug_log.txt",
-            "output_log.txt"
+            "output_log.txt",
+            "thread_log.txt"
         };
         foreach (var file in files)
         {
@@ -370,6 +374,82 @@ public partial class Form1 : Form
             File.Delete(path);
             OutputText("Cleared log file: " + path);
         }
+    }
+
+    private void ValidateParseDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (string.IsNullOrEmpty(rtxtParseDir.Text))
+        {
+            rtxtParseDir.Text = rtxtContentDir.Text;
+            return;
+        }
+
+        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
+        rtxtParseDir.Text = rtxtContentDir.Text;
+    }
+
+    private static bool IsSubPathOf(string subPath, string basePath)
+    {
+        if (!Directory.Exists(subPath)) return false;
+        var rel = Path.GetRelativePath(basePath, subPath);
+        return !rel.StartsWith('.') && !Path.IsPathRooted(rel);
+    }
+
+    private void ValidateContentDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text))
+        {
+            rtxtContentDir.Text = lastValidContentDir;
+        }
+        lastValidContentDir = rtxtContentDir.Text;
+        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
+        rtxtParseDir.Text = rtxtContentDir.Text;
+    }
+
+    private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var rtxtBox = (RichTextBox)sender;
+        if (!Directory.Exists(rtxtBox.Text))
+        {
+            if (!CreateFolderMessage(rtxtBox)) rtxtBox.Text = "";
+        }
+    }
+
+    private bool CreateFolderMessage(RichTextBox rtxtBox)
+    {
+        var caption = "";
+        if (rtxtBox.Name == "rtxtJSONDir")
+        {
+            caption = "JSON Dir doesn't exist";
+            if (string.IsNullOrEmpty(rtxtBox.Text))
+            {
+                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
+            }
+        }
+
+        if (rtxtBox.Name == "rtxtOutputDir")
+        {
+            caption = "Cooked Dir doesn't exist";
+            if (string.IsNullOrEmpty(rtxtBox.Text))
+            {
+                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            }
+        }
+
+        if (Directory.Exists(rtxtBox.Text)) return true;
+
+        var result = MessageBox.Show($@"Create {rtxtBox.Text} directory?", caption, MessageBoxButtons.YesNo);
+        if (result == DialogResult.Yes)
+        {
+            Directory.CreateDirectory(rtxtBox.Text);
+            if (!Directory.Exists(rtxtBox.Text))
+            {
+                MessageBox.Show($@"Can't create {rtxtBox.Text} directory", @"Error", MessageBoxButtons.OK);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void btnSelectContentDir_Click(object sender, EventArgs e)
@@ -391,18 +471,17 @@ public partial class Form1 : Form
     {
         SetupGlobals();
         Task.Run(() => {
-            
             try {
                 lock(boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.ScanAssetTypes();
                 lock(boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception) {
                 OutputText(exception.ToString());
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
             OutputText("Scanned assets!");
@@ -415,20 +494,19 @@ public partial class Form1 : Form
 
         Task.Run(() =>
         {
-            
             try
             {
                 lock(boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.GetCookedAssets();
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception)
             {
                 OutputText(exception.ToString());
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
 
@@ -442,19 +520,18 @@ public partial class Form1 : Form
 
         Task.Run(() =>
         {
-            //DisableButtons(true);
             try
             {
                 lock (boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.SerializeAssets();
                 lock(boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception) {
                 OutputText(exception.ToString());
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
 
@@ -515,69 +592,5 @@ public partial class Form1 : Form
 
     private void btnSelectParseDir_Click(object sender, EventArgs e) {
         rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
-    }
-
-    private void ValidateParseDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        if (string.IsNullOrEmpty(rtxtParseDir.Text)) { rtxtParseDir.Text = rtxtContentDir.Text; return; }
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
-
-    }
-
-    private static bool IsSubPathOf(string subPath, string basePath) {
-        if (!Directory.Exists(subPath)) return false;
-        var rel = Path.GetRelativePath(basePath, subPath);
-        return !rel.StartsWith('.') && !Path.IsPathRooted(rel);
-    }
-
-    private void ValidateContentDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        
-        if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) {
-            rtxtContentDir.Text = lastValidContentDir;
-        }
-        lastValidContentDir = rtxtContentDir.Text;
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
-    }
-
-    private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        var rtxtBox = (RichTextBox)sender;
-        if (!Directory.Exists(rtxtBox.Text)) {
-
-            if (!CreateFolderMessage(rtxtBox)) {
-                rtxtBox.Text = "";
-            }
-        }
-    }
-
-    private bool CreateFolderMessage(RichTextBox rtxtBox) {
-        var messagename = "";
-        if (rtxtBox.Name == "rtxtJSONDir") {
-            messagename = "JSON Dir doesn't exist";
-            if (string.IsNullOrEmpty(rtxtBox.Text)) {
-                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "AssetDump");
-            }
-        }
-        if (rtxtBox.Name == "rtxtOutputDir") {
-            messagename = "Cooked Dir doesn't exist";
-            if (string.IsNullOrEmpty(rtxtBox.Text)) {
-                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "Cooked");
-            }
-        }
-
-        if (Directory.Exists(rtxtBox.Text)) return true;
-
-        var result =  MessageBox.Show($"Create {rtxtBox.Text} directory?", messagename, MessageBoxButtons.YesNo);
-        if (result == DialogResult.Yes) { 
-            Directory.CreateDirectory(rtxtBox.Text);
-            if (!Directory.Exists(rtxtBox.Text)) {
-                MessageBox.Show($"Can't create {rtxtBox.Text} directory", "Error", MessageBoxButtons.OK);
-                return false;
-            } 
-            return true;
-
-        }
-
-        return false;
     }
 }

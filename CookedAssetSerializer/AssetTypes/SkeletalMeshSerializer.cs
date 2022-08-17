@@ -1,10 +1,6 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
+﻿namespace CookedAssetSerializer.AssetTypes;
 
-
-namespace CookedAssetSerializer.AssetTypes;
-
-public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
+/*public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
 {
     public SkeletalMeshSerializer(Settings assetSettings, UAsset asset)
     {
@@ -17,8 +13,6 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
     {
         if (!SetupSerialization()) return;
         
-
-        
         if (!SetupAssetInfo()) return;
 
         //if (ClassExport.Extras.Length > 0) {
@@ -26,10 +20,17 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         //    Debug.WriteLine(ClassExport.Extras.Length);
         //}
         
-        //SerializeHeaders();
+        SerializeHeaders();
         
-        //AssignAssetSerializedData();
-        
+        AssignAssetSerializedData();
+    }
+}*/
 
+public class SkeletalMeshSerializer : SimpleAssetSerializer<SkeletalMeshExport>
+{
+    public SkeletalMeshSerializer(Settings settings, UAsset asset) : base(settings, asset)
+    {
+        if (!Setup(true)) return;
+        SerializeAsset(new JProperty("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset)));
     }
 }

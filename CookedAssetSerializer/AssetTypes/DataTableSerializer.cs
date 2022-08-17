@@ -4,7 +4,7 @@ public class DataTableSerializer : SimpleAssetSerializer<DataTableExport>
 {
     public DataTableSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        Setup(true);
+        if (!Setup(true)) return;
         SerializeAsset(null, SerializeDataTable(ClassExport.Table));
     }
 

@@ -37,7 +37,7 @@ public class System
         var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
-        AssetCount = 0;
+        AssetCount = 1;
         foreach (var file in files)
         {
             var type = GetAssetType(file, Settings.GlobalUEVersion);
@@ -122,8 +122,7 @@ public class System
                 continue;
             }
 
-            PrintOutput(file, "SerializeAssets");
-
+            bool skip = false;
             if (asset.assetType != EAssetType.Uncategorized)
             {
                 switch (asset.assetType)
@@ -131,19 +130,19 @@ public class System
                     case EAssetType.Blueprint:
                     case EAssetType.WidgetBlueprint:
                     case EAssetType.AnimBlueprint:
-                        new BlueprintSerializer(Settings, asset, false);
+                        skip = new BlueprintSerializer(Settings, asset, false).IsSkipped;
                         break;
                     case EAssetType.DataTable:
-                        new DataTableSerializer(Settings, asset);
+                        skip = new DataTableSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.StringTable:
-                        new StringTableSerializer(Settings, asset);
+                        skip = new StringTableSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.UserDefinedStruct:
-                        new UserDefinedStructSerializer(Settings, asset);
+                        skip = new UserDefinedStructSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.BlendSpaceBase:
-                        new BlendSpaceSerializer(Settings, asset);
+                        skip = new BlendSpaceSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.AnimMontage:
                     case EAssetType.CameraAnim:
@@ -152,50 +151,53 @@ public class System
                     case EAssetType.MediaTexture:
                     case EAssetType.SubsurfaceProfile:
                         var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                        if (!sas.Setup(false, false)) break;
-                        sas.SerializeAsset();
+                        if (!sas.Setup(false, false) && !sas.IsSkipped)
+                        {
+                            PrintOutput(file + ": Failed to setup serializer", "SerializeAssets");
+                        } else if (sas.IsSkipped) skip = true;
+                        else sas.SerializeAsset();
                         break;
                     case EAssetType.Skeleton:
-                        new SkeletonSerializer(Settings, asset);
+                        skip = new SkeletonSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.MaterialParameterCollection:
-                        new MaterialParameterCollectionSerializer(Settings, asset);
+                        skip = new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.PhycialMaterial:
-                        new PhysicalMaterialSerializer(Settings, asset);
+                        skip = new PhysicalMaterialSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.Material:
-                        new MaterialSerializer(Settings, asset);
+                        skip = new MaterialSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.MaterialInstanceConstant:
-                        new MaterialInstanceConstantSerializer(Settings, asset);
+                        skip = new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.UserDefinedEnum:
-                        new UserDefinedEnumSerializer(Settings, asset);
+                        skip = new UserDefinedEnumSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.SoundCue:
-                        new SoundCueSerializer(Settings, asset);
+                        skip = new SoundCueSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.Font:
-                        new FontSerializer(Settings, asset);
+                        skip = new FontSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.FontFace:
-                        new FontFaceSerializer(Settings, asset);
+                        skip = new FontFaceSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.CurveBase:
-                        new CurveBaseSerializer(Settings, asset);
+                        skip = new CurveBaseSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.Texture2D:
-                        new Texture2DSerializer(Settings, asset);
+                        skip = new Texture2DSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.SkeletalMesh:
-                        new SkeletalMeshSerializer(Settings, asset);
+                        skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.FileMediaSource:
-                        new FileMediaSourceSerializer(Settings, asset);
+                        skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.StaticMesh:
-                        new StaticMeshSerializer(Settings, asset);
+                        skip = new StaticMeshSerializer(Settings, asset).IsSkipped;
                         break;
                 }
             }
@@ -205,9 +207,17 @@ public class System
                 var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
                 if (!Settings.SimpleAssets.Contains(aType)) continue;
                 var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                if (!sas.Setup()) continue;
-                sas.SerializeAsset();
+                if (!sas.Setup() && !sas.IsSkipped)
+                {
+                    PrintOutput(file + ": Failed to setup serializer", "SerializeAssets");
+                    continue;
+                } 
+                else if (sas.IsSkipped) skip = true;
+                else sas.SerializeAsset();
             }
+            
+            if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+            else PrintOutput(file, "SerializeAssets");
         }
     }
 

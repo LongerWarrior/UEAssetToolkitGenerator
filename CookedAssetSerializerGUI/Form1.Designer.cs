@@ -535,7 +535,7 @@ partial class Form1 {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.ClientSize = new System.Drawing.Size(1199, 809);
+            this.ClientSize = new System.Drawing.Size(1300, 800);
             this.Controls.Add(this.rtxtParseDir);
             this.Controls.Add(this.btnSelectParseDir);
             this.Controls.Add(this.lblProgress);
