@@ -1,75 +1,71 @@
-using Newtonsoft.Json;
-using System.Linq;
+namespace UAssetAPI;
 
-namespace UAssetAPI
+/// <summary>
+/// A string table. Holds Key->SourceString pairs of text.
+/// </summary>
+public class FStringTable : TMap<FString, FString>
 {
-    /// <summary>
-    /// A string table. Holds Key->SourceString pairs of text.
-    /// </summary>
-    public class FStringTable : TMap<FString, FString>
+    [JsonProperty]
+    public FString TableNamespace;
+
+    public FStringTable() : base() {
+
+    }
+
+    public FStringTable(FString tableNamespace) : base()
     {
-        [JsonProperty]
-        public FString TableNamespace;
+        TableNamespace = tableNamespace;
+    }
+}
 
-        public FStringTable() : base() {
+/// <summary>
+/// Export data for a string table. See <see cref="FStringTable"/>.
+/// </summary>
+public class StringTableExport : NormalExport
+{
+    [JsonProperty]
+    public FStringTable Table;
 
-        }
+    public StringTableExport(Export super) : base(super)
+    {
 
-        public FStringTable(FString tableNamespace) : base()
+    }
+
+    public StringTableExport(FStringTable data, UAsset asset, byte[] extras) : base(asset, extras)
+    {
+        Table = data;
+    }
+
+    public StringTableExport()
+    {
+
+    }
+
+    public override void Read(AssetBinaryReader reader, int nextStarting)
+    {
+        base.Read(reader, nextStarting);
+        reader.ReadInt32();
+
+        Table = new FStringTable(reader.ReadFString());
+
+        int numEntries = reader.ReadInt32();
+        for (int i = 0; i < numEntries; i++)
         {
-            TableNamespace = tableNamespace;
+            Table.Add(reader.ReadFString(), reader.ReadFString());
         }
     }
 
-    /// <summary>
-    /// Export data for a string table. See <see cref="FStringTable"/>.
-    /// </summary>
-    public class StringTableExport : NormalExport
+    public override void Write(AssetBinaryWriter writer)
     {
-        [JsonProperty]
-        public FStringTable Table;
+        base.Write(writer);
+        writer.Write((int)0);
 
-        public StringTableExport(Export super) : base(super)
+        writer.Write(Table.TableNamespace);
+        writer.Write(Table.Count);
+        for (int i = 0; i < Table.Count; i++)
         {
-
-        }
-
-        public StringTableExport(FStringTable data, UAsset asset, byte[] extras) : base(asset, extras)
-        {
-            Table = data;
-        }
-
-        public StringTableExport()
-        {
-
-        }
-
-        public override void Read(AssetBinaryReader reader, int nextStarting)
-        {
-            base.Read(reader, nextStarting);
-            reader.ReadInt32();
-
-            Table = new FStringTable(reader.ReadFString());
-
-            int numEntries = reader.ReadInt32();
-            for (int i = 0; i < numEntries; i++)
-            {
-                Table.Add(reader.ReadFString(), reader.ReadFString());
-            }
-        }
-
-        public override void Write(AssetBinaryWriter writer)
-        {
-            base.Write(writer);
-            writer.Write((int)0);
-
-            writer.Write(Table.TableNamespace);
-            writer.Write(Table.Count);
-            for (int i = 0; i < Table.Count; i++)
-            {
-                writer.Write(Table.Keys.ElementAt(i));
-                writer.Write(Table[i]);
-            }
+            writer.Write(Table.Keys.ElementAt(i));
+            writer.Write(Table[i]);
         }
     }
 }

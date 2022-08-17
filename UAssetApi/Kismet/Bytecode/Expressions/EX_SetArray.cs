@@ -1,82 +1,79 @@
-﻿using Newtonsoft.Json;
+﻿namespace UAssetAPI.Kismet.Bytecode.Expressions;
 
-namespace UAssetAPI.Kismet.Bytecode.Expressions
+/// <summary>
+/// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.SetArray"/> instruction.
+/// </summary>
+public class EX_SetArray : KismetExpression
 {
     /// <summary>
-    /// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.SetArray"/> instruction.
+    /// The token of this expression.
     /// </summary>
-    public class EX_SetArray : KismetExpression
+    public override EExprToken Token { get { return EExprToken.SetArray; } }
+
+    /// <summary>
+    /// Array property to assign to
+    /// </summary>
+    [JsonProperty]
+    public KismetExpression AssigningProperty;
+
+    /// <summary>
+    /// Pointer to the array inner property (FProperty*).
+    /// Only used in engine versions prior to <see cref="UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE"/>.
+    /// </summary>
+    [JsonProperty]
+    public FPackageIndex ArrayInnerProp;
+
+    /// <summary>
+    /// Array items.
+    /// </summary>
+    [JsonProperty]
+    public KismetExpression[] Elements;
+
+    public EX_SetArray()
     {
-        /// <summary>
-        /// The token of this expression.
-        /// </summary>
-        public override EExprToken Token { get { return EExprToken.SetArray; } }
 
-        /// <summary>
-        /// Array property to assign to
-        /// </summary>
-        [JsonProperty]
-        public KismetExpression AssigningProperty;
+    }
 
-        /// <summary>
-        /// Pointer to the array inner property (FProperty*).
-        /// Only used in engine versions prior to <see cref="UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE"/>.
-        /// </summary>
-        [JsonProperty]
-        public FPackageIndex ArrayInnerProp;
-
-        /// <summary>
-        /// Array items.
-        /// </summary>
-        [JsonProperty]
-        public KismetExpression[] Elements;
-
-        public EX_SetArray()
+    /// <summary>
+    /// Reads out the expression from a BinaryReader.
+    /// </summary>
+    /// <param name="reader">The BinaryReader to read from.</param>
+    public override void Read(AssetBinaryReader reader)
+    {
+        if (reader.Ver >= UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE)
         {
-
+            AssigningProperty = ExpressionSerializer.ReadExpression(reader);
+        }
+        else
+        {
+            ArrayInnerProp = reader.XFERPTR();
         }
 
-        /// <summary>
-        /// Reads out the expression from a BinaryReader.
-        /// </summary>
-        /// <param name="reader">The BinaryReader to read from.</param>
-        public override void Read(AssetBinaryReader reader)
-        {
-            if (reader.Asset.EngineVersion >= UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE)
-            {
-                AssigningProperty = ExpressionSerializer.ReadExpression(reader);
-            }
-            else
-            {
-                ArrayInnerProp = reader.XFERPTR();
-            }
+        Elements = reader.ReadExpressionArray(EExprToken.EndArray);
+    }
 
-            Elements = reader.ReadExpressionArray(EExprToken.EndArray);
+    /// <summary>
+    /// Writes the expression to a BinaryWriter.
+    /// </summary>
+    /// <param name="writer">The BinaryWriter to write from.</param>
+    /// <returns>The iCode offset of the data that was written.</returns>
+    public override int Write(AssetBinaryWriter writer)
+    {
+        int offset = 0;
+        if (writer.Asset.EngineVersion >= UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE)
+        {
+            offset += ExpressionSerializer.WriteExpression(AssigningProperty, writer);
+        }
+        else
+        {
+            offset += writer.XFERPTR(ArrayInnerProp);
         }
 
-        /// <summary>
-        /// Writes the expression to a BinaryWriter.
-        /// </summary>
-        /// <param name="writer">The BinaryWriter to write from.</param>
-        /// <returns>The iCode offset of the data that was written.</returns>
-        public override int Write(AssetBinaryWriter writer)
+        for (int i = 0; i < Elements.Length; i++)
         {
-            int offset = 0;
-            if (writer.Asset.EngineVersion >= UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE)
-            {
-                offset += ExpressionSerializer.WriteExpression(AssigningProperty, writer);
-            }
-            else
-            {
-                offset += writer.XFERPTR(ArrayInnerProp);
-            }
-
-            for (int i = 0; i < Elements.Length; i++)
-            {
-                offset += ExpressionSerializer.WriteExpression(Elements[i], writer);
-            }
-            offset += ExpressionSerializer.WriteExpression(new EX_EndArray(), writer);
-            return offset;
+            offset += ExpressionSerializer.WriteExpression(Elements[i], writer);
         }
+        offset += ExpressionSerializer.WriteExpression(new EX_EndArray(), writer);
+        return offset;
     }
 }

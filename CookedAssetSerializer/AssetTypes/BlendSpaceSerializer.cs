@@ -1,100 +1,90 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using UAssetAPI;
-using UAssetAPI.Kismet;
-using UAssetAPI.PropertyTypes;
-using UAssetAPI.StructTypes;
-using static CookedAssetSerializer.SerializationUtils;
+﻿namespace CookedAssetSerializer.AssetTypes;
 
-namespace CookedAssetSerializer.AssetTypes
+public struct ParameterNames
 {
-    public struct ParameterNames
+    public string StructPropertyData;
+    public string FName;
+    public string FloatPropertyData;
+    public string StrPropertyData;
+    public string FString;
+    public float Value;
+}
+
+public class BlendSpaceSerializer : Serializer<BlendSpaceBaseExport>
+{
+    public BlendSpaceSerializer(Settings assetSettings, UAsset asset)
     {
-        public string StructPropertyData;
-        public string FName;
-        public string FloatPropertyData;
-        public string StrPropertyData;
-        public string FString;
-        public float Value;
+        Settings = assetSettings;
+        Asset = asset;
+        SerializeAsset();
     }
-    
-    public class BlendSpaceSerializer : Serializer<BlendSpaceBaseExport>
+
+    private void SerializeAsset()
     {
-        public BlendSpaceSerializer(Settings assetSettings, UAsset asset)
+        if (!SetupSerialization()) return;
+
+        if (!SetupAssetInfo()) return;
+
+        SerializeHeaders();
+
+        var blendSpaceParameterNames = new ParameterNames
         {
-            Settings = assetSettings;
-            Asset = asset;
-            SerializeAsset();
-        }
-
-        private void SerializeAsset()
+            StructPropertyData = "BlendParameters",
+            FName = "BlendParameter",
+            FloatPropertyData = "Max",
+            StrPropertyData = "DisplayName",
+            FString = "None",
+            Value = 100.0f
+        };
+        PopulateParameters(ref ClassExport.Data, blendSpaceParameterNames);
+        var interpolationParameterNames = new ParameterNames
         {
-            if (!SetupSerialization()) return;
+            StructPropertyData = "InterpolationParam",
+            FName = "InterpolationParameter",
+            FloatPropertyData = "InterpolationTime",
+            StrPropertyData = "InterpolationType",
+            FString = "BSIT_Average",
+            Value = 0.0f
+        };
+        PopulateParameters(ref ClassExport.Data, interpolationParameterNames);
+        
+        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        AssetData.Add("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset));
+        properties.Add("SkeletonGuid", GuidToJson(ClassExport.SkeletonGuid));
+        properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
+        AssetData.Add("AssetObjectData", properties);
+        
+        AssignAssetSerializedData();
 
-            if (!SetupAssetInfo()) return;
+        WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
+    }
 
-            SerializeHeaders();
-
-            var blendSpaceParameterNames = new ParameterNames
+    private void PopulateParameters(ref List<PropertyData> data, ParameterNames pm, int v = 3)
+    {
+        var fullEntries = Enumerable.Range(0, v).ToList();
+        var entries = (from t in data where t.Name.ToName() == pm.StructPropertyData select t.DuplicationIndex).ToList();
+        if (entries.Count <= 0) return;
+        var missing = fullEntries.Except(entries).ToList();
+        data.AddRange(missing.Select(missed => new StructPropertyData(new FName(pm.StructPropertyData), 
+            new FName(pm.FName), missed) 
             {
-                StructPropertyData = "BlendParameters",
-                FName = "BlendParameter",
-                FloatPropertyData = "Max",
-                StrPropertyData = "DisplayName",
-                FString = "None",
-                Value = 100.0f
-            };
-            PopulateParameters(ref ClassExport.Data, blendSpaceParameterNames);
-            var interpolationParameterNames = new ParameterNames
-            {
-                StructPropertyData = "InterpolationParam",
-                FName = "InterpolationParameter",
-                FloatPropertyData = "InterpolationTime",
-                StrPropertyData = "InterpolationType",
-                FString = "BSIT_Average",
-                Value = 0.0f
-            };
-            PopulateParameters(ref ClassExport.Data, interpolationParameterNames);
-            
-            var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
-            AssetData.Add("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset));
-            properties.Add("SkeletonGuid", GuidToJson(ClassExport.SkeletonGuid));
-            properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));
-            AssetData.Add("AssetObjectData", properties);
-            
-            AssignAssetSerializedData();
-
-            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
-        }
-
-        private void PopulateParameters(ref List<PropertyData> data, ParameterNames pm, int v = 3)
-        {
-            var fullEntries = Enumerable.Range(0, v).ToList();
-            var entries = (from t in data where t.Name.ToName() == pm.StructPropertyData select t.DuplicationIndex).ToList();
-            if (entries.Count <= 0) return;
-            var missing = fullEntries.Except(entries).ToList();
-            data.AddRange(missing.Select(missed => new StructPropertyData(new FName(pm.StructPropertyData), 
-                new FName(pm.FName), missed) 
+                Value = new List<PropertyData> 
                 {
-                    Value = new List<PropertyData> 
+                    new StrPropertyData(new FName(pm.StrPropertyData))
                     {
-                        new StrPropertyData(new FName(pm.StrPropertyData))
-                        {
-                            Value = new FString(pm.FString)
-                        }, 
-                        new FloatPropertyData(new FName(pm.FloatPropertyData))
-                        {
-                            Value = pm.Value
-                        }
+                        Value = new FString(pm.FString)
+                    }, 
+                    new FloatPropertyData(new FName(pm.FloatPropertyData))
+                    {
+                        Value = pm.Value
                     }
                 }
-            ));
-            data.Sort((x, y) => {
-                var ret = x.Name.ToName().CompareTo(y.Name.ToName());
-                if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
-                return ret;
-            });
-        }
+            }
+        ));
+        data.Sort((x, y) => {
+            var ret = x.Name.ToName().CompareTo(y.Name.ToName());
+            if (ret == 0) ret = x.DuplicationIndex.CompareTo(y.DuplicationIndex);
+            return ret;
+        });
     }
 }

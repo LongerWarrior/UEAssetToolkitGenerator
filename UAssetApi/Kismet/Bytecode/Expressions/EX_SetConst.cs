@@ -1,64 +1,61 @@
-﻿using Newtonsoft.Json;
+﻿namespace UAssetAPI.Kismet.Bytecode.Expressions;
 
-namespace UAssetAPI.Kismet.Bytecode.Expressions
+/// <summary>
+/// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.SetConst"/> instruction.
+/// </summary>
+public class EX_SetConst : KismetExpression
 {
     /// <summary>
-    /// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.SetConst"/> instruction.
+    /// The token of this expression.
     /// </summary>
-    public class EX_SetConst : KismetExpression
+    public override EExprToken Token { get { return EExprToken.SetConst; } }
+
+    /// <summary>
+    /// Pointer to this constant's inner property (FProperty*).
+    /// </summary>
+    [JsonProperty]
+    //public FPackageIndex InnerProperty;
+    public KismetPropertyPointer InnerProperty;
+
+    /// <summary>
+    /// Set constant entries.
+    /// </summary>
+    [JsonProperty]
+    public KismetExpression[] Elements;
+
+    public EX_SetConst()
     {
-        /// <summary>
-        /// The token of this expression.
-        /// </summary>
-        public override EExprToken Token { get { return EExprToken.SetConst; } }
 
-        /// <summary>
-        /// Pointer to this constant's inner property (FProperty*).
-        /// </summary>
-        [JsonProperty]
-        //public FPackageIndex InnerProperty;
-        public KismetPropertyPointer InnerProperty;
+    }
 
-        /// <summary>
-        /// Set constant entries.
-        /// </summary>
-        [JsonProperty]
-        public KismetExpression[] Elements;
+    /// <summary>
+    /// Reads out the expression from a BinaryReader.
+    /// </summary>
+    /// <param name="reader">The BinaryReader to read from.</param>
+    public override void Read(AssetBinaryReader reader)
+    {
+        //InnerProperty = reader.XFERPTR();
+        InnerProperty = reader.XFER_PROP_POINTER();
+        int numEntries = reader.ReadInt32(); // Number of elements
+        Elements = reader.ReadExpressionArray(EExprToken.EndSetConst);
+    }
 
-        public EX_SetConst()
+    /// <summary>
+    /// Writes the expression to a BinaryWriter.
+    /// </summary>
+    /// <param name="writer">The BinaryWriter to write from.</param>
+    /// <returns>The iCode offset of the data that was written.</returns>
+    public override int Write(AssetBinaryWriter writer)
+    {
+        int offset = 0;
+        //offset += writer.XFERPTR(InnerProperty);
+        offset += writer.XFER_PROP_POINTER(InnerProperty);
+        writer.Write(Elements.Length); offset += sizeof(int);
+        for (int i = 0; i < Elements.Length; i++)
         {
-
+            offset += ExpressionSerializer.WriteExpression(Elements[i], writer);
         }
-
-        /// <summary>
-        /// Reads out the expression from a BinaryReader.
-        /// </summary>
-        /// <param name="reader">The BinaryReader to read from.</param>
-        public override void Read(AssetBinaryReader reader)
-        {
-            //InnerProperty = reader.XFERPTR();
-            InnerProperty = reader.XFER_PROP_POINTER();
-            int numEntries = reader.ReadInt32(); // Number of elements
-            Elements = reader.ReadExpressionArray(EExprToken.EndSetConst);
-        }
-
-        /// <summary>
-        /// Writes the expression to a BinaryWriter.
-        /// </summary>
-        /// <param name="writer">The BinaryWriter to write from.</param>
-        /// <returns>The iCode offset of the data that was written.</returns>
-        public override int Write(AssetBinaryWriter writer)
-        {
-            int offset = 0;
-            //offset += writer.XFERPTR(InnerProperty);
-            offset += writer.XFER_PROP_POINTER(InnerProperty);
-            writer.Write(Elements.Length); offset += sizeof(int);
-            for (int i = 0; i < Elements.Length; i++)
-            {
-                offset += ExpressionSerializer.WriteExpression(Elements[i], writer);
-            }
-            offset += ExpressionSerializer.WriteExpression(new EX_EndSetConst(), writer);
-            return offset;
-        }
+        offset += ExpressionSerializer.WriteExpression(new EX_EndSetConst(), writer);
+        return offset;
     }
 }

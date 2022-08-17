@@ -1,81 +1,77 @@
-﻿using System.IO;
-using UAssetAPI.StructTypes;
+﻿namespace UAssetAPI.PropertyTypes;
 
-namespace UAssetAPI.PropertyTypes
+/// <summary>
+/// Describes a set.
+/// </summary>
+public class SetPropertyData : ArrayPropertyData
 {
-    /// <summary>
-    /// Describes a set.
-    /// </summary>
-    public class SetPropertyData : ArrayPropertyData
+    public PropertyData[] ElementsToRemove = null;
+
+    public SetPropertyData(FName name) : base(name)
     {
-        public PropertyData[] ElementsToRemove = null;
+        Value = Array.Empty<PropertyData>();
+        ElementsToRemove = Array.Empty<PropertyData>();
+    }
 
-        public SetPropertyData(FName name) : base(name)
+    public SetPropertyData()
+    {
+        Value = Array.Empty<PropertyData>();
+        ElementsToRemove = Array.Empty<PropertyData>();
+    }
+
+    private static readonly FName CurrentPropertyType = new FName("SetProperty");
+    public override FName PropertyType { get { return CurrentPropertyType; } }
+
+    public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
+    {
+        this.ShouldSerializeStructsDifferently = false;
+
+        if (includeHeader)
         {
-            Value = new PropertyData[0];
-            ElementsToRemove = new PropertyData[0];
+            ArrayType = reader.ReadFName();
+            PropertyGuid = reader.ReadPropertyGuid();
         }
 
-        public SetPropertyData()
+        var removedItemsDummy = new ArrayPropertyData(new FName("ElementsToRemove"));
+        removedItemsDummy.ShouldSerializeStructsDifferently = false;
+        removedItemsDummy.ArrayType = ArrayType;
+        removedItemsDummy.Read(reader, false, leng1, leng2);
+        ElementsToRemove = removedItemsDummy.Value;
+
+        base.Read(reader, false, leng1, leng2);
+    }
+
+    public override int Write(AssetBinaryWriter writer, bool includeHeader)
+    {
+        this.ShouldSerializeStructsDifferently = false;
+
+        if (Value.Length > 0) ArrayType = Value[0].PropertyType;
+
+        if (includeHeader)
         {
-            Value = new PropertyData[0];
-            ElementsToRemove = new PropertyData[0];
+            writer.Write(ArrayType);
+            writer.WritePropertyGuid(PropertyGuid);
         }
 
-        private static readonly FName CurrentPropertyType = new FName("SetProperty");
-        public override FName PropertyType { get { return CurrentPropertyType; } }
+        var removedItemsDummy = new ArrayPropertyData(new FName("ElementsToRemove"));
+        removedItemsDummy.ShouldSerializeStructsDifferently = false;
+        removedItemsDummy.ArrayType = ArrayType;
+        removedItemsDummy.Value = ElementsToRemove;
 
-        public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
+        int leng1 = removedItemsDummy.Write(writer, false);
+        return leng1 + base.Write(writer, false);
+    }
+
+    protected override void HandleCloned(PropertyData res)
+    {
+        base.HandleCloned(res);
+        SetPropertyData cloningProperty = (SetPropertyData)res;
+
+        PropertyData[] newData = new PropertyData[this.ElementsToRemove.Length];
+        for (int i = 0; i < this.Value.Length; i++)
         {
-            this.ShouldSerializeStructsDifferently = false;
-
-            if (includeHeader)
-            {
-                ArrayType = reader.ReadFName();
-                PropertyGuid = reader.ReadPropertyGuid();
-            }
-
-            var removedItemsDummy = new ArrayPropertyData(new FName("ElementsToRemove"));
-            removedItemsDummy.ShouldSerializeStructsDifferently = false;
-            removedItemsDummy.ArrayType = ArrayType;
-            removedItemsDummy.Read(reader, false, leng1, leng2);
-            ElementsToRemove = removedItemsDummy.Value;
-
-            base.Read(reader, false, leng1, leng2);
+            newData[i] = (PropertyData)this.Value[i].Clone();
         }
-
-        public override int Write(AssetBinaryWriter writer, bool includeHeader)
-        {
-            this.ShouldSerializeStructsDifferently = false;
-
-            if (Value.Length > 0) ArrayType = Value[0].PropertyType;
-
-            if (includeHeader)
-            {
-                writer.Write(ArrayType);
-                writer.WritePropertyGuid(PropertyGuid);
-            }
-
-            var removedItemsDummy = new ArrayPropertyData(new FName("ElementsToRemove"));
-            removedItemsDummy.ShouldSerializeStructsDifferently = false;
-            removedItemsDummy.ArrayType = ArrayType;
-            removedItemsDummy.Value = ElementsToRemove;
-
-            int leng1 = removedItemsDummy.Write(writer, false);
-            return leng1 + base.Write(writer, false);
-        }
-
-        protected override void HandleCloned(PropertyData res)
-        {
-            base.HandleCloned(res);
-            SetPropertyData cloningProperty = (SetPropertyData)res;
-
-            PropertyData[] newData = new PropertyData[this.ElementsToRemove.Length];
-            for (int i = 0; i < this.Value.Length; i++)
-            {
-                newData[i] = (PropertyData)this.Value[i].Clone();
-            }
-            cloningProperty.ElementsToRemove = newData;
-        }
+        cloningProperty.ElementsToRemove = newData;
     }
 }

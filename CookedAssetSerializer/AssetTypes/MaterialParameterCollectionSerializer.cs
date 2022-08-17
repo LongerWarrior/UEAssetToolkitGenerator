@@ -1,13 +1,10 @@
-﻿using UAssetAPI;
+﻿namespace CookedAssetSerializer.AssetTypes;
 
-namespace CookedAssetSerializer.AssetTypes
+public class MaterialParameterCollectionSerializer : SimpleAssetSerializer<NormalExport>
 {
-    public class MaterialParameterCollectionSerializer : SimpleAssetSerializer<NormalExport>
+    public MaterialParameterCollectionSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        public MaterialParameterCollectionSerializer(Settings settings, UAsset asset) : base(settings, asset)
-        {
-            Setup(true);
-            SerializeAsset();
-        }
+        Setup(true);
+        SerializeAsset();
     }
 }

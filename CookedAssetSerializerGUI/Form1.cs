@@ -8,8 +8,10 @@ namespace CookedAssetSerializerGUI;
 
 public partial class Form1 : Form
 {
-    public Form1()
-    {
+    public Form1() {
+        Singleton.Init(new Dictionary<string, bool> { ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false ,
+            ["SkeletalMesh.KeepMobileMinLODSettingOnDesktop"] = false
+            });
         InitializeComponent();
         SetupForm();
         SetupGlobals();

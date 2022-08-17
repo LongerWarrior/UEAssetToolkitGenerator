@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -17,6 +18,11 @@ namespace UAssetGUI
         [STAThread]
         static void Main()
         {
+            Singleton.Init(new Dictionary<string, bool> {
+                ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false,
+                ["SkeletalMesh.KeepMobileMinLODSettingOnDesktop"] = false
+            });
+
             if (Environment.OSVersion.Version.Major >= 6) SetProcessDPIAware();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
