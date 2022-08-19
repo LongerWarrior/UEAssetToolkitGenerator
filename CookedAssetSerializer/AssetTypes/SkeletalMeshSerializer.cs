@@ -30,7 +30,7 @@ public class SkeletalMeshSerializer : SimpleAssetSerializer<SkeletalMeshExport>
 {
     public SkeletalMeshSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        if (!Setup(true)) return;
+        if (!Setup()) return;
         SerializeAsset(new JProperty("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset)));
     }
 }

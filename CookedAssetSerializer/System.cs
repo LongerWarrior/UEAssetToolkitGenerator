@@ -187,12 +187,7 @@ public class System
                             Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
                         break;
                     case EAssetType.SubsurfaceProfile:
-                        var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                        if (!sas.Setup(false, false) && !sas.IsSkipped)
-                        {
-                            PrintOutput(file + ": Failed to setup serializer", "SerializeAssets");
-                        } else if (sas.IsSkipped) skip = true;
-                        else sas.SerializeAsset();
+                        skip = new SubsurfaceProfileSerializer(Settings, asset).IsSkipped;
                         break;
                     case EAssetType.Skeleton:
                         skip = new SkeletonSerializer(Settings, asset).IsSkipped;
@@ -245,16 +240,8 @@ public class System
             else
             {
                 if (asset.mainExport == 0) continue;
-                var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
-                if (!Settings.SimpleAssets.Contains(aType)) continue;
-                var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                if (!sas.Setup() && !sas.IsSkipped)
-                {
-                    PrintOutput(file + ": Failed to setup serializer", "SerializeAssets");
-                    continue;
-                } 
-                else if (sas.IsSkipped) skip = true;
-                else sas.SerializeAsset();
+                if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
+                skip = new UncategorizedSerializer(Settings, asset).IsSkipped;
             }
             
             if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");

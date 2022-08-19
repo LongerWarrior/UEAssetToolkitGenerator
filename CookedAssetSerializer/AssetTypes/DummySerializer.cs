@@ -4,8 +4,9 @@ public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {
     public DummySerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        if (!Setup()) return;
-        SerializeAsset();
+        if (!Setup(false)) return;
+        AssignAssetSerializedData();
+        WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
     }
 }
 

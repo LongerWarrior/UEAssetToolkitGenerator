@@ -4,7 +4,7 @@ public class FileMediaSourceSerializer : SimpleAssetSerializer<FileMediaSourceEx
 {
     public FileMediaSourceSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        if (!Setup(true)) return;
+        if (!Setup()) return;
         SerializeAsset(null, null, new JProperty("PlayerName", 
             ClassExport.PlayerName.ToName()));
     }

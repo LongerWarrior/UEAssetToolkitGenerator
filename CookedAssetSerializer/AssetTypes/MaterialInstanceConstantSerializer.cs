@@ -4,7 +4,7 @@ public class MaterialInstanceConstantSerializer : SimpleAssetSerializer<NormalEx
 {
     public MaterialInstanceConstantSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        if (!Setup(true)) return;
+        if (!Setup()) return;
 
         JProperty property = null;
         
