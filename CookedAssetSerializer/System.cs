@@ -144,11 +144,48 @@ public class System
                     case EAssetType.BlendSpaceBase:
                         skip = new BlendSpaceSerializer(Settings, asset).IsSkipped;
                         break;
+                    case EAssetType.AnimSequence:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummySerializer(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.AnimMontage:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.CameraAnim:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.LandscapeGrassType:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.MediaPlayer:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.MediaTexture:
+                        // Temp - change false to true if you want this delete to run
+                        skip = new DummySerializer(Settings, asset).IsSkipped;
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+                        break;
                     case EAssetType.SubsurfaceProfile:
                         var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
                         if (!sas.Setup(false, false) && !sas.IsSkipped)
@@ -192,6 +229,10 @@ public class System
                         break;
                     case EAssetType.SkeletalMesh:
                         skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
+                        // Temp - change false to true if you want this delete to run
+                        if (skip && false) File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+                            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+                            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
                         break;
                     case EAssetType.FileMediaSource:
                         skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;

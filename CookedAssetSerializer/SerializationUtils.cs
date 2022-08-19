@@ -375,7 +375,7 @@ public static class SerializationUtils
         return jprop;
     }
 
-    public static JObject SerializaListOfProperties(List<PropertyData> data, AssetInfo assetInfo, ref List<int> refObjects, bool _struct = false)
+    public static JObject SerializeListOfProperties(List<PropertyData> data, AssetInfo assetInfo, ref List<int> refObjects, bool _struct = false)
     {
         if (!CheckDuplications(ref data))
         {
@@ -466,7 +466,7 @@ public static class SerializationUtils
         jexport.Add("Outer", Index(export.OuterIndex.Index, assetInfo.Dict));
         jexport.Add("ObjectName", export.ObjectName.ToName());
         jexport.Add("ObjectFlags", (long)export.ObjectFlags);
-        var properties = SerializaListOfProperties(export.Data, assetInfo, ref refObjects);
+        var properties = SerializeListOfProperties(export.Data, assetInfo, ref refObjects);
         properties.Add("$ReferencedObjects", JArray.FromObject(refObjects.Distinct<int>()));
         jexport.Add("Properties", properties);
 
@@ -688,7 +688,7 @@ public static class SerializationUtils
 
                 foreach (var item in prop.Value.Impls)
                 {
-                    var structres = SerializaListOfProperties(item, assetInfo, ref refObjects, true);
+                    var structres = SerializeListOfProperties(item, assetInfo, ref refObjects, true);
                     jimpls.Add(structres);
                 }
 
@@ -735,7 +735,7 @@ public static class SerializationUtils
 
                 foreach (var item in Tree.Data.Items)
                 {
-                    var structres = SerializaListOfProperties(item, assetInfo, ref refObjects, true);
+                    var structres = SerializeListOfProperties(item, assetInfo, ref refObjects, true);
                     items.Add(structres);
                 }
 
@@ -750,7 +750,7 @@ public static class SerializationUtils
             }
             case StructPropertyData prop:
             {
-                var structres = SerializaListOfProperties(prop.Value, assetInfo, ref refObjects, true);
+                var structres = SerializeListOfProperties(prop.Value, assetInfo, ref refObjects, true);
                 jprop.Value = structres;
                 res.Add(jprop);
                 break;

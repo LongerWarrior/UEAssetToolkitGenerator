@@ -19,6 +19,8 @@ public partial class Form1 : Form
         SetupForm();
         SetupGlobals();
 
+        //new GenerateBPY();
+
         Task.Run(EventLoop);
     }
 

@@ -52,7 +52,7 @@
 		
 		AssignAssetSerializedData();
 		
-		var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+		var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
 		AssetData.Add("AssetObjectData", properties);
 		properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
 		

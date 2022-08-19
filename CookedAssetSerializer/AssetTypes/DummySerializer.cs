@@ -1,8 +1,17 @@
 ﻿namespace CookedAssetSerializer.AssetTypes;
 
-public class DummySerializer : Serializer<Export>
+public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {
-    public DummySerializer(Settings assetSettings, UAsset asset)
+    public DummySerializer(Settings settings, UAsset asset) : base(settings, asset)
+    {
+        if (!Setup()) return;
+        SerializeAsset();
+    }
+}
+
+public class DummyWithProps : Serializer<NormalExport>
+{
+    public DummyWithProps(Settings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;
@@ -16,32 +25,8 @@ public class DummySerializer : Serializer<Export>
         if (!SetupAssetInfo()) return;
         
         SerializeHeaders();
-
-        AssetData.Add("AssetObjectData", new JObject(new JProperty("$ReferencedObjects", new JArray())));
         
-        AssignAssetSerializedData();
-
-        WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
-    }
-}
-
-public class DummyWithProps : Serializer<NormalExport>
-{
-    public DummyWithProps(Settings assetSettings)
-    {
-        Settings = assetSettings;
-        SerializeAsset();
-    }
-    
-    private void SerializeAsset()
-    {
-        if (!SetupSerialization()) return;
-
-        if (!SetupAssetInfo()) return;
-        
-        SerializeHeaders();
-        
-        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         List<string> waveProps = new();
         foreach (var prop in properties.Properties()) 
         {

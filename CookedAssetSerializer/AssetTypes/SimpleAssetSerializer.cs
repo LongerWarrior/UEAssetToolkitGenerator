@@ -23,13 +23,13 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
         return true;
     }
 
-    public void SerializeAsset(JProperty preSlopAssetData = null, JProperty postSlopAssetData = null, 
-        JProperty extraAssetData = null, JProperty postSlopProps = null, bool skipRefs = false)
+    public void SerializeAsset(JProperty assetClass = null, JProperty extraAssetData = null, 
+        JProperty extraAssetObjectData = null, JProperty extraProperties = null, bool skipRefs = false, bool skipAOD = false)
     {
-        if (preSlopAssetData != null) AssetData.Add(preSlopAssetData);
+        if (assetClass != null) AssetData.Add(assetClass);
 
-        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
-        
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+
         if (GetFullName(ClassExport.ClassIndex.Index, Asset) == "/Script/Paper2D.PaperSprite") 
         {
             if (FindPropertyData(ClassExport, "BakedSourceTexture", out var _source))
@@ -52,15 +52,20 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
             }
         }
         
-        if (postSlopAssetData != null) AssetData.Add(postSlopAssetData);
+        if (extraAssetData != null) AssetData.Add(extraAssetData);
         
-        if (postSlopProps != null) properties.Add(postSlopProps);
+        if (extraProperties != null) properties.Add(extraProperties);
         
         if (!skipRefs) properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
         
-        AssetData.Add("AssetObjectData", properties);
+        if (!skipAOD) AssetData.Add("AssetObjectData", properties);
+        else
+        {
+            AssetData.Add(SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects).Properties());
+            AssetData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
+        }
         
-        if (extraAssetData != null) AssetData.Add(extraAssetData);
+        if (extraAssetObjectData != null) AssetData.Add(extraAssetObjectData);
         
         AssignAssetSerializedData();
 
