@@ -8,6 +8,14 @@ This is a work-in-progress .NET API to generate [UEAssetToolkit](https://github.
 4. Click the `Serialize Assets` button to generate the JSON files.
 5. Save your settings by clicking the `Save Config Settings` button if you have not done so already.
 
+If you aren't satisfied with just copying the cooked Static Mesh (which can still be dragged into the level), the current (temporary) process of obtaining the serialized static meshes is as follows:
+1. Download [UModel](https://www.gildor.org/en/projects/umodel)
+2. Edit and run [this](https://gist.github.com/Buckminsterfullerene02/a9c9a19ddb573fcff78b2e31586383ad) in command prompt 
+3. Edit and run [this](https://gist.github.com/Buckminsterfullerene02/a4a0e62066d09a17315a5191b4e41186) simple C# application to generate the blender script
+4. Open blender and paste the script into the script editor, and run it
+5. Run CAS to serialize the FBX and cooked assets into JSON
+
+## Settings
 Setting | Explanation | Example
 ------- | ----------- | -------
 **Run Tab**
