@@ -59,14 +59,15 @@ partial class Form1 {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tbRun = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
+            this.rtxtInfoDir = new System.Windows.Forms.RichTextBox();
+            this.btnInfoDir = new System.Windows.Forms.Button();
             this.tbSettings = new System.Windows.Forms.TabPage();
+            this.label7 = new System.Windows.Forms.Label();
+            this.lbAssetsToDelete = new System.Windows.Forms.ListBox();
             this.chkDummyWithProps = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.lbDummyAssets = new System.Windows.Forms.ListBox();
-            this.rtxtInfoDir = new System.Windows.Forms.RichTextBox();
-            this.btnInfoDir = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.lbAssetsToDelete = new System.Windows.Forms.ListBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tbRun.SuspendLayout();
             this.tbSettings.SuspendLayout();
@@ -524,7 +525,7 @@ partial class Form1 {
             this.tbRun.Location = new System.Drawing.Point(4, 29);
             this.tbRun.Name = "tbRun";
             this.tbRun.Padding = new System.Windows.Forms.Padding(3);
-            this.tbRun.Size = new System.Drawing.Size(1094, 906);
+            this.tbRun.Size = new System.Drawing.Size(1094, 909);
             this.tbRun.TabIndex = 0;
             this.tbRun.Text = "Run";
             // 
@@ -538,6 +539,35 @@ partial class Form1 {
             this.label2.Size = new System.Drawing.Size(111, 38);
             this.label2.TabIndex = 33;
             this.label2.Text = "Output";
+            // 
+            // rtxtInfoDir
+            // 
+            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtInfoDir.Location = new System.Drawing.Point(171, 211);
+            this.rtxtInfoDir.Multiline = false;
+            this.rtxtInfoDir.Name = "rtxtInfoDir";
+            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtInfoDir.Size = new System.Drawing.Size(899, 40);
+            this.rtxtInfoDir.TabIndex = 37;
+            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
+            // 
+            // btnInfoDir
+            // 
+            this.btnInfoDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnInfoDir.FlatAppearance.BorderSize = 2;
+            this.btnInfoDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnInfoDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnInfoDir.Location = new System.Drawing.Point(15, 211);
+            this.btnInfoDir.Name = "btnInfoDir";
+            this.btnInfoDir.Size = new System.Drawing.Size(139, 40);
+            this.btnInfoDir.TabIndex = 36;
+            this.btnInfoDir.Text = "Info Dir";
+            this.btnInfoDir.UseVisualStyleBackColor = true;
+            this.btnInfoDir.Click += new System.EventHandler(this.btnInfoDir_Click);
             // 
             // tbSettings
             // 
@@ -561,6 +591,31 @@ partial class Form1 {
             this.tbSettings.Size = new System.Drawing.Size(1094, 909);
             this.tbSettings.TabIndex = 1;
             this.tbSettings.Text = "Settings";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.label7.Location = new System.Drawing.Point(701, 644);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(330, 38);
+            this.label7.TabIndex = 39;
+            this.label7.Text = "Existing assets to delete";
+            // 
+            // lbAssetsToDelete
+            // 
+            this.lbAssetsToDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.lbAssetsToDelete.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lbAssetsToDelete.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.lbAssetsToDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.lbAssetsToDelete.FormattingEnabled = true;
+            this.lbAssetsToDelete.ItemHeight = 28;
+            this.lbAssetsToDelete.Location = new System.Drawing.Point(667, 689);
+            this.lbAssetsToDelete.Name = "lbAssetsToDelete";
+            this.lbAssetsToDelete.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+            this.lbAssetsToDelete.Size = new System.Drawing.Size(404, 196);
+            this.lbAssetsToDelete.TabIndex = 40;
             // 
             // chkDummyWithProps
             // 
@@ -599,59 +654,16 @@ partial class Form1 {
             this.lbDummyAssets.Size = new System.Drawing.Size(404, 252);
             this.lbDummyAssets.TabIndex = 35;
             // 
-            // rtxtInfoDir
+            // label8
             // 
-            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtInfoDir.Location = new System.Drawing.Point(171, 211);
-            this.rtxtInfoDir.Multiline = false;
-            this.rtxtInfoDir.Name = "rtxtInfoDir";
-            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.rtxtInfoDir.Size = new System.Drawing.Size(899, 40);
-            this.rtxtInfoDir.TabIndex = 37;
-            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
-            // 
-            // btnInfoDir
-            // 
-            this.btnInfoDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnInfoDir.FlatAppearance.BorderSize = 2;
-            this.btnInfoDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnInfoDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnInfoDir.Location = new System.Drawing.Point(15, 211);
-            this.btnInfoDir.Name = "btnInfoDir";
-            this.btnInfoDir.Size = new System.Drawing.Size(139, 40);
-            this.btnInfoDir.TabIndex = 36;
-            this.btnInfoDir.Text = "Info Dir";
-            this.btnInfoDir.UseVisualStyleBackColor = true;
-            this.btnInfoDir.Click += new System.EventHandler(this.btnInfoDir_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label7.Location = new System.Drawing.Point(701, 644);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(330, 38);
-            this.label7.TabIndex = 39;
-            this.label7.Text = "Existing assets to delete";
-            // 
-            // lbAssetsToDelete
-            // 
-            this.lbAssetsToDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.lbAssetsToDelete.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lbAssetsToDelete.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.lbAssetsToDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lbAssetsToDelete.FormattingEnabled = true;
-            this.lbAssetsToDelete.ItemHeight = 28;
-            this.lbAssetsToDelete.Location = new System.Drawing.Point(667, 689);
-            this.lbAssetsToDelete.Name = "lbAssetsToDelete";
-            this.lbAssetsToDelete.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.lbAssetsToDelete.Size = new System.Drawing.Size(404, 196);
-            this.lbAssetsToDelete.TabIndex = 40;
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.label8.Location = new System.Drawing.Point(329, 9);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(495, 20);
+            this.label8.TabIndex = 38;
+            this.label8.Text = "Written by LongerWarrior, Buckminsterfullerene and atenfyr (UAAPI)";
             // 
             // Form1
             // 
@@ -660,6 +672,7 @@ partial class Form1 {
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
             this.ClientSize = new System.Drawing.Size(1126, 968);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.tabControl1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.Name = "Form1";
@@ -671,6 +684,7 @@ partial class Form1 {
             this.tbSettings.ResumeLayout(false);
             this.tbSettings.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
     }
 
@@ -717,4 +731,5 @@ partial class Form1 {
     private Label label2;
     private Label label7;
     private ListBox lbAssetsToDelete;
+    private Label label8;
 }
