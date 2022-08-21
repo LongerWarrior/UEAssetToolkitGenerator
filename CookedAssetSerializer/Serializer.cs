@@ -6,7 +6,7 @@ public class Serializer<T> where T: Export
 {
     protected Settings Settings;
 
-    public bool IsSkipped = false;
+    public bool IsSkipped;
     
     protected UAsset Asset;
     private string AssetName;
@@ -54,7 +54,11 @@ public class Serializer<T> where T: Export
     
     protected bool SetupAssetInfo()
     {
-        if (Asset.Exports[Asset.mainExport - 1] is RawExport) { Debug.WriteLine("Raw "+Asset.FilePath); return false; }
+        if (Asset.Exports[Asset.mainExport - 1] is RawExport)
+        {
+            Debug.WriteLine("Raw " + Asset.FilePath); 
+            return false;
+        }
         ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
         if (ClassExport == null) return false;
         ClassName = ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName();
