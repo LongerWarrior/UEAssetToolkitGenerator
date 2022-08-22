@@ -68,9 +68,16 @@ partial class Form1 {
             this.label9 = new System.Windows.Forms.Label();
             this.lbDummyAssets = new System.Windows.Forms.ListBox();
             this.tbNativSett = new System.Windows.Forms.TabPage();
+            this.btnDfltGamCnfg = new System.Windows.Forms.Button();
+            this.rtxtDfltGamCnfg = new System.Windows.Forms.RichTextBox();
+            this.btnCXXDir = new System.Windows.Forms.Button();
+            this.rtxtCXXDir = new System.Windows.Forms.RichTextBox();
+            this.lbNativMode = new System.Windows.Forms.Label();
+            this.cbNativMethod = new System.Windows.Forms.ComboBox();
+            this.chkUserEnumStruct = new System.Windows.Forms.CheckBox();
             this.lbNativAssets = new System.Windows.Forms.Label();
             this.rtxtNativAssets = new System.Windows.Forms.RichTextBox();
-            this.label8 = new System.Windows.Forms.Label();
+            this.lbAuthors = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tbRun.SuspendLayout();
             this.tbSettings.SuspendLayout();
@@ -694,6 +701,13 @@ partial class Form1 {
             // tbNativSett
             // 
             this.tbNativSett.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tbNativSett.Controls.Add(this.btnDfltGamCnfg);
+            this.tbNativSett.Controls.Add(this.rtxtDfltGamCnfg);
+            this.tbNativSett.Controls.Add(this.btnCXXDir);
+            this.tbNativSett.Controls.Add(this.rtxtCXXDir);
+            this.tbNativSett.Controls.Add(this.lbNativMode);
+            this.tbNativSett.Controls.Add(this.cbNativMethod);
+            this.tbNativSett.Controls.Add(this.chkUserEnumStruct);
             this.tbNativSett.Controls.Add(this.lbNativAssets);
             this.tbNativSett.Controls.Add(this.rtxtNativAssets);
             this.tbNativSett.Location = new System.Drawing.Point(4, 24);
@@ -704,17 +718,113 @@ partial class Form1 {
             this.tbNativSett.TabIndex = 2;
             this.tbNativSett.Text = "Nativ. Asset Settings";
             // 
+            // btnDfltGamCnfg
+            // 
+            this.btnDfltGamCnfg.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnDfltGamCnfg.FlatAppearance.BorderSize = 2;
+            this.btnDfltGamCnfg.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDfltGamCnfg.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnDfltGamCnfg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnDfltGamCnfg.Location = new System.Drawing.Point(14, 16);
+            this.btnDfltGamCnfg.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnDfltGamCnfg.Name = "btnDfltGamCnfg";
+            this.btnDfltGamCnfg.Size = new System.Drawing.Size(122, 30);
+            this.btnDfltGamCnfg.TabIndex = 23;
+            this.btnDfltGamCnfg.Text = "Game .ini";
+            this.btnDfltGamCnfg.UseVisualStyleBackColor = true;
+            // 
+            // rtxtDfltGamCnfg
+            // 
+            this.rtxtDfltGamCnfg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtDfltGamCnfg.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtDfltGamCnfg.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtDfltGamCnfg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtDfltGamCnfg.Location = new System.Drawing.Point(151, 16);
+            this.rtxtDfltGamCnfg.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.rtxtDfltGamCnfg.Multiline = false;
+            this.rtxtDfltGamCnfg.Name = "rtxtDfltGamCnfg";
+            this.rtxtDfltGamCnfg.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtDfltGamCnfg.Size = new System.Drawing.Size(787, 30);
+            this.rtxtDfltGamCnfg.TabIndex = 24;
+            this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\DefaultGame.ini";
+            // 
+            // btnCXXDir
+            // 
+            this.btnCXXDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnCXXDir.FlatAppearance.BorderSize = 2;
+            this.btnCXXDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCXXDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnCXXDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnCXXDir.Location = new System.Drawing.Point(14, 61);
+            this.btnCXXDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnCXXDir.Name = "btnCXXDir";
+            this.btnCXXDir.Size = new System.Drawing.Size(122, 30);
+            this.btnCXXDir.TabIndex = 21;
+            this.btnCXXDir.Text = "CXX Hdr Dir";
+            this.btnCXXDir.UseVisualStyleBackColor = true;
+            // 
+            // rtxtCXXDir
+            // 
+            this.rtxtCXXDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtCXXDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtCXXDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtCXXDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtCXXDir.Location = new System.Drawing.Point(151, 61);
+            this.rtxtCXXDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.rtxtCXXDir.Multiline = false;
+            this.rtxtCXXDir.Name = "rtxtCXXDir";
+            this.rtxtCXXDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtCXXDir.Size = new System.Drawing.Size(787, 30);
+            this.rtxtCXXDir.TabIndex = 22;
+            this.rtxtCXXDir.Text = "C:\\ExamplePath\\CXXHeaderDump";
+            // 
+            // lbNativMode
+            // 
+            this.lbNativMode.AutoSize = true;
+            this.lbNativMode.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbNativMode.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.lbNativMode.Location = new System.Drawing.Point(215, 360);
+            this.lbNativMode.Name = "lbNativMode";
+            this.lbNativMode.Size = new System.Drawing.Size(157, 21);
+            this.lbNativMode.TabIndex = 19;
+            this.lbNativMode.Text = "Nativization Mode:";
+            // 
+            // cbNativMethod
+            // 
+            this.cbNativMethod.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.cbNativMethod.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cbNativMethod.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.cbNativMethod.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.cbNativMethod.FormattingEnabled = true;
+            this.cbNativMethod.Location = new System.Drawing.Point(378, 357);
+            this.cbNativMethod.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.cbNativMethod.Name = "cbNativMethod";
+            this.cbNativMethod.Size = new System.Drawing.Size(156, 29);
+            this.cbNativMethod.TabIndex = 20;
+            // 
+            // chkUserEnumStruct
+            // 
+            this.chkUserEnumStruct.AutoSize = true;
+            this.chkUserEnumStruct.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUserEnumStruct.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUserEnumStruct.Location = new System.Drawing.Point(215, 406);
+            this.chkUserEnumStruct.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.chkUserEnumStruct.Name = "chkUserEnumStruct";
+            this.chkUserEnumStruct.Size = new System.Drawing.Size(325, 25);
+            this.chkUserEnumStruct.TabIndex = 18;
+            this.chkUserEnumStruct.Text = "Create User Defined Enums and Structs";
+            this.chkUserEnumStruct.UseVisualStyleBackColor = true;
+            // 
             // lbNativAssets
             // 
             this.lbNativAssets.AutoSize = true;
             this.lbNativAssets.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lbNativAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lbNativAssets.Location = new System.Drawing.Point(188, 2);
+            this.lbNativAssets.Location = new System.Drawing.Point(333, 130);
             this.lbNativAssets.Name = "lbNativAssets";
-            this.lbNativAssets.Size = new System.Drawing.Size(152, 30);
+            this.lbNativAssets.Size = new System.Drawing.Size(286, 30);
             this.lbNativAssets.TabIndex = 16;
-            this.lbNativAssets.Text = "Simple assets";
-            this.lbNativAssets.Click += new System.EventHandler(this.lbNativAssets_Click);
+            this.lbNativAssets.Text = "Nativized Blueprint Assets";
             // 
             // rtxtNativAssets
             // 
@@ -722,25 +832,24 @@ partial class Form1 {
             this.rtxtNativAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtNativAssets.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtNativAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtNativAssets.Location = new System.Drawing.Point(14, 33);
+            this.rtxtNativAssets.Location = new System.Drawing.Point(213, 163);
             this.rtxtNativAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtNativAssets.Name = "rtxtNativAssets";
             this.rtxtNativAssets.Size = new System.Drawing.Size(543, 189);
             this.rtxtNativAssets.TabIndex = 17;
-            this.rtxtNativAssets.Text = resources.GetString("rtxtNativAssets.Text");
-            this.rtxtNativAssets.WordWrap = false;
-            this.rtxtNativAssets.TextChanged += new System.EventHandler(this.rtxtNativAssets_TextChanged);
+            this.rtxtNativAssets.Text = "Copy/Paste List of Nativized Assets from DefaultGame.ini or Select DefaultGame.in" +
+    "i Above";
             // 
-            // label8
+            // lbAuthors
             // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label8.Location = new System.Drawing.Point(288, 7);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(393, 15);
-            this.label8.TabIndex = 38;
-            this.label8.Text = "Written by LongerWarrior, Buckminsterfullerene and atenfyr (UAAPI)";
+            this.lbAuthors.AutoSize = true;
+            this.lbAuthors.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbAuthors.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.lbAuthors.Location = new System.Drawing.Point(288, 7);
+            this.lbAuthors.Name = "lbAuthors";
+            this.lbAuthors.Size = new System.Drawing.Size(393, 15);
+            this.lbAuthors.TabIndex = 38;
+            this.lbAuthors.Text = "Written by LongerWarrior, Buckminsterfullerene and atenfyr (UAAPI)";
             // 
             // Form1
             // 
@@ -749,7 +858,7 @@ partial class Form1 {
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
             this.ClientSize = new System.Drawing.Size(985, 726);
-            this.Controls.Add(this.label8);
+            this.Controls.Add(this.lbAuthors);
             this.Controls.Add(this.tabControl1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -819,10 +928,17 @@ partial class Form1 {
     private Label label2;
     private Label label7;
     private ListBox lbAssetsToDelete;
-    private Label label8;
+    private Label lbAuthors;
     private TabPage tbNativSett;
     private Label lbNativAssets;
     private RichTextBox rtxtNativAssets;
+    private Label lbNativMode;
+    private ComboBox cbNativMethod;
+    private CheckBox chkUserEnumStruct;
+    private Button btnCXXDir;
+    private RichTextBox rtxtCXXDir;
+    private Button btnDfltGamCnfg;
+    private RichTextBox rtxtDfltGamCnfg;
 
     // 
     // Nativized Asset Dummying Settings Tab

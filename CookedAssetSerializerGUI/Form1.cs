@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using CookedAssetSerializer;
+using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
 
@@ -109,6 +110,22 @@ public partial class Form1 : Form
         UE4Version.VER_UE4_27
     };
 
+
+
+    private readonly object[] nativeMethodKeys =
+    {
+        "Disabled",
+        "Inclusive",
+        "Exclusive"
+    };
+
+    private readonly EBlueprintNativizationMethod[] nativMethodValues =
+    {
+        EBlueprintNativizationMethod.Disabled,
+        EBlueprintNativizationMethod.Inclusive,
+        EBlueprintNativizationMethod.Exclusive
+    };
+
     #endregion
 
     #region CustomFormSetup
@@ -191,6 +208,8 @@ public partial class Form1 : Form
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
+
+        cbNativMethod.Items.AddRange(nativeMethodKeys);
 
         List<EAssetType> defaultSkipAssets = new()
         {
@@ -624,13 +643,4 @@ public partial class Form1 : Form
         rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
     }
 
-    private void rtxtNativAssets_TextChanged(object sender, EventArgs e)
-    {
-
-    }
-
-    private void lbNativAssets_Click(object sender, EventArgs e)
-    {
-
-    }
 }
