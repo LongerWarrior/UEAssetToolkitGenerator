@@ -210,6 +210,7 @@ public partial class Form1 : Form
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
 
         cbNativMethod.Items.AddRange(nativeMethodKeys);
+        cbNativMethod.SelectedIndex = 0;
 
         List<EAssetType> defaultSkipAssets = new()
         {
