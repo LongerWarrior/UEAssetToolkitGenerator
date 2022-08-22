@@ -76,4 +76,9 @@
 "/Script/Engine.SoundAttenuation",
 "/Script/Foliage.FoliageType_InstancedStaticMesh",</value>
   </data>
+  <data name="rtxtNativAssets.Text" xml:space="preserve">
+    <value>
+      
+    </value>
+  </data>
 </root>

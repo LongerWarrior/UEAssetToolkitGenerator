@@ -623,4 +623,14 @@ public partial class Form1 : Form
     {
         rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
     }
+
+    private void rtxtNativAssets_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void lbNativAssets_Click(object sender, EventArgs e)
+    {
+
+    }
 }
