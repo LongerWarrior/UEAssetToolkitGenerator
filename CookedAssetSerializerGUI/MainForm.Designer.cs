@@ -64,7 +64,7 @@ partial class MainForm {
             this.lblProgress = new System.Windows.Forms.Label();
             this.btnClearLogs = new System.Windows.Forms.Button();
             this.btnSerializeAssets = new System.Windows.Forms.Button();
-            this.btnSelectOutputDir = new System.Windows.Forms.Button();
+            this.btnSelectCookedDir = new System.Windows.Forms.Button();
             this.btnMoveCookedAssets = new System.Windows.Forms.Button();
             this.btnScanAssets = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -202,7 +202,7 @@ partial class MainForm {
             this.tbRun.Controls.Add(this.lblProgress);
             this.tbRun.Controls.Add(this.btnClearLogs);
             this.tbRun.Controls.Add(this.btnSerializeAssets);
-            this.tbRun.Controls.Add(this.btnSelectOutputDir);
+            this.tbRun.Controls.Add(this.btnSelectCookedDir);
             this.tbRun.Controls.Add(this.btnMoveCookedAssets);
             this.tbRun.Controls.Add(this.btnScanAssets);
             this.tbRun.Controls.Add(this.label1);
@@ -316,6 +316,7 @@ partial class MainForm {
             this.rtxtInfoDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtInfoDir.TabIndex = 37;
             this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
+            this.rtxtInfoDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
             // 
             // rtxtOutput
             // 
@@ -346,6 +347,7 @@ partial class MainForm {
             this.rtxtParseDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtParseDir.TabIndex = 33;
             this.rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
+            this.rtxtParseDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
             // 
             // rtxtContentDir
             // 
@@ -361,6 +363,7 @@ partial class MainForm {
             this.rtxtContentDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
+            this.rtxtContentDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
             // 
             // rtxtJSONDir
             // 
@@ -376,8 +379,9 @@ partial class MainForm {
             this.rtxtJSONDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtJSONDir.TabIndex = 3;
             this.rtxtJSONDir.Text = "C:\\ExamplePath\\AssetDump";
+            this.rtxtJSONDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
             // 
-            // rtxtOutputDir
+            // rtxtCookedDir
             // 
             this.rtxtCookedDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
             this.rtxtCookedDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -386,11 +390,12 @@ partial class MainForm {
             this.rtxtCookedDir.Location = new System.Drawing.Point(150, 122);
             this.rtxtCookedDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtCookedDir.Multiline = false;
-            this.rtxtCookedDir.Name = "rtxtOutputDir";
+            this.rtxtCookedDir.Name = "rtxtCookedDir";
             this.rtxtCookedDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.rtxtCookedDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtCookedDir.TabIndex = 5;
             this.rtxtCookedDir.Text = "C:\\ExamplePath\\Cooked";
+            this.rtxtCookedDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
             // 
             // btnSelectContentDir
             // 
@@ -422,6 +427,7 @@ partial class MainForm {
             this.btnInfoDir.TabIndex = 36;
             this.btnInfoDir.Text = "Info Dir";
             this.btnInfoDir.UseVisualStyleBackColor = true;
+            this.btnInfoDir.Click += new System.EventHandler(this.btnInfoDir_Click);
             // 
             // btnOpenAllTypes
             // 
@@ -437,6 +443,7 @@ partial class MainForm {
             this.btnOpenAllTypes.TabIndex = 25;
             this.btnOpenAllTypes.Text = "Open AllTypes";
             this.btnOpenAllTypes.UseVisualStyleBackColor = true;
+            this.btnOpenAllTypes.Click += new System.EventHandler(this.btnOpenAllTypes_Click);
             // 
             // btnOpenAssetTypes
             // 
@@ -452,6 +459,7 @@ partial class MainForm {
             this.btnOpenAssetTypes.TabIndex = 24;
             this.btnOpenAssetTypes.Text = "Open AssetTypes";
             this.btnOpenAssetTypes.UseVisualStyleBackColor = true;
+            this.btnOpenAssetTypes.Click += new System.EventHandler(this.btnOpenAssetTypes_Click);
             // 
             // btnSelectParseDir
             // 
@@ -467,6 +475,7 @@ partial class MainForm {
             this.btnSelectParseDir.TabIndex = 32;
             this.btnSelectParseDir.Text = "Parse Dir";
             this.btnSelectParseDir.UseVisualStyleBackColor = true;
+            this.btnSelectParseDir.Click += new System.EventHandler(this.btnSelectParseDir_Click);
             // 
             // btnOpenLogs
             // 
@@ -482,6 +491,7 @@ partial class MainForm {
             this.btnOpenLogs.TabIndex = 26;
             this.btnOpenLogs.Text = "Open Logs";
             this.btnOpenLogs.UseVisualStyleBackColor = true;
+            this.btnOpenLogs.Click += new System.EventHandler(this.btnOpenLogs_Click);
             // 
             // btnSelectJSONDir
             // 
@@ -524,6 +534,7 @@ partial class MainForm {
             this.btnClearLogs.TabIndex = 28;
             this.btnClearLogs.Text = "Clear Logs";
             this.btnClearLogs.UseVisualStyleBackColor = true;
+            this.btnClearLogs.Click += new System.EventHandler(this.btnClearLogs_Click);
             // 
             // btnSerializeAssets
             // 
@@ -539,21 +550,23 @@ partial class MainForm {
             this.btnSerializeAssets.TabIndex = 18;
             this.btnSerializeAssets.Text = "Serialize Assets";
             this.btnSerializeAssets.UseVisualStyleBackColor = true;
+            this.btnSerializeAssets.Click += new System.EventHandler(this.btnSerializeAssets_Click);
             // 
-            // btnSelectOutputDir
+            // btnSelectCookedDir
             // 
-            this.btnSelectOutputDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnSelectOutputDir.FlatAppearance.BorderSize = 2;
-            this.btnSelectOutputDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelectOutputDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSelectOutputDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSelectOutputDir.Location = new System.Drawing.Point(13, 122);
-            this.btnSelectOutputDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnSelectOutputDir.Name = "btnSelectOutputDir";
-            this.btnSelectOutputDir.Size = new System.Drawing.Size(122, 30);
-            this.btnSelectOutputDir.TabIndex = 4;
-            this.btnSelectOutputDir.Text = "Cooked Dir";
-            this.btnSelectOutputDir.UseVisualStyleBackColor = true;
+            this.btnSelectCookedDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnSelectCookedDir.FlatAppearance.BorderSize = 2;
+            this.btnSelectCookedDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelectCookedDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelectCookedDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnSelectCookedDir.Location = new System.Drawing.Point(13, 122);
+            this.btnSelectCookedDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnSelectCookedDir.Name = "btnSelectCookedDir";
+            this.btnSelectCookedDir.Size = new System.Drawing.Size(122, 30);
+            this.btnSelectCookedDir.TabIndex = 4;
+            this.btnSelectCookedDir.Text = "Cooked Dir";
+            this.btnSelectCookedDir.UseVisualStyleBackColor = true;
+            this.btnSelectCookedDir.Click += new System.EventHandler(this.btnSelectOutputDir_Click);
             // 
             // btnMoveCookedAssets
             // 
@@ -569,6 +582,7 @@ partial class MainForm {
             this.btnMoveCookedAssets.TabIndex = 17;
             this.btnMoveCookedAssets.Text = "Move Cooked Assets";
             this.btnMoveCookedAssets.UseVisualStyleBackColor = true;
+            this.btnMoveCookedAssets.Click += new System.EventHandler(this.btnMoveCookedAssets_Click);
             // 
             // btnScanAssets
             // 
@@ -584,6 +598,7 @@ partial class MainForm {
             this.btnScanAssets.TabIndex = 16;
             this.btnScanAssets.Text = "Scan Assets";
             this.btnScanAssets.UseVisualStyleBackColor = true;
+            this.btnScanAssets.Click += new System.EventHandler(this.btnScanAssets_Click);
             // 
             // label1
             // 
@@ -1018,7 +1033,7 @@ partial class MainForm {
     private Label lblProgress;
     private Button btnClearLogs;
     private Button btnSerializeAssets;
-    private Button btnSelectOutputDir;
+    private Button btnSelectCookedDir;
     private Button btnMoveCookedAssets;
     private Button btnScanAssets;
     private Label label1;
