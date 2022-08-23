@@ -9,6 +9,7 @@ using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
 using static System.Windows.Forms.Design.AxImporter;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace CookedAssetSerializerGUI;
@@ -230,7 +231,7 @@ public partial class MainForm : Form
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtParseDir.Text = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
-        rtxtOutputDir.Text = Environment.CurrentDirectory;
+        rtxtCookedDir.Text = Environment.CurrentDirectory;
         rtxtInfoDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
@@ -312,10 +313,10 @@ public partial class MainForm : Form
             Directory.CreateDirectory(rtxtJSONDir.Text);
         }
 
-        if (string.IsNullOrEmpty(rtxtOutputDir.Text)) 
+        if (string.IsNullOrEmpty(rtxtCookedDir.Text)) 
         {
-            rtxtOutputDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
-            Directory.CreateDirectory(rtxtOutputDir.Text);
+            rtxtCookedDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            Directory.CreateDirectory(rtxtCookedDir.Text);
         }
 
 
@@ -324,7 +325,7 @@ public partial class MainForm : Form
             ContentDir = rtxtContentDir.Text,
             ParseDir = rtxtParseDir.Text,
             JSONDir = rtxtJSONDir.Text,
-            CookedDir = rtxtOutputDir.Text,
+            CookedDir = rtxtCookedDir.Text,
             InfoDir = rtxtInfoDir.Text,
             GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
             RefreshAssets = chkRefreshAssets.Checked,
@@ -350,7 +351,7 @@ public partial class MainForm : Form
             rtxtContentDir.Text = jsonsettings.ContentDir;
             rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
-            rtxtOutputDir.Text = jsonsettings.CookedDir;
+            rtxtCookedDir.Text = jsonsettings.CookedDir;
             rtxtInfoDir.Text = jsonsettings.InfoDir;
         }
 
@@ -585,7 +586,7 @@ public partial class MainForm : Form
 
     private void btnSelectOutputDir_Click(object sender, EventArgs e)
     {
-        rtxtOutputDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
+        rtxtCookedDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
     }
 
     private void btnScanAssets_Click(object sender, EventArgs e)
@@ -729,7 +730,8 @@ public partial class MainForm : Form
         SaveJSONSettings();
     }
 
-    private void btnSelectParseDir_Click(object sender, EventArgs e) {
+    private void btnSelectParseDir_Click(object sender, EventArgs e) 
+    {
         rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
     }
 
@@ -748,40 +750,108 @@ public partial class MainForm : Form
 
     private void MainForm_Load(object sender, EventArgs e)
     {
+
+        panel1.Visible = false;
         if (AppSettings.Default.bAutoUseLastCfg == true)
         {
             AutoLoadConfig();
             chkAutoLoad.Checked = true;
         }
     }
-}
 
 
-public static class CheckboxDialog
-{
-    public static bool bYesNo;
-    public static bool ShowDialog(string text, string caption)
+    private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
     {
-        Form prompt = new Form();
-        prompt.Width = 400;
-        prompt.Height = 200;
-        prompt.Text = caption;
-        FlowLayoutPanel panel = new FlowLayoutPanel();
-        CheckBox chk = new CheckBox();
-        chk.Text = text;
-        Button ok = new Button() { Text = "Yes" };
-        ok.Click += (sender, e) => { prompt.Close();
-            bYesNo = true; };
-        Button no = new Button() { Text = "No" };
-        no.Click += (sender, e) => { prompt.Close();
-            bYesNo = false;
-        };
-        panel.Controls.Add(chk);
-        panel.SetFlowBreak(chk, true);
-        panel.Controls.Add(ok);
-        panel.Controls.Add(no);
-        prompt.Controls.Add(panel);
-        prompt.ShowDialog();
-        return chk.Checked;
+           // Get the node at the current mouse pointer location.  
+           TreeNode theNode = this.treeParseDir.GetNodeAt(e.X, e.Y);  
+  
+           // Set a ToolTip only if the mouse pointer is actually paused on a node.  
+           if (theNode != null && theNode.Tag != null)  
+           {  
+               // Change the ToolTip only if the pointer moved to a new node.  
+               if (theNode.Tag.ToString() != this.tTipTree.GetToolTip(this.treeParseDir))  
+                   this.tTipTree.SetToolTip(this.treeParseDir, theNode.Tag.ToString());
+
+           }  
+           else     // Pointer is not over a node so clear the ToolTip.  
+           {  
+               this.tTipTree.SetToolTip(this.treeParseDir, "");
+           }   
+    }
+
+    private void UpdateProgress()
+    { 
+        if (prgbarTreeLd.Value < prgbarTreeLd.Maximum)  
+            {
+                prgbarTreeLd.Value++;  
+                int percent = (int)(((double)prgbarTreeLd.Value / (double)prgbarTreeLd.Maximum) * 100);
+                prgbarTreeLd.CreateGraphics().DrawString(percent.ToString() + "%", new Font("Arial", (float)8.25, FontStyle.Regular), Brushes.Black, new PointF(prgbarTreeLd.Width / 2 - 10, prgbarTreeLd.Height / 2 - 7));  
+                Application.DoEvents();  
+            }  
+    }
+
+    private void LoadFiles(string dir, TreeNode td)
+    {
+        string[] Files = Directory.GetFiles(dir, "*.*");
+
+        // Loop through them to see files  
+        foreach (string file in Files)
+        {
+            FileInfo fi = new FileInfo(file);
+            TreeNode tds = td.Nodes.Add(fi.Name);
+            tds.Tag = fi.FullName;
+            tds.StateImageIndex = 1;
+            UpdateProgress();
+
+        }
+    }
+
+    private void LoadSubDirectories(string dir, TreeNode td)
+    {
+        // Get all subdirectories  
+        string[] subdirectoryEntries = Directory.GetDirectories(dir);
+        // Loop through them to see if they have any other subdirectories  
+        foreach (string subdirectory in subdirectoryEntries)
+        {
+
+            DirectoryInfo di = new DirectoryInfo(subdirectory);
+            TreeNode tds = td.Nodes.Add(di.Name);
+            tds.StateImageIndex = 0;
+            tds.Tag = di.FullName;
+            LoadFiles(subdirectory, tds);
+            LoadSubDirectories(subdirectory, tds);
+            UpdateProgress();
+
+        }
+    }
+
+    public void LoadDirectory(string Dir)
+    {
+        DirectoryInfo di = new DirectoryInfo(Dir);
+        //Setting ProgressBar Maximum Value  
+        prgbarTreeLd.Maximum = Directory.GetFiles(Dir, "*.*", SearchOption.AllDirectories).Length + Directory.GetDirectories(Dir, "**", SearchOption.AllDirectories).Length;
+        TreeNode tds = treeParseDir.Nodes.Add(di.Name);
+        tds.Tag = di.FullName;
+        tds.StateImageIndex = 0;
+        LoadFiles(Dir, tds);
+        LoadSubDirectories(Dir, tds);
+    }
+
+    private void btnPrsTree_Click(object sender, EventArgs e)
+    {
+        if (panel1.Visible == false)
+        {
+            panel1.Visible = true;
+            treeParseDir.Nodes.Clear();
+            if (rtxtParseDir.Text != "" && Directory.Exists(rtxtParseDir.Text))
+                LoadDirectory(rtxtParseDir.Text);
+            else
+                MessageBox.Show("Select Existing Content Directory!!");
+        }
+        else
+        {
+            panel1.Visible = false;
+            treeParseDir.Nodes.Clear();
+        }
     }
 }
