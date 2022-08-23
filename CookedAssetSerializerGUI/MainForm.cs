@@ -459,7 +459,7 @@ public partial class MainForm : Form
 
         // I don't know why, I don't know how, but doing just Process.Start(path) doesn't fucking work,
         // even though that's the preferred option since it opens whatever editor is associated with the file extension
-        Process.Start("notepad.exe", path);
+        Process.Start(new ProcessStartInfo { FileName = @path, UseShellExecute = true });
     }
 
     private string OpenDirectoryDialog(string path) 
