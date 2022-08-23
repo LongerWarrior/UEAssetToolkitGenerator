@@ -2,7 +2,7 @@
 
 public class MaterialInstanceConstantSerializer : SimpleAssetSerializer<NormalExport>
 {
-    public MaterialInstanceConstantSerializer(Settings settings, UAsset asset) : base(settings, asset)
+    public MaterialInstanceConstantSerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup()) return;
 

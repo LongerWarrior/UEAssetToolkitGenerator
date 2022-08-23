@@ -4,7 +4,7 @@ namespace CookedAssetSerializer.AssetTypes;
 
 public class StaticMeshSerializer : Serializer<StaticMeshExport>
 {
-    public StaticMeshSerializer(Settings assetSettings, UAsset asset)
+    public StaticMeshSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

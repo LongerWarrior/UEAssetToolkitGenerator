@@ -1,6 +1,9 @@
-﻿namespace CookedAssetSerializerGUI;
+﻿using CookedAssetSerializer;
+using CookedAssetSerializerGUI.Properties;
 
-partial class Form1 {
+namespace CookedAssetSerializerGUI;
+
+partial class MainForm {
     /// <summary>
     ///  Required designer variable.
     /// </summary>
@@ -18,6 +21,9 @@ partial class Form1 {
         base.Dispose(disposing);
     }
 
+    
+
+
     #region Windows Form Designer generated code
 
     /// <summary>
@@ -25,7 +31,7 @@ partial class Form1 {
     ///  the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.btnSelectContentDir = new System.Windows.Forms.Button();
             this.rtxtContentDir = new System.Windows.Forms.RichTextBox();
             this.rtxtJSONDir = new System.Windows.Forms.RichTextBox();
@@ -58,6 +64,7 @@ partial class Form1 {
             this.btnSelectParseDir = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tbRun = new System.Windows.Forms.TabPage();
+            this.chkAutoLoad = new System.Windows.Forms.CheckBox();
             this.chkDumNativ = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.rtxtInfoDir = new System.Windows.Forms.RichTextBox();
@@ -210,7 +217,7 @@ partial class Form1 {
             this.chkRefreshAssets.AutoSize = true;
             this.chkRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkRefreshAssets.Location = new System.Drawing.Point(306, 202);
+            this.chkRefreshAssets.Location = new System.Drawing.Point(308, 228);
             this.chkRefreshAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkRefreshAssets.Name = "chkRefreshAssets";
             this.chkRefreshAssets.Size = new System.Drawing.Size(137, 25);
@@ -300,7 +307,7 @@ partial class Form1 {
             this.btnScanAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnScanAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnScanAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnScanAssets.Location = new System.Drawing.Point(11, 270);
+            this.btnScanAssets.Location = new System.Drawing.Point(15, 275);
             this.btnScanAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnScanAssets.Name = "btnScanAssets";
             this.btnScanAssets.Size = new System.Drawing.Size(198, 30);
@@ -316,7 +323,7 @@ partial class Form1 {
             this.btnMoveCookedAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMoveCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnMoveCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnMoveCookedAssets.Location = new System.Drawing.Point(238, 270);
+            this.btnMoveCookedAssets.Location = new System.Drawing.Point(242, 275);
             this.btnMoveCookedAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMoveCookedAssets.Name = "btnMoveCookedAssets";
             this.btnMoveCookedAssets.Size = new System.Drawing.Size(198, 30);
@@ -332,7 +339,7 @@ partial class Form1 {
             this.btnSerializeAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSerializeAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSerializeAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSerializeAssets.Location = new System.Drawing.Point(468, 270);
+            this.btnSerializeAssets.Location = new System.Drawing.Point(472, 275);
             this.btnSerializeAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnSerializeAssets.Name = "btnSerializeAssets";
             this.btnSerializeAssets.Size = new System.Drawing.Size(198, 30);
@@ -372,7 +379,7 @@ partial class Form1 {
             this.rtxtOutput.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtOutput.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtOutput.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtOutput.Location = new System.Drawing.Point(15, 342);
+            this.rtxtOutput.Location = new System.Drawing.Point(16, 342);
             this.rtxtOutput.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtOutput.Name = "rtxtOutput";
             this.rtxtOutput.ReadOnly = true;
@@ -388,7 +395,7 @@ partial class Form1 {
             this.btnOpenAssetTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenAssetTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnOpenAssetTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnOpenAssetTypes.Location = new System.Drawing.Point(196, 637);
+            this.btnOpenAssetTypes.Location = new System.Drawing.Point(197, 637);
             this.btnOpenAssetTypes.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnOpenAssetTypes.Name = "btnOpenAssetTypes";
             this.btnOpenAssetTypes.Size = new System.Drawing.Size(177, 30);
@@ -404,7 +411,7 @@ partial class Form1 {
             this.btnOpenAllTypes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnOpenAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnOpenAllTypes.Location = new System.Drawing.Point(15, 637);
+            this.btnOpenAllTypes.Location = new System.Drawing.Point(16, 637);
             this.btnOpenAllTypes.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnOpenAllTypes.Name = "btnOpenAllTypes";
             this.btnOpenAllTypes.Size = new System.Drawing.Size(160, 30);
@@ -420,7 +427,7 @@ partial class Form1 {
             this.btnOpenLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenLogs.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnOpenLogs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnOpenLogs.Location = new System.Drawing.Point(676, 637);
+            this.btnOpenLogs.Location = new System.Drawing.Point(677, 637);
             this.btnOpenLogs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnOpenLogs.Name = "btnOpenLogs";
             this.btnOpenLogs.Size = new System.Drawing.Size(121, 30);
@@ -436,7 +443,7 @@ partial class Form1 {
             this.btnClearLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnClearLogs.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnClearLogs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnClearLogs.Location = new System.Drawing.Point(819, 637);
+            this.btnClearLogs.Location = new System.Drawing.Point(820, 637);
             this.btnClearLogs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnClearLogs.Name = "btnClearLogs";
             this.btnClearLogs.Size = new System.Drawing.Size(121, 30);
@@ -481,7 +488,7 @@ partial class Form1 {
             // 
             this.lblProgress.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblProgress.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lblProgress.Location = new System.Drawing.Point(704, 270);
+            this.lblProgress.Location = new System.Drawing.Point(708, 275);
             this.lblProgress.Name = "lblProgress";
             this.lblProgress.Size = new System.Drawing.Size(233, 30);
             this.lblProgress.TabIndex = 31;
@@ -502,6 +509,8 @@ partial class Form1 {
             this.rtxtParseDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtParseDir.TabIndex = 33;
             this.rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
+            this.rtxtParseDir.Enter += new System.EventHandler(this.rtxtParseDir_Enter);
+            this.rtxtParseDir.Leave += new System.EventHandler(this.rtxtParseDir_Leave);
             this.rtxtParseDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateParseDir);
             // 
             // btnSelectParseDir
@@ -535,6 +544,7 @@ partial class Form1 {
             // tbRun
             // 
             this.tbRun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tbRun.Controls.Add(this.chkAutoLoad);
             this.tbRun.Controls.Add(this.chkDumNativ);
             this.tbRun.Controls.Add(this.label2);
             this.tbRun.Controls.Add(this.btnLoadConfig);
@@ -569,25 +579,39 @@ partial class Form1 {
             this.tbRun.TabIndex = 0;
             this.tbRun.Text = "Run";
             // 
+            // chkAutoLoad
+            // 
+            this.chkAutoLoad.AutoSize = true;
+            this.chkAutoLoad.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkAutoLoad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkAutoLoad.Location = new System.Drawing.Point(623, 243);
+            this.chkAutoLoad.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.chkAutoLoad.Name = "chkAutoLoad";
+            this.chkAutoLoad.Size = new System.Drawing.Size(245, 25);
+            this.chkAutoLoad.TabIndex = 39;
+            this.chkAutoLoad.Text = "Auto Load Config on Launch";
+            this.chkAutoLoad.UseVisualStyleBackColor = true;
+            // 
             // chkDumNativ
             // 
             this.chkDumNativ.AutoSize = true;
             this.chkDumNativ.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkDumNativ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkDumNativ.Location = new System.Drawing.Point(306, 227);
+            this.chkDumNativ.Location = new System.Drawing.Point(308, 199);
             this.chkDumNativ.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkDumNativ.Name = "chkDumNativ";
-            this.chkDumNativ.Size = new System.Drawing.Size(190, 25);
+            this.chkDumNativ.Size = new System.Drawing.Size(164, 25);
             this.chkDumNativ.TabIndex = 38;
-            this.chkDumNativ.Text = "Dummy Nativ. Assets";
+            this.chkDumNativ.Text = "Uses Nativ. Assets";
             this.chkDumNativ.UseVisualStyleBackColor = true;
+            this.chkDumNativ.CheckedChanged += new System.EventHandler(this.chkDumNativ_CheckedChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label2.Location = new System.Drawing.Point(424, 306);
+            this.label2.Location = new System.Drawing.Point(434, 306);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(88, 30);
             this.label2.TabIndex = 33;
@@ -860,13 +884,13 @@ partial class Form1 {
             this.lbAuthors.AutoSize = true;
             this.lbAuthors.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lbAuthors.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lbAuthors.Location = new System.Drawing.Point(288, 7);
+            this.lbAuthors.Location = new System.Drawing.Point(296, 7);
             this.lbAuthors.Name = "lbAuthors";
             this.lbAuthors.Size = new System.Drawing.Size(393, 15);
             this.lbAuthors.TabIndex = 38;
             this.lbAuthors.Text = "Written by LongerWarrior, Buckminsterfullerene and atenfyr (UAAPI)";
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -877,9 +901,10 @@ partial class Form1 {
             this.Controls.Add(this.tabControl1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Cooked Asset Serializer";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnClosed);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.tabControl1.ResumeLayout(false);
             this.tbRun.ResumeLayout(false);
             this.tbRun.PerformLayout();
@@ -944,6 +969,12 @@ partial class Form1 {
     private Label label7;
     private ListBox lbAssetsToDelete;
     private Label lbAuthors;
+
+
+    // 
+    // Nativized Asset Dummying Settings Tab
+    // 
+
     private TabPage tbNativSett;
     private Label lbNativAssets;
     private RichTextBox rtxtNativAssets;
@@ -955,11 +986,5 @@ partial class Form1 {
     private Button btnDfltGamCnfg;
     private RichTextBox rtxtDfltGamCnfg;
     private CheckBox chkDumNativ;
-
-    // 
-    // Nativized Asset Dummying Settings Tab
-    // 
-
-
-
+    private CheckBox chkAutoLoad;
 }

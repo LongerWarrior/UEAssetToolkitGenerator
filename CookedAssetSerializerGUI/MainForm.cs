@@ -1,25 +1,36 @@
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 using CookedAssetSerializer;
+using CookedAssetSerializerGUI.Properties;
 using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
+using static System.Windows.Forms.Design.AxImporter;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace CookedAssetSerializerGUI;
 
-public partial class Form1 : Form
+public partial class MainForm : Form
 {
-    public Form1() {
+    public MainForm() {
         Singleton.Init(new Dictionary<string, bool> 
         { 
             ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false,
             ["SkeletalMesh.KeepMobileMinLODSettingOnDesktop"] = false
         });
-        
+
         InitializeComponent();
         SetupForm();
         SetupGlobals();
+
+        string SetContentDir = jsonsettings.ContentDir;
+        string SetParseDir = jsonsettings.ParseDir;
+        string SetJSONDir = jsonsettings.JSONDir;
+        string SetCookedDir = jsonsettings.CookedDir;
+        string SetInfoDir = jsonsettings.InfoDir;
 
         //new GenerateBPY();
 
@@ -36,7 +47,7 @@ public partial class Form1 : Form
 
     private CookedAssetSerializer.System system;
 
-    private Settings settings;
+    private JSONSettings jsonsettings;
 
     private volatile bool isRunning;
     
@@ -152,11 +163,23 @@ public partial class Form1 : Form
 
     private void OnClosed(object sender, FormClosedEventArgs e)
     {
-        if (MessageBox.Show(@"Do you want to save?", @"Holup!",
-                MessageBoxButtons.YesNo) == DialogResult.Yes)
+        if (AppSettings.Default.bDNSSave == false)
         {
-            SetupGlobals();
-            SaveSettings();
+            var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", "Auto Load Last Used Config on Launch?", "Do Not Show Again.");
+            var result = dialog.ShowDialog();
+            if (dialog.b1Dialog == true)
+            {
+                AppSettings.Default.bAutoUseLastCfg = true;
+            }
+            if (dialog.b2Dialog == true)
+            {
+                AppSettings.Default.bDNSSave = true;
+            }
+            if (result == DialogResult.Yes)
+            {
+                SetupGlobals();
+                SaveJSONSettings();
+            }
         }
     }
 
@@ -181,6 +204,10 @@ public partial class Form1 : Form
             }
         }
     }
+
+
+    
+
 
     private void SetupAssetsListBox(List<EAssetType> assets, ListBox assetBox)
     {
@@ -230,6 +257,25 @@ public partial class Form1 : Form
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
     }
 
+
+    private void rtxtParseDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtParseDir.Text.Length == 0)
+        {
+            rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
+            rtxtParseDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtParseDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtParseDir.Text == "C:\\ExamplePath\\Content\\Data")
+        {
+            rtxtParseDir.Text = "";
+            rtxtParseDir.ForeColor = SystemColors.WindowText;
+        }
+    }
+
     private string[] SanitiseInputs(string[] lines)
     {
         for (var i = 0; i < lines.Length; i++)
@@ -245,7 +291,7 @@ public partial class Form1 : Form
         return lines;
     }
 
-    private void SetupGlobals()
+    public void SetupGlobals()
     {
         var typesToCopy = new List<string>();
         typesToCopy.AddRange(SanitiseInputs(rtxtCookedAssets.Lines));
@@ -273,7 +319,7 @@ public partial class Form1 : Form
         }
 
 
-        settings = new Settings
+        jsonsettings = new JSONSettings
         {
             ContentDir = rtxtContentDir.Text,
             ParseDir = rtxtParseDir.Text,
@@ -292,35 +338,36 @@ public partial class Form1 : Form
             SelectedIndex = cbUEVersion.SelectedIndex
         };
 
-        system = new CookedAssetSerializer.System(settings);
+        system = new CookedAssetSerializer.System(jsonsettings);
     }
 
-    private void LoadSettings()
+    private void LoadJSONSettings()
     {
+        
         if (MessageBox.Show(@"Do you want to load in the file paths?", @"Holup!",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            rtxtContentDir.Text = settings.ContentDir;
-            rtxtParseDir.Text = settings.ParseDir;
-            rtxtJSONDir.Text = settings.JSONDir;
-            rtxtOutputDir.Text = settings.CookedDir;
-            rtxtInfoDir.Text = settings.InfoDir;
+            rtxtContentDir.Text = jsonsettings.ContentDir;
+            rtxtParseDir.Text = jsonsettings.ParseDir;
+            rtxtJSONDir.Text = jsonsettings.JSONDir;
+            rtxtOutputDir.Text = jsonsettings.CookedDir;
+            rtxtInfoDir.Text = jsonsettings.InfoDir;
         }
 
-        cbUEVersion.SelectedIndex = settings.SelectedIndex;
-        chkRefreshAssets.Checked = settings.RefreshAssets;
-        chkDummyWithProps.Checked = settings.DummyWithProps;
-        SetupAssetsListBox(settings.SkipSerialization, lbAssetsToSkipSerialization);
-        SetupAssetsListBox(settings.DummyAssets, lbDummyAssets);
-        SetupAssetsListBox(settings.DeleteAssets, lbAssetsToDelete);
-        rtxtCircularDependancy.Lines = settings.CircularDependency.ToArray();
-        rtxtSimpleAssets.Lines = settings.SimpleAssets.ToArray();
-        rtxtCookedAssets.Lines = settings.TypesToCopy.ToArray();
+        cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
+        chkRefreshAssets.Checked = jsonsettings.RefreshAssets;
+        chkDummyWithProps.Checked = jsonsettings.DummyWithProps;
+        SetupAssetsListBox(jsonsettings.SkipSerialization, lbAssetsToSkipSerialization);
+        SetupAssetsListBox(jsonsettings.DummyAssets, lbDummyAssets);
+        SetupAssetsListBox(jsonsettings.DeleteAssets, lbAssetsToDelete);
+        rtxtCircularDependancy.Lines = jsonsettings.CircularDependency.ToArray();
+        rtxtSimpleAssets.Lines = jsonsettings.SimpleAssets.ToArray();
+        rtxtCookedAssets.Lines = jsonsettings.TypesToCopy.ToArray();
     }
 
-    private void SaveSettings()
+    public void SaveJSONSettings()
     {
-        var output = JsonConvert.SerializeObject(settings, Formatting.Indented);
+        var output = JsonConvert.SerializeObject(jsonsettings, Formatting.Indented);
 
         var dialog = new SaveFileDialog();
         dialog.Filter = @"JSON files (*.json)|*.json";
@@ -330,8 +377,37 @@ public partial class Form1 : Form
         if (dialog.ShowDialog() != DialogResult.OK) return;
         if (dialog.FileName == "") return;
         File.WriteAllText(dialog.FileName, output);
+        AppSettings.Default.LastUsedCfg = dialog.FileName;
+        AppSettings.Default.Save();
         OutputText("Saved settings to: " + dialog.FileName, rtxtOutput);
     }
+
+    private void AutoLoadConfig()
+    {
+            var configFile = AppSettings.Default.LastUsedCfg;
+            if (!File.Exists(configFile))
+            {
+                OutputText("Please select a valid file!", rtxtOutput);
+                return;
+            }
+
+            // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
+            try
+            {
+                system.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
+                jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
+                LoadJSONSettings();
+                AppSettings.Default.LastUsedCfg = configFile;
+                AppSettings.Default.Save();
+                OutputText("Loaded settings from: " + configFile, rtxtOutput);
+            }
+            catch (Exception exception)
+            {
+                OutputText("Warning! Last used config is invalid!", rtxtOutput);
+                OutputText(exception.ToString(), rtxtOutput);
+            }        
+    }
+
 
     private void ToggleButtons()
     {
@@ -613,13 +689,23 @@ public partial class Form1 : Form
             OutputText("Please select a valid file!", rtxtOutput);
             return;
         }
+        if (chkAutoLoad.Checked)
+        {
+            AppSettings.Default.bAutoUseLastCfg = true;
+        }
+        else
+        {
+            AppSettings.Default.bAutoUseLastCfg = false;
+        }
 
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try
         {
             system.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
-            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(configFile));
-            LoadSettings();
+            jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
+            LoadJSONSettings();
+            AppSettings.Default.LastUsedCfg = configFile;
+            AppSettings.Default.Save();
             OutputText("Loaded settings from: " + configFile, rtxtOutput);
         }
         catch (Exception exception)
@@ -631,8 +717,16 @@ public partial class Form1 : Form
 
     private void btnSaveConfig_Click(object sender, EventArgs e)
     {
+        if (chkAutoLoad.Checked)
+        {
+            AppSettings.Default.bAutoUseLastCfg = true;
+        }
+        else
+        {
+            AppSettings.Default.bAutoUseLastCfg = false;
+        }
         SetupGlobals();
-        SaveSettings();
+        SaveJSONSettings();
     }
 
     private void btnSelectParseDir_Click(object sender, EventArgs e) {
@@ -644,4 +738,50 @@ public partial class Form1 : Form
         rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
     }
 
+    private void chkDumNativ_CheckedChanged(object sender, EventArgs e)
+    {
+        if (chkDumNativ.Checked)
+            tabControl1.TabPages.Add(tbNativSett);
+        else
+            tabControl1.TabPages.Remove(tbNativSett);
+    }
+
+    private void MainForm_Load(object sender, EventArgs e)
+    {
+        if (AppSettings.Default.bAutoUseLastCfg == true)
+        {
+            AutoLoadConfig();
+            chkAutoLoad.Checked = true;
+        }
+    }
+}
+
+
+public static class CheckboxDialog
+{
+    public static bool bYesNo;
+    public static bool ShowDialog(string text, string caption)
+    {
+        Form prompt = new Form();
+        prompt.Width = 400;
+        prompt.Height = 200;
+        prompt.Text = caption;
+        FlowLayoutPanel panel = new FlowLayoutPanel();
+        CheckBox chk = new CheckBox();
+        chk.Text = text;
+        Button ok = new Button() { Text = "Yes" };
+        ok.Click += (sender, e) => { prompt.Close();
+            bYesNo = true; };
+        Button no = new Button() { Text = "No" };
+        no.Click += (sender, e) => { prompt.Close();
+            bYesNo = false;
+        };
+        panel.Controls.Add(chk);
+        panel.SetFlowBreak(chk, true);
+        panel.Controls.Add(ok);
+        panel.Controls.Add(no);
+        prompt.Controls.Add(panel);
+        prompt.ShowDialog();
+        return chk.Checked;
+    }
 }

@@ -2,7 +2,7 @@
 
 public class UserDefinedEnumSerializer : Serializer<EnumExport>
 {
-    public UserDefinedEnumSerializer(Settings assetSettings, UAsset asset)
+    public UserDefinedEnumSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

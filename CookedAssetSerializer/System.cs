@@ -4,16 +4,16 @@ namespace CookedAssetSerializer;
 
 public class System
 {
-    private readonly Settings Settings;
+    private readonly JSONSettings JSONSettings;
 
     private int AssetTotal;
     private int AssetCount;
     StreamWriter Writer;
 
-    public System(Settings settings)
+    public System(JSONSettings jsonsettings)
     {
-        Settings = settings;
-        Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
+        JSONSettings = jsonsettings;
+        Writer = File.AppendText(Path.Combine(JSONSettings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -28,9 +28,9 @@ public class System
 
     public void ClearLists()
     {
-        Settings.CircularDependency.Clear();
-        Settings.SimpleAssets.Clear();
-        Settings.TypesToCopy.Clear();
+        JSONSettings.CircularDependency.Clear();
+        JSONSettings.SimpleAssets.Clear();
+        JSONSettings.TypesToCopy.Clear();
     }
 
     public void ScanAssetTypes(string typeToFind = "")
@@ -38,14 +38,14 @@ public class System
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
 
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(JSONSettings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
         AssetCount = 1;
         foreach (var file in files)
         {
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
-            var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
+            var type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+            var path = "/" + Path.GetRelativePath(JSONSettings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
             AssetCount++;
@@ -65,14 +65,14 @@ public class System
             allTypes.Add("\"" + entry.Key + "\",");
         }
 
-        File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
-        File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
+        File.WriteAllText(JSONSettings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
+        File.WriteAllText(JSONSettings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
         Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
     {
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(JSONSettings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
         AssetCount = 0;
@@ -80,17 +80,17 @@ public class System
         {
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            var type = GetAssetType(file, JSONSettings.GlobalUEVersion);
 
             AssetCount++;
-            if (!Settings.TypesToCopy.Contains(type))
+            if (!JSONSettings.TypesToCopy.Contains(type))
             {
                 PrintOutput("Skipped operation on " + file, "GetCookedAssets");
                 continue;
             }
 
-            var relativePath = Path.GetRelativePath(Settings.ContentDir, file);
-            var newPath = Path.Combine(Settings.CookedDir, relativePath);
+            var relativePath = Path.GetRelativePath(JSONSettings.ContentDir, file);
+            var newPath = Path.Combine(JSONSettings.CookedDir, relativePath);
 
             PrintOutput(newPath, "GetCookedAssets");
 
@@ -113,16 +113,16 @@ public class System
     
     public void SerializeAssets()
     {
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(JSONSettings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
         AssetCount = 0;
         foreach (var file in files)
         {
-            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
+            UAsset asset = new UAsset(file, JSONSettings.GlobalUEVersion, true);
             AssetCount++;
 
-            if (Settings.SkipSerialization.Contains(asset.assetType))
+            if (JSONSettings.SkipSerialization.Contains(asset.assetType))
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                 continue;
@@ -131,10 +131,10 @@ public class System
             bool skip = false;
             if (asset.assetType != EAssetType.Uncategorized)
             {
-                if (Settings.DummyAssets.Contains(asset.assetType))
+                if (JSONSettings.DummyAssets.Contains(asset.assetType))
                 {
-                    if (Settings.DummyWithProps) skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
-                    else skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                    if (JSONSettings.DummyWithProps) skip = CheckDeleteAsset(asset, new DummyWithProps(JSONSettings, asset).IsSkipped);
+                    else skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
                 }
                 else
                 {
@@ -143,82 +143,82 @@ public class System
                         case EAssetType.Blueprint:
                         case EAssetType.WidgetBlueprint:
                         case EAssetType.AnimBlueprint:
-                            skip = CheckDeleteAsset(asset, new BlueprintSerializer(Settings, asset, false).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new BlueprintSerializer(JSONSettings, asset, false).IsSkipped);
                             break;
                         case EAssetType.DataTable:
-                            skip = CheckDeleteAsset(asset, new DataTableSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DataTableSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.StringTable:
-                            skip = CheckDeleteAsset(asset, new StringTableSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new StringTableSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.UserDefinedStruct:
-                            skip = CheckDeleteAsset(asset, new UserDefinedStructSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new UserDefinedStructSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.BlendSpaceBase:
-                            skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.CameraAnim:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.LandscapeGrassType:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.MediaPlayer:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.MediaTexture:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.SubsurfaceProfile:
-                            skip = CheckDeleteAsset(asset, new SubsurfaceProfileSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new SubsurfaceProfileSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.Skeleton:
-                            skip = CheckDeleteAsset(asset, new SkeletonSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new SkeletonSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.MaterialParameterCollection:
-                            skip = CheckDeleteAsset(asset, new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new MaterialParameterCollectionSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.PhycialMaterial:
-                            skip = CheckDeleteAsset(asset, new PhysicalMaterialSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new PhysicalMaterialSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.Material:
-                            skip = CheckDeleteAsset(asset, new MaterialSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new MaterialSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.MaterialInstanceConstant:
-                            skip = CheckDeleteAsset(asset, new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new MaterialInstanceConstantSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.UserDefinedEnum:
-                            skip = CheckDeleteAsset(asset, new UserDefinedEnumSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new UserDefinedEnumSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.SoundCue:
-                            skip = CheckDeleteAsset(asset, new SoundCueSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new SoundCueSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.Font:
-                            skip = CheckDeleteAsset(asset, new FontSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new FontSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.FontFace:
-                            skip = CheckDeleteAsset(asset, new FontFaceSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new FontFaceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.CurveBase:
-                            skip = CheckDeleteAsset(asset, new CurveBaseSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new CurveBaseSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.Texture2D:
-                            skip = CheckDeleteAsset(asset, new Texture2DSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new Texture2DSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.SkeletalMesh:
-                            skip = CheckDeleteAsset(asset, new SkeletalMeshSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new SkeletalMeshSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.FileMediaSource:
-                            skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.StaticMesh:
-                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(JSONSettings, asset).IsSkipped);
                             break;
                     }
                 }
@@ -226,8 +226,8 @@ public class System
             else
             {
                 if (asset.mainExport == 0) continue;
-                if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
-                skip = CheckDeleteAsset(asset, new UncategorizedSerializer(Settings, asset).IsSkipped);
+                if (!JSONSettings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
+                skip = CheckDeleteAsset(asset, new UncategorizedSerializer(JSONSettings, asset).IsSkipped);
             }
             
             if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
@@ -238,10 +238,10 @@ public class System
 
     public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
     {
-        if (isSkipped && Settings.DeleteAssets.Contains(asset.assetType)) 
+        if (isSkipped && JSONSettings.DeleteAssets.Contains(asset.assetType)) 
         {
-            File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
-            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+            File.Delete(Path.Join(JSONSettings.JSONDir, Path.Join("\\Game", 
+            Path.GetRelativePath(JSONSettings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
             Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
         }
         return isSkipped;

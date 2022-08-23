@@ -2,7 +2,7 @@
 
     public class FontSerializer : Serializer<FontExport>
     {
-        public FontSerializer(Settings assetSettings, UAsset asset)
+        public FontSerializer(JSONSettings assetSettings, UAsset asset)
         {
             Settings = assetSettings;
             Asset = asset;

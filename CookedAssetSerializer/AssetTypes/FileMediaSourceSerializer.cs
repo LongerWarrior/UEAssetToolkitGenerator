@@ -2,7 +2,7 @@
 
 public class FileMediaSourceSerializer : SimpleAssetSerializer<FileMediaSourceExport>
 {
-    public FileMediaSourceSerializer(Settings settings, UAsset asset) : base(settings, asset)
+    public FileMediaSourceSerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup()) return;
         SerializeAsset(null, null, new JProperty("PlayerName", 

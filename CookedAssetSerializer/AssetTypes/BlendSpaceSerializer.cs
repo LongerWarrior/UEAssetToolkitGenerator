@@ -12,7 +12,7 @@ public struct ParameterNames
 
 public class BlendSpaceSerializer : Serializer<BlendSpaceBaseExport>
 {
-    public BlendSpaceSerializer(Settings assetSettings, UAsset asset)
+    public BlendSpaceSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

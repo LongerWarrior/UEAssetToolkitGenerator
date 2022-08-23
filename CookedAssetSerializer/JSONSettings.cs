@@ -1,6 +1,6 @@
 ﻿namespace CookedAssetSerializer;
 
-public struct Settings
+public struct JSONSettings
 {
     [JsonProperty] public string ContentDir;
     [JsonProperty] public string ParseDir;
@@ -17,4 +17,5 @@ public struct Settings
     [JsonProperty] public List<string> SimpleAssets;
     [JsonProperty] public List<string> TypesToCopy;
     [JsonProperty] public int SelectedIndex;
+
 }

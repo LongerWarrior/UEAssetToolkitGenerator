@@ -2,7 +2,7 @@
 
 public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {
-    public DummySerializer(Settings settings, UAsset asset) : base(settings, asset)
+    public DummySerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup(false)) return;
         AssignAssetSerializedData();
@@ -12,7 +12,7 @@ public class DummySerializer : SimpleAssetSerializer<NormalExport>
 
 public class DummyWithProps : Serializer<NormalExport>
 {
-    public DummyWithProps(Settings assetSettings, UAsset asset)
+    public DummyWithProps(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

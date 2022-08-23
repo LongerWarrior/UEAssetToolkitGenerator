@@ -2,7 +2,7 @@
 
 public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
 {
-    public SimpleAssetSerializer(Settings assetSettings, UAsset asset)
+    public SimpleAssetSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;
