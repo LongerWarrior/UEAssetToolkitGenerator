@@ -15,6 +15,9 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace CookedAssetSerializerGUI;
 
+
+
+
 public partial class MainForm : Form
 {
     
@@ -840,6 +843,18 @@ public partial class MainForm : Form
         }
     }
 
+    private void treeParseDir_AfterCheck(object sender, TreeViewEventArgs e)
+    {
+        if (e.Action == TreeViewAction.Unknown) return;
+
+        foreach (TreeNode n in e.Node.Children())
+            n.Checked = e.Node.Checked;
+
+        // Comment this if you don't need it.
+        foreach (TreeNode p in e.Node.Parents())
+            p.Checked = p.Nodes.OfType<TreeNode>().Any(n => n.Checked);
+    }
+
 
     private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
     {
@@ -936,6 +951,9 @@ public partial class MainForm : Form
         }
     }
 
+
+
+
     private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
     {
         if (chkSettDNS.Checked == true)
@@ -960,5 +978,31 @@ public partial class MainForm : Form
             AppSettings.Default.bAutoUseLastCfg = false;
         }
         AppSettings.Default.Save();
+    }
+}
+
+static class TreeViewExtensions
+{
+    public static IEnumerable<TreeNode> Children(this TreeNode node)
+    {
+        foreach (TreeNode n in node.Nodes)
+        {
+            yield return n;
+
+            foreach (TreeNode child in Children(n))
+                yield return child;
+        }
+    }
+
+    public static IEnumerable<TreeNode> Parents(this TreeNode node)
+    {
+        var p = node.Parent;
+
+        while (p != null)
+        {
+            yield return p;
+
+            p = p.Parent;
+        }
     }
 }

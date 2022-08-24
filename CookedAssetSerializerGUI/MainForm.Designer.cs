@@ -143,6 +143,7 @@ partial class MainForm {
             this.treeParseDir.Size = new System.Drawing.Size(215, 669);
             this.treeParseDir.TabIndex = 2;
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
+            this.treeParseDir.AfterCheck += new TreeViewEventHandler(this.treeParseDir_AfterCheck);
             // 
             // panel2
             // 
