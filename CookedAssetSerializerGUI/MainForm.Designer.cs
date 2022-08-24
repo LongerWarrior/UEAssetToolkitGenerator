@@ -258,6 +258,7 @@ partial class MainForm {
             this.chkDumNativ.TabIndex = 38;
             this.chkDumNativ.Text = "Uses Nativ. Assets";
             this.chkDumNativ.UseVisualStyleBackColor = true;
+            this.chkDumNativ.CheckedChanged += new System.EventHandler(this.chkDumNativ_CheckedChanged);
             // 
             // label2
             // 
@@ -302,22 +303,6 @@ partial class MainForm {
             this.btnSaveConfig.UseVisualStyleBackColor = true;
             this.btnSaveConfig.Click += new System.EventHandler(this.btnSaveConfig_Click);
             // 
-            // rtxtInfoDir
-            // 
-            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtInfoDir.Location = new System.Drawing.Point(150, 158);
-            this.rtxtInfoDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.rtxtInfoDir.Multiline = false;
-            this.rtxtInfoDir.Name = "rtxtInfoDir";
-            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.rtxtInfoDir.Size = new System.Drawing.Size(787, 30);
-            this.rtxtInfoDir.TabIndex = 37;
-            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
-            this.rtxtInfoDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
-            // 
             // rtxtOutput
             // 
             this.rtxtOutput.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
@@ -347,7 +332,8 @@ partial class MainForm {
             this.rtxtParseDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtParseDir.TabIndex = 33;
             this.rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
-            this.rtxtParseDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
+            this.rtxtParseDir.Enter += new System.EventHandler(this.rtxtParseDir_Enter);
+            this.rtxtParseDir.Leave += new System.EventHandler(this.rtxtParseDir_Leave);
             // 
             // rtxtContentDir
             // 
@@ -363,7 +349,8 @@ partial class MainForm {
             this.rtxtContentDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
-            this.rtxtContentDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
+            this.rtxtContentDir.Enter += new System.EventHandler(this.rtxtContentDir_Enter);
+            this.rtxtContentDir.Leave += new System.EventHandler(this.rtxtContentDir_Leave);
             // 
             // rtxtJSONDir
             // 
@@ -379,7 +366,8 @@ partial class MainForm {
             this.rtxtJSONDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtJSONDir.TabIndex = 3;
             this.rtxtJSONDir.Text = "C:\\ExamplePath\\AssetDump";
-            this.rtxtJSONDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
+            this.rtxtJSONDir.Enter += new System.EventHandler(this.rtxtJSONDir_Enter);
+            this.rtxtJSONDir.Leave += new System.EventHandler(this.rtxtJSONDir_Leave);
             // 
             // rtxtCookedDir
             // 
@@ -395,7 +383,25 @@ partial class MainForm {
             this.rtxtCookedDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtCookedDir.TabIndex = 5;
             this.rtxtCookedDir.Text = "C:\\ExamplePath\\Cooked";
-            this.rtxtCookedDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateDir);
+            this.rtxtCookedDir.Enter += new System.EventHandler(this.rtxtCookedDir_Enter);
+            this.rtxtCookedDir.Leave += new System.EventHandler(this.rtxtCookedDir_Leave);
+            // 
+            // rtxtInfoDir
+            // 
+            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtInfoDir.Location = new System.Drawing.Point(150, 158);
+            this.rtxtInfoDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.rtxtInfoDir.Multiline = false;
+            this.rtxtInfoDir.Name = "rtxtInfoDir";
+            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtInfoDir.Size = new System.Drawing.Size(787, 30);
+            this.rtxtInfoDir.TabIndex = 37;
+            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
+            this.rtxtInfoDir.Enter += new System.EventHandler(this.rtxtInfoDir_Enter);
+            this.rtxtInfoDir.Leave += new System.EventHandler(this.rtxtInfoDir_Leave);
             // 
             // btnSelectContentDir
             // 

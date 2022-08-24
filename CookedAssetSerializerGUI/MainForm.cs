@@ -27,11 +27,11 @@ public partial class MainForm : Form
         SetupForm();
         SetupGlobals();
 
-        string SetContentDir = jsonsettings.ContentDir;
+        /*string SetContentDir = jsonsettings.ContentDir;
         string SetParseDir = jsonsettings.ParseDir;
         string SetJSONDir = jsonsettings.JSONDir;
         string SetCookedDir = jsonsettings.CookedDir;
-        string SetInfoDir = jsonsettings.InfoDir;
+        string SetInfoDir = jsonsettings.InfoDir;*/
 
         //new GenerateBPY();
 
@@ -227,12 +227,12 @@ public partial class MainForm : Form
 
     private void SetupForm()
     {
-        rtxtContentDir.Text = Environment.CurrentDirectory;
+        /*rtxtContentDir.Text = Environment.CurrentDirectory;
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtParseDir.Text = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
         rtxtCookedDir.Text = Environment.CurrentDirectory;
-        rtxtInfoDir.Text = Environment.CurrentDirectory;
+        rtxtInfoDir.Text = Environment.CurrentDirectory;*/
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
@@ -256,6 +256,79 @@ public partial class MainForm : Form
         };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
+    }
+
+
+    private void rtxtCookedDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtCookedDir.Text.Length == 0)
+        {
+            rtxtCookedDir.Text = "C:\\ExamplePath\\Cooked";
+            rtxtCookedDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtCookedDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtCookedDir.Text == "C:\\ExamplePath\\Cooked")
+        {
+            rtxtCookedDir.Text = "";
+            rtxtCookedDir.ForeColor = SystemColors.WindowText;
+        }
+    }
+
+    private void rtxtJSONDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtJSONDir.Text.Length == 0)
+        {
+            rtxtJSONDir.Text = "C:\\ExamplePath\\AssetDump";
+            rtxtJSONDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtJSONDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtJSONDir.Text == "C:\\ExamplePath\\AssetDump")
+        {
+            rtxtJSONDir.Text = "";
+            rtxtJSONDir.ForeColor = SystemColors.WindowText;
+        }
+    }
+
+    private void rtxtContentDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtContentDir.Text.Length == 0)
+        {
+            rtxtContentDir.Text = "C:\\ExamplePath\\Content";
+            rtxtContentDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtContentDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtContentDir.Text == "C:\\ExamplePath\\Content")
+        {
+            rtxtContentDir.Text = "";
+            rtxtContentDir.ForeColor = SystemColors.WindowText;
+        }
+    }
+
+    private void rtxtInfoDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtInfoDir.Text.Length == 0)
+        {
+            rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
+            rtxtInfoDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtInfoDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtInfoDir.Text == "C:\\ExamplePath\\Info")
+        {
+            rtxtInfoDir.Text = "";
+            rtxtInfoDir.ForeColor = SystemColors.WindowText;
+        }
     }
 
 
@@ -853,5 +926,10 @@ public partial class MainForm : Form
             panel1.Visible = false;
             treeParseDir.Nodes.Clear();
         }
+    }
+
+    private void rtxtContentDir_TextChanged(object sender, EventArgs e)
+    {
+
     }
 }
