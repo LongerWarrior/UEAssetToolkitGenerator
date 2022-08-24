@@ -71,6 +71,7 @@ partial class MainForm {
             this.chkRefreshAssets = new System.Windows.Forms.CheckBox();
             this.cbUEVersion = new System.Windows.Forms.ComboBox();
             this.tbSettings = new System.Windows.Forms.TabPage();
+            this.chkSettDNS = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.lbAssetsToDelete = new System.Windows.Forms.ListBox();
             this.chkDummyWithProps = new System.Windows.Forms.CheckBox();
@@ -141,6 +142,7 @@ partial class MainForm {
             this.treeParseDir.Name = "treeParseDir";
             this.treeParseDir.Size = new System.Drawing.Size(215, 669);
             this.treeParseDir.TabIndex = 2;
+            this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
             // 
             // panel2
             // 
@@ -169,7 +171,6 @@ partial class MainForm {
             // 
             this.tabControl1.Controls.Add(this.tbRun);
             this.tabControl1.Controls.Add(this.tbSettings);
-            this.tabControl1.Controls.Add(this.tbNativSett);
             this.tabControl1.Location = new System.Drawing.Point(3, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
@@ -245,6 +246,7 @@ partial class MainForm {
             this.chkAutoLoad.TabIndex = 39;
             this.chkAutoLoad.Text = "Auto Load Config on Launch";
             this.chkAutoLoad.UseVisualStyleBackColor = true;
+            this.chkAutoLoad.CheckedChanged += new System.EventHandler(this.chkAutoLoad_CheckedChanged);
             // 
             // chkDumNativ
             // 
@@ -302,6 +304,23 @@ partial class MainForm {
             this.btnSaveConfig.Text = "Save Config Settings";
             this.btnSaveConfig.UseVisualStyleBackColor = true;
             this.btnSaveConfig.Click += new System.EventHandler(this.btnSaveConfig_Click);
+            // 
+            // rtxtInfoDir
+            // 
+            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtInfoDir.Location = new System.Drawing.Point(150, 158);
+            this.rtxtInfoDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.rtxtInfoDir.Multiline = false;
+            this.rtxtInfoDir.Name = "rtxtInfoDir";
+            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtInfoDir.Size = new System.Drawing.Size(787, 30);
+            this.rtxtInfoDir.TabIndex = 37;
+            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
+            this.rtxtInfoDir.Enter += new System.EventHandler(this.rtxtInfoDir_Enter);
+            this.rtxtInfoDir.Leave += new System.EventHandler(this.rtxtInfoDir_Leave);
             // 
             // rtxtOutput
             // 
@@ -385,23 +404,6 @@ partial class MainForm {
             this.rtxtCookedDir.Text = "C:\\ExamplePath\\Cooked";
             this.rtxtCookedDir.Enter += new System.EventHandler(this.rtxtCookedDir_Enter);
             this.rtxtCookedDir.Leave += new System.EventHandler(this.rtxtCookedDir_Leave);
-            // 
-            // rtxtInfoDir
-            // 
-            this.rtxtInfoDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.rtxtInfoDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtInfoDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.rtxtInfoDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtInfoDir.Location = new System.Drawing.Point(150, 158);
-            this.rtxtInfoDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.rtxtInfoDir.Multiline = false;
-            this.rtxtInfoDir.Name = "rtxtInfoDir";
-            this.rtxtInfoDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.rtxtInfoDir.Size = new System.Drawing.Size(787, 30);
-            this.rtxtInfoDir.TabIndex = 37;
-            this.rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
-            this.rtxtInfoDir.Enter += new System.EventHandler(this.rtxtInfoDir_Enter);
-            this.rtxtInfoDir.Leave += new System.EventHandler(this.rtxtInfoDir_Leave);
             // 
             // btnSelectContentDir
             // 
@@ -646,6 +648,7 @@ partial class MainForm {
             // tbSettings
             // 
             this.tbSettings.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tbSettings.Controls.Add(this.chkSettDNS);
             this.tbSettings.Controls.Add(this.label7);
             this.tbSettings.Controls.Add(this.lbAssetsToDelete);
             this.tbSettings.Controls.Add(this.chkDummyWithProps);
@@ -666,6 +669,17 @@ partial class MainForm {
             this.tbSettings.Size = new System.Drawing.Size(956, 681);
             this.tbSettings.TabIndex = 1;
             this.tbSettings.Text = "Settings";
+            // 
+            // chkSettDNS
+            // 
+            this.chkSettDNS.AutoSize = true;
+            this.chkSettDNS.Location = new System.Drawing.Point(656, 654);
+            this.chkSettDNS.Name = "chkSettDNS";
+            this.chkSettDNS.Size = new System.Drawing.Size(215, 19);
+            this.chkSettDNS.TabIndex = 41;
+            this.chkSettDNS.Text = "Do Not Show Save Prompt on Close";
+            this.chkSettDNS.UseVisualStyleBackColor = true;
+            this.chkSettDNS.CheckedChanged += new System.EventHandler(this.chkSettDNS_CheckedChanged);
             // 
             // label7
             // 
@@ -690,7 +704,7 @@ partial class MainForm {
             this.lbAssetsToDelete.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lbAssetsToDelete.Name = "lbAssetsToDelete";
             this.lbAssetsToDelete.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.lbAssetsToDelete.Size = new System.Drawing.Size(354, 147);
+            this.lbAssetsToDelete.Size = new System.Drawing.Size(354, 126);
             this.lbAssetsToDelete.TabIndex = 40;
             // 
             // chkDummyWithProps
@@ -816,7 +830,7 @@ partial class MainForm {
             this.rtxtCircularDependancy.Location = new System.Drawing.Point(17, 517);
             this.rtxtCircularDependancy.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rtxtCircularDependancy.Name = "rtxtCircularDependancy";
-            this.rtxtCircularDependancy.Size = new System.Drawing.Size(543, 147);
+            this.rtxtCircularDependancy.Size = new System.Drawing.Size(543, 131);
             this.rtxtCircularDependancy.TabIndex = 20;
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
@@ -1069,4 +1083,5 @@ partial class MainForm {
     private ComboBox cbNativMethod;
     private CheckBox chkUserEnumStruct;
     private Label lbNativAssets;
+    private CheckBox chkSettDNS;
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CookedAssetSerializerGUI.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,43 +25,49 @@ namespace CookedAssetSerializerGUI
             lbBoolDialog.Left = (this.ClientSize.Width - (lbBoolDialog.Width)) / 2;
             chkBool1.Left = (this.ClientSize.Width - (chkBool1.Width)) / 2;
             chkBool2.Left = (this.ClientSize.Width - (chkBool2.Width)) / 2;
-
         }
 
         public bool b1Dialog
         {
             get { return chkBool1.Checked; }
+            set { chkBool1.Checked = value; }
         }
+
 
         public bool b2Dialog
         {
             get { return chkBool2.Checked; }
+            set { chkBool2.Checked = value; }
         }
+
 
         public string chk1Caption;
         public string chk2Caption;
         public string DialogCaption;
         public string dTitle;
-        
 
-        /*private void btnYes_Click(object sender, EventArgs e)
+        private void chkBool1_CheckedChanged(object sender, EventArgs e)
         {
-            SetBoolfromChk(b1Dialog, chkBool1);
-            SetBoolfromChk(b2Dialog, chkBool2);
-        }
-
-        private void btnNo_Click(object sender, EventArgs e)
-        {
-            SetBoolfromChk(b1Dialog, chkBool1);
-            SetBoolfromChk(b2Dialog, chkBool2);
-        }
-
-        private void SetBoolfromChk(bool boolToSet, CheckBox checkBoxtc)
-        {
-            if (checkBoxtc.Checked)
-                boolToSet = true;
+            if (chkBool1.Checked == true)
+            {
+                b1Dialog = true;
+            }
             else
-                boolToSet = false;
-        }*/
+            {
+                b1Dialog = false;
+            }
+        }
+
+        private void chkBool2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkBool2.Checked == true)
+            {
+                b2Dialog = true;
+            }
+            else
+            {
+                b2Dialog = false;
+            }
+        }
     }
 }

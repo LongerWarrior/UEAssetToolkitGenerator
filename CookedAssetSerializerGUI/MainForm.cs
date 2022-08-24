@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -16,6 +17,9 @@ namespace CookedAssetSerializerGUI;
 
 public partial class MainForm : Form
 {
+    
+
+
     public MainForm() {
         Singleton.Init(new Dictionary<string, bool> 
         { 
@@ -25,13 +29,9 @@ public partial class MainForm : Form
 
         InitializeComponent();
         SetupForm();
-        SetupGlobals();
+        /*SetupGlobals();*/
 
-        /*string SetContentDir = jsonsettings.ContentDir;
-        string SetParseDir = jsonsettings.ParseDir;
-        string SetJSONDir = jsonsettings.JSONDir;
-        string SetCookedDir = jsonsettings.CookedDir;
-        string SetInfoDir = jsonsettings.InfoDir;*/
+        
 
         //new GenerateBPY();
 
@@ -167,20 +167,23 @@ public partial class MainForm : Form
         if (AppSettings.Default.bDNSSave == false)
         {
             var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", "Auto Load Last Used Config on Launch?", "Do Not Show Again.");
+            if (AppSettings.Default.bAutoUseLastCfg == true)
+            {
+                dialog.b1Dialog = true;
+            }
             var result = dialog.ShowDialog();
-            if (dialog.b1Dialog == true)
-            {
-                AppSettings.Default.bAutoUseLastCfg = true;
-            }
-            if (dialog.b2Dialog == true)
-            {
-                AppSettings.Default.bDNSSave = true;
-            }
+
+            AppSettings.Default.bAutoUseLastCfg = dialog.b1Dialog;
+            AppSettings.Default.bDNSSave = dialog.b2Dialog;
+            AppSettings.Default.Save();
+            
+
+
             if (result == DialogResult.Yes)
             {
                 SetupGlobals();
                 SaveJSONSettings();
-            }
+            }             
         }
     }
 
@@ -256,6 +259,11 @@ public partial class MainForm : Form
         };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
+    }
+
+    private void SetDialogDirectories()
+    {
+
     }
 
 
@@ -530,24 +538,28 @@ public partial class MainForm : Form
             if (!bIsLog) OutputText("You need to scan the assets first!", rtxtOutput);
             return;
         }
-
-        // I don't know why, I don't know how, but doing just Process.Start(path) doesn't fucking work,
-        // even though that's the preferred option since it opens whatever editor is associated with the file extension
         Process.Start(new ProcessStartInfo { FileName = @path, UseShellExecute = true });
     }
 
     private string OpenDirectoryDialog(string path) 
     {
         var fbd = new FolderBrowserDialog();
+        if (string.IsNullOrEmpty(path))
+        {
+
+            fbd.InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+            
+        }
         if (Directory.Exists(path)) fbd.SelectedPath = path + @"\";
         if (fbd.ShowDialog() == DialogResult.Cancel) return path;
         return fbd.SelectedPath;
     }
 
-    private string OpenFileDialog(string filter)
+    private string OpenFileDialog(string filter, string path)
     {
         var dialog = new OpenFileDialog();
         dialog.Filter = filter;
+        dialog.InitialDirectory = path;
         dialog.RestoreDirectory = true;
         return dialog.ShowDialog() != DialogResult.OK ? "" : dialog.FileName;
     }
@@ -757,7 +769,7 @@ public partial class MainForm : Form
 
     private void btnLoadConfig_Click(object sender, EventArgs e)
     {
-        var configFile = OpenFileDialog(@"JSON files (*.json)|*.json");
+        var configFile = OpenFileDialog(@"JSON files (*.json)|*.json", rtxtInfoDir.Text);
         if (!File.Exists(configFile))
         {
             OutputText("Please select a valid file!", rtxtOutput);
@@ -791,14 +803,6 @@ public partial class MainForm : Form
 
     private void btnSaveConfig_Click(object sender, EventArgs e)
     {
-        if (chkAutoLoad.Checked)
-        {
-            AppSettings.Default.bAutoUseLastCfg = true;
-        }
-        else
-        {
-            AppSettings.Default.bAutoUseLastCfg = false;
-        }
         SetupGlobals();
         SaveJSONSettings();
     }
@@ -815,7 +819,7 @@ public partial class MainForm : Form
 
     private void chkDumNativ_CheckedChanged(object sender, EventArgs e)
     {
-        if (chkDumNativ.Checked)
+        if (chkDumNativ.Checked == true)
             tabControl1.TabPages.Add(tbNativSett);
         else
             tabControl1.TabPages.Remove(tbNativSett);
@@ -829,6 +833,10 @@ public partial class MainForm : Form
         {
             AutoLoadConfig();
             chkAutoLoad.Checked = true;
+        }
+        if (AppSettings.Default.bDNSSave == true)
+        {
+            chkSettDNS.Checked = true;
         }
     }
 
@@ -928,8 +936,29 @@ public partial class MainForm : Form
         }
     }
 
-    private void rtxtContentDir_TextChanged(object sender, EventArgs e)
+    private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
     {
+        if (chkSettDNS.Checked == true)
+        {
+            AppSettings.Default.bDNSSave = true;
+        }
+        else
+        {
+            AppSettings.Default.bDNSSave = false;
+        }
+        AppSettings.Default.Save();
+    }
 
+    private void chkAutoLoad_CheckedChanged(object sender, EventArgs e)
+    {
+        if (chkAutoLoad.Checked == true)
+        {
+            AppSettings.Default.bAutoUseLastCfg = true;
+        }
+        else
+        {
+            AppSettings.Default.bAutoUseLastCfg = false;
+        }
+        AppSettings.Default.Save();
     }
 }

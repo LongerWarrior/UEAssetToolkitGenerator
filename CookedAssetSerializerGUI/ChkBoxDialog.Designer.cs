@@ -57,6 +57,7 @@ namespace CookedAssetSerializerGUI
             this.chkBool1.Size = new System.Drawing.Size(15, 14);
             this.chkBool1.TabIndex = 1;
             this.chkBool1.UseVisualStyleBackColor = true;
+            this.chkBool1.CheckedChanged += new System.EventHandler(this.chkBool1_CheckedChanged);
             // 
             // chkBool2
             // 
@@ -67,6 +68,7 @@ namespace CookedAssetSerializerGUI
             this.chkBool2.Size = new System.Drawing.Size(15, 14);
             this.chkBool2.TabIndex = 2;
             this.chkBool2.UseVisualStyleBackColor = true;
+            this.chkBool2.CheckedChanged += new System.EventHandler(this.chkBool2_CheckedChanged);
             // 
             // btnNo
             // 
