@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
 using UAssetAPI;
@@ -10,12 +11,17 @@ namespace CookedAssetSerializerGUI;
 public partial class Form1 : Form
 {
     public Form1() {
-        Singleton.Init(new Dictionary<string, bool> { ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false ,
+        Singleton.Init(new Dictionary<string, bool> 
+        { 
+            ["StaticMesh.KeepMobileMinLODSettingOnDesktop"] = false,
             ["SkeletalMesh.KeepMobileMinLODSettingOnDesktop"] = false
-            });
+        });
+        
         InitializeComponent();
         SetupForm();
         SetupGlobals();
+
+        //new GenerateBPY();
 
         Task.Run(EventLoop);
     }
@@ -23,7 +29,9 @@ public partial class Form1 : Form
     #region Vars
 
     private delegate void SafeCallDelegate();
-    private delegate void SafeCallDelegateBool(bool enable);
+
+    private delegate void SafeCallDelegateRichText(string text, RichTextBox rtxt);
+
     private delegate void SafeCallDelegateText(string text);
 
     private CookedAssetSerializer.System system;
@@ -142,31 +150,35 @@ public partial class Form1 : Form
         {
             lock(boolLock) if (isRunning)
             {
-                    if (system.GetAssetTotal() != 0) {
-                        ProgressText(system.GetAssetCount()+ " / " +system.GetAssetTotal());
-                    }
+                if (system.GetAssetTotal() != 0) 
+                {
+                    ProgressText(system.GetAssetCount() + " / " + system.GetAssetTotal());
+                }
             }
-
-            await using var sw = File.AppendText(Path.Combine(settings.JSONDir, "thread_log.txt"));
-            await sw.WriteLineAsync($"[{isRunning}]");
-
             await Task.Delay(50);
+            
+            // Do this in order to make sure that the correct total is outputted when the isRunning is set to false
+            // and the delay is not enough to make the total outputted
+            if ((system.GetAssetTotal() == system.GetAssetCount()) && system.GetAssetTotal() != 0)
+            {
+                ProgressText(system.GetAssetCount() + " / " + system.GetAssetTotal());
+            }
         }
     }
 
-    private void SetupAssetsToSkipSerialization(List<EAssetType> assets)
+    private void SetupAssetsListBox(List<EAssetType> assets, ListBox assetBox)
     {
-        lbAssetsToSkipSerialization.DataSource = Enum.GetValues(typeof(EAssetType));
+        assetBox.DataSource = Enum.GetValues(typeof(EAssetType));
         var hasBP = false;
         foreach (var asset in assets)
         {
-            lbAssetsToSkipSerialization.SetSelected(lbAssetsToSkipSerialization.FindString(asset.ToString()), true);
+            assetBox.SetSelected(assetBox.FindString(asset.ToString()), true);
             if (asset == EAssetType.Blueprint) hasBP = true;
         }
 
         // For some stupid reason, the first item in the lb is always enabled, which in this case, is the Blueprint,
         // which is the absolute worst time for this """feature""" to happen
-        lbAssetsToSkipSerialization.SetSelected(0, hasBP);
+        assetBox.SetSelected(0, hasBP);
     }
 
     private void SetupForm()
@@ -176,21 +188,27 @@ public partial class Form1 : Form
         rtxtParseDir.Text = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
         rtxtOutputDir.Text = Environment.CurrentDirectory;
+        rtxtInfoDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
 
-        List<EAssetType> defaultAssets = new()
+        List<EAssetType> defaultSkipAssets = new()
         {
-            EAssetType.BlendSpaceBase,
-            EAssetType.AnimSequence,
-            EAssetType.SkeletalMesh,
-            EAssetType.Skeleton,
-            EAssetType.AnimMontage,
-            EAssetType.FileMediaSource,
-            EAssetType.StaticMesh
+            EAssetType.SkeletalMesh
         };
-        SetupAssetsToSkipSerialization(defaultAssets);
+        SetupAssetsListBox(defaultSkipAssets, lbAssetsToSkipSerialization);
+        List<EAssetType> defaultDummyAssets = new()
+        {
+            EAssetType.AnimSequence,
+            EAssetType.AnimMontage,
+            EAssetType.CameraAnim,
+            EAssetType.LandscapeGrassType,
+            EAssetType.MediaPlayer,
+            EAssetType.MediaTexture
+        };
+        SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
+        SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
     }
 
     private string[] SanitiseInputs(string[] lines)
@@ -216,16 +234,22 @@ public partial class Form1 : Form
         simpleAssets.AddRange(SanitiseInputs(rtxtSimpleAssets.Lines));
         var assetsToSkip = new List<EAssetType>();
         assetsToSkip.AddRange(lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>());
+        var dummyAssets = new List<EAssetType>();
+        dummyAssets.AddRange(lbDummyAssets.SelectedItems.Cast<EAssetType>());
+        var assetsToDelete = new List<EAssetType>();
+        assetsToDelete.AddRange(lbAssetsToDelete.SelectedItems.Cast<EAssetType>());
         var circularDependencies = new List<string>();
         circularDependencies.AddRange(SanitiseInputs(rtxtCircularDependancy.Lines));
 
-        if (string.IsNullOrEmpty(rtxtJSONDir.Text)) {
-            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "AssetDump");
+        if (string.IsNullOrEmpty(rtxtJSONDir.Text)) 
+        {
+            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
             Directory.CreateDirectory(rtxtJSONDir.Text);
         }
 
-        if (string.IsNullOrEmpty(rtxtOutputDir.Text)) {
-            rtxtOutputDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "Cooked");
+        if (string.IsNullOrEmpty(rtxtOutputDir.Text)) 
+        {
+            rtxtOutputDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
             Directory.CreateDirectory(rtxtOutputDir.Text);
         }
 
@@ -235,10 +259,14 @@ public partial class Form1 : Form
             ContentDir = rtxtContentDir.Text,
             ParseDir = rtxtParseDir.Text,
             JSONDir = rtxtJSONDir.Text,
-            OutputDir = rtxtOutputDir.Text,
+            CookedDir = rtxtOutputDir.Text,
+            InfoDir = rtxtInfoDir.Text,
             GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
             RefreshAssets = chkRefreshAssets.Checked,
+            DummyWithProps = chkDummyWithProps.Checked,
+            DummyAssets = dummyAssets,
             SkipSerialization = assetsToSkip,
+            DeleteAssets = assetsToDelete,
             CircularDependency = circularDependencies,
             SimpleAssets = simpleAssets,
             TypesToCopy = typesToCopy,
@@ -256,12 +284,16 @@ public partial class Form1 : Form
             rtxtContentDir.Text = settings.ContentDir;
             rtxtParseDir.Text = settings.ParseDir;
             rtxtJSONDir.Text = settings.JSONDir;
-            rtxtOutputDir.Text = settings.OutputDir;
+            rtxtOutputDir.Text = settings.CookedDir;
+            rtxtInfoDir.Text = settings.InfoDir;
         }
 
         cbUEVersion.SelectedIndex = settings.SelectedIndex;
         chkRefreshAssets.Checked = settings.RefreshAssets;
-        SetupAssetsToSkipSerialization(settings.SkipSerialization);
+        chkDummyWithProps.Checked = settings.DummyWithProps;
+        SetupAssetsListBox(settings.SkipSerialization, lbAssetsToSkipSerialization);
+        SetupAssetsListBox(settings.DummyAssets, lbDummyAssets);
+        SetupAssetsListBox(settings.DeleteAssets, lbAssetsToDelete);
         rtxtCircularDependancy.Lines = settings.CircularDependency.ToArray();
         rtxtSimpleAssets.Lines = settings.SimpleAssets.ToArray();
         rtxtCookedAssets.Lines = settings.TypesToCopy.ToArray();
@@ -279,42 +311,46 @@ public partial class Form1 : Form
         if (dialog.ShowDialog() != DialogResult.OK) return;
         if (dialog.FileName == "") return;
         File.WriteAllText(dialog.FileName, output);
-        OutputText("Saved settings to: " + dialog.FileName);
+        OutputText("Saved settings to: " + dialog.FileName, rtxtOutput);
     }
 
-    private void EnableButtons()
+    private void ToggleButtons()
     {
-        if (this.InvokeRequired) {
-            var d = new SafeCallDelegate(EnableButtons);
-            this.Invoke(d, new object[] { });
-        } else {
-            btnScanAR.Enabled = !isRunning;
+        if (InvokeRequired)
+        {
+            var d = new SafeCallDelegate(ToggleButtons);
+            Invoke(d, new object[] { });
+        }
+        else
+        {
             btnScanAssets.Enabled = !isRunning;
             btnMoveCookedAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
             btnClearLogs.Enabled = !isRunning;
             btnLoadConfig.Enabled = !isRunning;
         }
-
     }
 
     private void ProgressText(string text) {
-        if (this.InvokeRequired) {
+        if (InvokeRequired)
+        {
             var d = new SafeCallDelegateText(ProgressText);
-            this.Invoke(d, new object[] { text });
-        } else {
-            lblProgress.Text = text;
+            Invoke(d, new object[] { text });
         }
+        else lblProgress.Text = text;
     }
 
-    private void OutputText(string text)
+    private void OutputText(string text, RichTextBox rtxt)
     {
-        if (this.InvokeRequired) {
-            var d = new SafeCallDelegateText(OutputText);
-            this.Invoke(d, new object[] { text });
-        } else {
-            if (rtxtOutput.TextLength == 0) rtxtOutput.Text += text;
-            else rtxtOutput.Text += Environment.NewLine + text;
+        if (InvokeRequired)
+        {
+            var d = new SafeCallDelegateRichText(OutputText);
+            Invoke(d, new object[] { text, rtxt });
+        }
+        else
+        {
+            if (rtxt.TextLength == 0) rtxt.Text += text;
+            else rtxt.Text += Environment.NewLine + text;
         }
     }
 
@@ -322,7 +358,7 @@ public partial class Form1 : Form
     {
         if (!File.Exists(path))
         {
-            if (!bIsLog) OutputText("You need to scan the assets first!");
+            if (!bIsLog) OutputText("You need to scan the assets first!", rtxtOutput);
             return;
         }
 
@@ -331,19 +367,10 @@ public partial class Form1 : Form
         Process.Start("notepad.exe", path);
     }
 
-    private string OpenDirectoryDialog()
-    {
-        var fbd = new FolderBrowserDialog();
-        fbd.ShowDialog();
-        return fbd.SelectedPath;
-    }
-
     private string OpenDirectoryDialog(string path) 
     {
         var fbd = new FolderBrowserDialog();
-        if (Directory.Exists(path)) {
-            fbd.SelectedPath = path+"\\";
-        }
+        if (Directory.Exists(path)) fbd.SelectedPath = path + @"\";
         if (fbd.ShowDialog() == DialogResult.Cancel) return path;
         return fbd.SelectedPath;
     }
@@ -361,17 +388,94 @@ public partial class Form1 : Form
         string[] files =
         {
             "debug_log.txt",
-            "output_log.txt"
+            "output_log.txt",
+            "thread_log.txt"
         };
         foreach (var file in files)
         {
             string path;
-            if (rtxtJSONDir.Text.EndsWith("\\")) path = rtxtJSONDir.Text + file;
-            else path = rtxtJSONDir.Text + "\\" + file;
+            if (rtxtInfoDir.Text.EndsWith("\\")) path = rtxtInfoDir.Text + file;
+            else path = rtxtInfoDir.Text + "\\" + file;
             if (!File.Exists(path)) continue;
             File.Delete(path);
-            OutputText("Cleared log file: " + path);
+            OutputText("Cleared log file: " + path, rtxtOutput);
         }
+    }
+
+    private void ValidateParseDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (string.IsNullOrEmpty(rtxtParseDir.Text))
+        {
+            rtxtParseDir.Text = rtxtContentDir.Text;
+            return;
+        }
+
+        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
+        rtxtParseDir.Text = rtxtContentDir.Text;
+    }
+
+    private static bool IsSubPathOf(string subPath, string basePath)
+    {
+        if (!Directory.Exists(subPath)) return false;
+        var rel = Path.GetRelativePath(basePath, subPath);
+        return !rel.StartsWith('.') && !Path.IsPathRooted(rel);
+    }
+
+    private void ValidateContentDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text))
+        {
+            rtxtContentDir.Text = lastValidContentDir;
+        }
+        lastValidContentDir = rtxtContentDir.Text;
+        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
+        rtxtParseDir.Text = rtxtContentDir.Text;
+    }
+
+    private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var rtxtBox = (RichTextBox)sender;
+        if (!Directory.Exists(rtxtBox.Text))
+        {
+            if (!CreateFolderMessage(rtxtBox)) rtxtBox.Text = "";
+        }
+    }
+
+    private bool CreateFolderMessage(RichTextBox rtxtBox)
+    {
+        var caption = "";
+        if (rtxtBox.Name == "rtxtJSONDir")
+        {
+            caption = "JSON Dir doesn't exist";
+            if (string.IsNullOrEmpty(rtxtBox.Text))
+            {
+                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
+            }
+        }
+
+        if (rtxtBox.Name == "rtxtOutputDir")
+        {
+            caption = "Cooked Dir doesn't exist";
+            if (string.IsNullOrEmpty(rtxtBox.Text))
+            {
+                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            }
+        }
+
+        if (Directory.Exists(rtxtBox.Text)) return true;
+
+        var result = MessageBox.Show($@"Create {rtxtBox.Text} directory?", caption, MessageBoxButtons.YesNo);
+        if (result == DialogResult.Yes)
+        {
+            Directory.CreateDirectory(rtxtBox.Text);
+            if (!Directory.Exists(rtxtBox.Text))
+            {
+                MessageBox.Show($@"Can't create {rtxtBox.Text} directory", @"Error", MessageBoxButtons.OK);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void btnSelectContentDir_Click(object sender, EventArgs e)
@@ -392,22 +496,24 @@ public partial class Form1 : Form
     private void btnScanAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
-        Task.Run(() => {
-            
-            try {
+        Task.Run(() => 
+        {
+            try 
+            {
                 lock(boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.ScanAssetTypes();
                 lock(boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
-            catch (Exception exception) {
-                OutputText(exception.ToString());
+            catch (Exception exception) 
+            {
+                OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
-            OutputText("Scanned assets!");
+            OutputText("Scanned assets!", rtxtOutput);
         });
     }
 
@@ -417,24 +523,22 @@ public partial class Form1 : Form
 
         Task.Run(() =>
         {
-            
             try
             {
                 lock(boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.GetCookedAssets();
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception)
             {
-                OutputText(exception.ToString());
+                OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
-
-            OutputText("Moved assets!");
+            OutputText("Moved assets!", rtxtOutput);
         });
     }
 
@@ -447,35 +551,34 @@ public partial class Form1 : Form
             try
             {
                 lock (boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
                 system.SerializeAssets();
                 lock(boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception) {
-                OutputText(exception.ToString());
+                OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
-
-            OutputText("Serialized assets!");
+            OutputText("Serialized assets!", rtxtOutput);
         });
     }
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtJSONDir.Text + "\\AllTypes.txt");
+        OpenFile(rtxtInfoDir.Text + "\\AllTypes.txt");
     }
 
     private void btnOpenAssetTypes_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtJSONDir.Text + "\\AssetTypes.json");
+        OpenFile(rtxtInfoDir.Text + "\\AssetTypes.json");
     }
 
     private void btnOpenLogs_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtJSONDir.Text + "\\output_log.txt", true);
+        OpenFile(rtxtInfoDir.Text + "\\output_log.txt", true);
     }
 
     private void btnClearLogs_Click(object sender, EventArgs e)
@@ -488,23 +591,22 @@ public partial class Form1 : Form
         var configFile = OpenFileDialog(@"JSON files (*.json)|*.json");
         if (!File.Exists(configFile))
         {
-            OutputText("Please select a valid file!");
+            OutputText("Please select a valid file!", rtxtOutput);
             return;
         }
 
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try
         {
-            system
-                .ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
+            system.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
             settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(configFile));
             LoadSettings();
-            OutputText("Loaded settings from: " + configFile);
+            OutputText("Loaded settings from: " + configFile, rtxtOutput);
         }
         catch (Exception exception)
         {
-            OutputText("Please load in a valid config file!");
-            OutputText(exception.ToString());
+            OutputText("Please load in a valid config file!", rtxtOutput);
+            OutputText(exception.ToString(), rtxtOutput);
         }
     }
 
@@ -518,68 +620,9 @@ public partial class Form1 : Form
         rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
     }
 
-    private void ValidateParseDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        if (string.IsNullOrEmpty(rtxtParseDir.Text)) { rtxtParseDir.Text = rtxtContentDir.Text; return; }
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
-
-    }
-
-    private static bool IsSubPathOf(string subPath, string basePath) {
-        if (!Directory.Exists(subPath)) return false;
-        var rel = Path.GetRelativePath(basePath, subPath);
-        return !rel.StartsWith('.') && !Path.IsPathRooted(rel);
-    }
-
-    private void ValidateContentDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        
-        if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) {
-            rtxtContentDir.Text = lastValidContentDir;
-        }
-        lastValidContentDir = rtxtContentDir.Text;
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
-    }
-
-    private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e) {
-        var rtxtBox = (RichTextBox)sender;
-        if (!Directory.Exists(rtxtBox.Text)) {
-
-            if (!CreateFolderMessage(rtxtBox)) {
-                rtxtBox.Text = "";
-            }
-        }
-    }
-
-    private bool CreateFolderMessage(RichTextBox rtxtBox) {
-        var messagename = "";
-        if (rtxtBox.Name == "rtxtJSONDir") {
-            messagename = "JSON Dir doesn't exist";
-            if (string.IsNullOrEmpty(rtxtBox.Text)) {
-                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "AssetDump");
-            }
-        }
-        if (rtxtBox.Name == "rtxtOutputDir") {
-            messagename = "Cooked Dir doesn't exist";
-            if (string.IsNullOrEmpty(rtxtBox.Text)) {
-                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text).FullName, "Cooked");
-            }
-        }
-
-        if (Directory.Exists(rtxtBox.Text)) return true;
-
-        var result =  MessageBox.Show($"Create {rtxtBox.Text} directory?", messagename, MessageBoxButtons.YesNo);
-        if (result == DialogResult.Yes) { 
-            Directory.CreateDirectory(rtxtBox.Text);
-            if (!Directory.Exists(rtxtBox.Text)) {
-                MessageBox.Show($"Can't create {rtxtBox.Text} directory", "Error", MessageBoxButtons.OK);
-                return false;
-            } 
-            return true;
-
-        }
-
-        return false;
+    private void btnInfoDir_Click(object sender, EventArgs e)
+    {
+        rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
     }
 
     private void btnScanAR_Click(object sender, EventArgs e) {

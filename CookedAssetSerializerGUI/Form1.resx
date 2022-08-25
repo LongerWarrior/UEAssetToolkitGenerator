@@ -59,12 +59,8 @@
   </resheader>
   <data name="rtxtCookedAssets.Text" xml:space="preserve">
     <value>"/Script/Engine.ParticleSystem",
-"/Script/Engine.StaticMesh",
 "/Script/Engine.SoundWave",
 "/Script/Engine.SkeletalMesh",
-"/Script/Engine.Skeleton",
-"/Script/Engine.AnimSequence",
-"/Script/Engine.BlendSpace1D",
 "/Script/Engine.PhysicsAsset",
 "/Script/Engine.VectorFieldStatic",
 "/Script/Engine.SubUVAnimation",

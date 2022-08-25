@@ -4,7 +4,7 @@ public class MaterialParameterCollectionSerializer : SimpleAssetSerializer<Norma
 {
     public MaterialParameterCollectionSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        Setup(true);
+        if (!Setup()) return;
         SerializeAsset();
     }
 }

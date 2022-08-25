@@ -21,7 +21,7 @@ public class FontFaceSerializer : Serializer<FontFaceExport>
         
         AssignAssetSerializedData();
         
-        AssetData.Add("AssetObjectData", SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects));
+        AssetData.Add("AssetObjectData", SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects));
         
         var ttf = Path.ChangeExtension(OutPath,"ttf");
         long length = 0;

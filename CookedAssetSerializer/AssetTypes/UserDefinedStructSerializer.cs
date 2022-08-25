@@ -53,7 +53,7 @@ public class UserDefinedStructSerializer : Serializer<UserDefinedStructExport>
 				
         if (!bGuid) AssetData.Add("Guid", new Guid("00000000000000000000000000000000"));
 
-        AssetData.Add("StructDefaultInstance", SerializaListOfProperties(ClassExport.DefaultStructInstance, AssetInfo, ref RefObjects));
+        AssetData.Add("StructDefaultInstance", SerializeListOfProperties(ClassExport.DefaultStructInstance, AssetInfo, ref RefObjects));
         AssetData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
         
         AssignAssetSerializedData();
