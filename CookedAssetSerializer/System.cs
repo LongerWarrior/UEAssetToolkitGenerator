@@ -1,4 +1,6 @@
-﻿namespace CookedAssetSerializer;
+﻿using System.Diagnostics;
+
+namespace CookedAssetSerializer;
 
 public class System
 {
@@ -40,7 +42,11 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            
+            var type = GetAssetTypeAR(file);
+            if (type == "null") {
+                Debug.WriteLine(file);
+                type = GetAssetType(file, Settings.GlobalUEVersion, true); }
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
@@ -51,7 +57,6 @@ public class System
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
         }
-
         PrintOutput("Find all files " + files.Length, "Scan");
         var jTypes = new JObject();
         foreach (var entry in types)
@@ -75,7 +80,11 @@ public class System
         {
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            var type = GetAssetTypeAR(file);
+            if (type == "null") {
+                Debug.WriteLine(file);
+                type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            }
 
             AssetCount++;
             if (!Settings.TypesToCopy.Contains(type))
@@ -219,13 +228,13 @@ public class System
         sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
     }
 
-    private string GetAssetType(string file, UE4Version version)
+    private string GetAssetType(string file, UE4Version version, bool shortname = true)
     {
         var name = Path.GetFileNameWithoutExtension(file).ToLower();
         UAsset asset = new UAsset(file, version, true);
         if (asset.Exports.Count == 1)
         {
-            return GetFullName(asset.Exports[0].ClassIndex.Index, asset);
+            return shortname ? GetName(asset.Exports[0].ClassIndex.Index, asset) : GetFullName(asset.Exports[0].ClassIndex.Index, asset);
         }
 
         List<Export> exportnames = new();
@@ -246,15 +255,29 @@ public class System
 
         if (exportnames.Count == 1)
         {
-            return GetFullName(exportnames[0].ClassIndex.Index, asset);
+            return shortname ? GetName(exportnames[0].ClassIndex.Index, asset): GetFullName(exportnames[0].ClassIndex.Index, asset);
         }
 
         if (isasset.Count == 1)
         {
-            return GetFullName(isasset[0].ClassIndex.Index, asset);
+            return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
         }
 
-        Console.WriteLine("Couldn't identify asset type : " + file);
+        //Console.WriteLine("Couldn't identify asset type : " + file);
+        return "null";
+    }
+
+    private string GetAssetTypeAR(string fullAssetPath) {
+        var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
+        var directory = Path.GetDirectoryName(fullAssetPath);
+        var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
+        if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
+        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
+
+        if (AssetList.ContainsKey(AssetPath)) {
+            var artype = AssetList[AssetPath].AssetClass;
+            return artype;
+        }
         return "null";
     }
 }

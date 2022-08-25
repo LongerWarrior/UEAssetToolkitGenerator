@@ -59,6 +59,7 @@ partial class Form1 {
             this.lblProgress = new System.Windows.Forms.Label();
             this.rtxtParseDir = new System.Windows.Forms.RichTextBox();
             this.btnSelectParseDir = new System.Windows.Forms.Button();
+            this.btnScanAR = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSelectContentDir
@@ -287,7 +288,7 @@ partial class Form1 {
             this.btnScanAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnScanAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnScanAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnScanAssets.Location = new System.Drawing.Point(500, 291);
+            this.btnScanAssets.Location = new System.Drawing.Point(500, 318);
             this.btnScanAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnScanAssets.Name = "btnScanAssets";
             this.btnScanAssets.Size = new System.Drawing.Size(198, 30);
@@ -303,7 +304,7 @@ partial class Form1 {
             this.btnMoveCookedAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMoveCookedAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnMoveCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnMoveCookedAssets.Location = new System.Drawing.Point(500, 350);
+            this.btnMoveCookedAssets.Location = new System.Drawing.Point(500, 361);
             this.btnMoveCookedAssets.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMoveCookedAssets.Name = "btnMoveCookedAssets";
             this.btnMoveCookedAssets.Size = new System.Drawing.Size(198, 30);
@@ -529,13 +530,30 @@ partial class Form1 {
             this.btnSelectParseDir.UseVisualStyleBackColor = true;
             this.btnSelectParseDir.Click += new System.EventHandler(this.btnSelectParseDir_Click);
             // 
+            // btnScanAR
+            // 
+            this.btnScanAR.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnScanAR.FlatAppearance.BorderSize = 2;
+            this.btnScanAR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnScanAR.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnScanAR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnScanAR.Location = new System.Drawing.Point(500, 273);
+            this.btnScanAR.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnScanAR.Name = "btnScanAR";
+            this.btnScanAR.Size = new System.Drawing.Size(198, 32);
+            this.btnScanAR.TabIndex = 34;
+            this.btnScanAR.Text = "Scan Asset registry";
+            this.btnScanAR.UseVisualStyleBackColor = true;
+            this.btnScanAR.Click += new System.EventHandler(this.btnScanAR_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.ClientSize = new System.Drawing.Size(1199, 809);
+            this.ClientSize = new System.Drawing.Size(1199, 787);
+            this.Controls.Add(this.btnScanAR);
             this.Controls.Add(this.rtxtParseDir);
             this.Controls.Add(this.btnSelectParseDir);
             this.Controls.Add(this.lblProgress);
@@ -614,4 +632,5 @@ partial class Form1 {
     private Label lblProgress;
     private RichTextBox rtxtParseDir;
     private Button btnSelectParseDir;
+    private Button btnScanAR;
 }

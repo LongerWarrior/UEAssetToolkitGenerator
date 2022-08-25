@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
 using UAssetAPI;
+using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializerGUI;
 
@@ -287,6 +288,7 @@ public partial class Form1 : Form
             var d = new SafeCallDelegate(EnableButtons);
             this.Invoke(d, new object[] { });
         } else {
+            btnScanAR.Enabled = !isRunning;
             btnScanAssets.Enabled = !isRunning;
             btnMoveCookedAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
@@ -442,7 +444,6 @@ public partial class Form1 : Form
 
         Task.Run(() =>
         {
-            //DisableButtons(true);
             try
             {
                 lock (boolLock) isRunning = true;
@@ -579,5 +580,39 @@ public partial class Form1 : Form
         }
 
         return false;
+    }
+
+    private void btnScanAR_Click(object sender, EventArgs e) {
+
+
+        SetupGlobals();
+        Task.Run(() => {
+
+            try {
+                lock (boolLock) isRunning = true;
+                EnableButtons();
+
+                var AR = new FAssetRegistryState(@"D:\FSDTest\FSD\AssetRegistry.bin", settings.GlobalUEVersion);
+
+                ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+                foreach (var data in AR.PreallocatedAssetDataBuffers) {            
+                    if (data.PackageName.ToName().StartsWith("/Game")) {
+                        ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+                    }
+                }
+                AR = null;
+                GC.Collect();
+
+                lock (boolLock) isRunning = false;
+                EnableButtons();
+            }
+            catch (Exception exception) {
+                OutputText(exception.ToString());
+                lock (boolLock) isRunning = false;
+                EnableButtons();
+                return;
+            }
+            OutputText("Scanned AR!");
+        });
     }
 }
