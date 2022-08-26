@@ -165,8 +165,14 @@ public partial class MainForm : Form
 
     #endregion
 
-    private void OnClosed(object sender, FormClosedEventArgs e)
+
+
+    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        if (e.CloseReason == CloseReason.WindowsShutDown) return;
+
+
+
         if (AppSettings.Default.bDNSSave == false)
         {
             var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", "Auto Load Last Used Config on Launch?", "Do Not Show Again.");
@@ -179,14 +185,19 @@ public partial class MainForm : Form
             AppSettings.Default.bAutoUseLastCfg = dialog.b1Dialog;
             AppSettings.Default.bDNSSave = dialog.b2Dialog;
             AppSettings.Default.Save();
-            
 
+            // case switch based on dialog result
 
             if (result == DialogResult.Yes)
             {
                 SetupGlobals();
                 SaveJSONSettings();
-            }             
+            }
+
+            if (result == DialogResult.Cancel)
+            {
+                return;
+            }
         }
     }
 
@@ -822,10 +833,6 @@ public partial class MainForm : Form
 
     private void chkDumNativ_CheckedChanged(object sender, EventArgs e)
     {
-        if (chkDumNativ.Checked == true)
-            tabControl1.TabPages.Add(tbNativSett);
-        else
-            tabControl1.TabPages.Remove(tbNativSett);
     }
 
     private void MainForm_Load(object sender, EventArgs e)

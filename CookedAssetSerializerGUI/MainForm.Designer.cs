@@ -196,6 +196,7 @@ partial class MainForm {
             // 
             this.tabControl1.Controls.Add(this.tbRun);
             this.tabControl1.Controls.Add(this.tbSettings);
+            this.tabControl1.Controls.Add(this.tbNativSett);
             this.tabControl1.Location = new System.Drawing.Point(3, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
@@ -1027,7 +1028,7 @@ partial class MainForm {
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "MainForm";
             this.Text = "Cooked Asset Serializer";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();

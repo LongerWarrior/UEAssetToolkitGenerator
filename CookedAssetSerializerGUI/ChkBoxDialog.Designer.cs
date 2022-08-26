@@ -103,6 +103,7 @@ namespace CookedAssetSerializerGUI
             this.Controls.Add(this.btnYes);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "ChkBoxDialog2Bool";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.ResumeLayout(false);
             this.PerformLayout();
 
