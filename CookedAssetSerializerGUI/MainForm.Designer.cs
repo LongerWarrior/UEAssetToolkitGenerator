@@ -906,6 +906,7 @@ partial class MainForm {
             this.btnDfltGamCnfg.TabIndex = 23;
             this.btnDfltGamCnfg.Text = "Game .ini";
             this.btnDfltGamCnfg.UseVisualStyleBackColor = true;
+            this.btnDfltGamCnfg.Click += new System.EventHandler(this.btnDfltGamCnfg_Click);
             // 
             // rtxtDfltGamCnfg
             // 
@@ -921,6 +922,7 @@ partial class MainForm {
             this.rtxtDfltGamCnfg.Size = new System.Drawing.Size(787, 30);
             this.rtxtDfltGamCnfg.TabIndex = 24;
             this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\DefaultGame.ini";
+            this.rtxtDfltGamCnfg.TextChanged += new System.EventHandler(this.rtxtDfltGamCnfg_TextChanged);
             // 
             // rtxtCXXDir
             // 
@@ -936,6 +938,7 @@ partial class MainForm {
             this.rtxtCXXDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtCXXDir.TabIndex = 22;
             this.rtxtCXXDir.Text = "C:\\ExamplePath\\CXXHeaderDump";
+            this.rtxtCXXDir.TextChanged += new System.EventHandler(this.rtxtCXXDir_TextChanged);
             // 
             // rtxtNativAssets
             // 
@@ -965,6 +968,7 @@ partial class MainForm {
             this.btnCXXDir.TabIndex = 21;
             this.btnCXXDir.Text = "CXX Hdr Dir";
             this.btnCXXDir.UseVisualStyleBackColor = true;
+            this.btnCXXDir.Click += new System.EventHandler(this.btnCXXDir_Click);
             // 
             // lbNativMode
             // 
@@ -1027,6 +1031,7 @@ partial class MainForm {
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Cooked Asset Serializer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);

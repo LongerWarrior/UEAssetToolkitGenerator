@@ -171,8 +171,6 @@ public partial class MainForm : Form
     {
         if (e.CloseReason == CloseReason.WindowsShutDown) return;
 
-
-
         if (AppSettings.Default.bDNSSave == false)
         {
             var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", "Auto Load Last Used Config on Launch?", "Do Not Show Again.");
@@ -186,7 +184,6 @@ public partial class MainForm : Form
             AppSettings.Default.bDNSSave = dialog.b2Dialog;
             AppSettings.Default.Save();
 
-            // case switch based on dialog result
 
             if (result == DialogResult.Yes)
             {
@@ -196,7 +193,7 @@ public partial class MainForm : Form
 
             if (result == DialogResult.Cancel)
             {
-                return;
+                e.Cancel = true;
             }
         }
     }
@@ -558,11 +555,9 @@ public partial class MainForm : Form
     private string OpenDirectoryDialog(string path) 
     {
         var fbd = new FolderBrowserDialog();
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path) || path.StartsWith("C:\\ExamplePath"))
         {
-
             fbd.InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-            
         }
         if (Directory.Exists(path)) fbd.SelectedPath = path + @"\";
         if (fbd.ShowDialog() == DialogResult.Cancel) return path;
@@ -573,7 +568,10 @@ public partial class MainForm : Form
     {
         var dialog = new OpenFileDialog();
         dialog.Filter = filter;
-        dialog.InitialDirectory = path;
+        if (string.IsNullOrEmpty(path) || path.StartsWith("C:\\ExamplePath"))
+        {
+            dialog.InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+        }
         dialog.RestoreDirectory = true;
         return dialog.ShowDialog() != DialogResult.OK ? "" : dialog.FileName;
     }
@@ -789,14 +787,6 @@ public partial class MainForm : Form
             OutputText("Please select a valid file!", rtxtOutput);
             return;
         }
-        if (chkAutoLoad.Checked)
-        {
-            AppSettings.Default.bAutoUseLastCfg = true;
-        }
-        else
-        {
-            AppSettings.Default.bAutoUseLastCfg = false;
-        }
 
         // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
         try
@@ -844,10 +834,8 @@ public partial class MainForm : Form
             AutoLoadConfig();
             chkAutoLoad.Checked = true;
         }
-        if (AppSettings.Default.bDNSSave == true)
-        {
-            chkSettDNS.Checked = true;
-        }
+        chkSettDNS.Checked = AppSettings.Default.bDNSSave;
+
     }
 
     private void treeParseDir_AfterCheck(object sender, TreeViewEventArgs e)
@@ -921,7 +909,7 @@ public partial class MainForm : Form
             TreeNode tds = td.Nodes.Add(di.Name);
             tds.StateImageIndex = 0;
             tds.Tag = di.FullName;
-            LoadFiles(subdirectory, tds);
+            /*LoadFiles(subdirectory, tds);*/
             LoadSubDirectories(subdirectory, tds);
             UpdateProgress();
 
@@ -932,11 +920,11 @@ public partial class MainForm : Form
     {
         DirectoryInfo di = new DirectoryInfo(Dir);
         //Setting ProgressBar Maximum Value  
-        prgbarTreeLd.Maximum = Directory.GetFiles(Dir, "*.*", SearchOption.AllDirectories).Length + Directory.GetDirectories(Dir, "**", SearchOption.AllDirectories).Length;
+        prgbarTreeLd.Maximum = /*Directory.GetFiles(Dir, "*.*", SearchOption.AllDirectories).Length +*/ Directory.GetDirectories(Dir, "**", SearchOption.AllDirectories).Length;
         TreeNode tds = treeParseDir.Nodes.Add(di.Name);
         tds.Tag = di.FullName;
         tds.StateImageIndex = 0;
-        LoadFiles(Dir, tds);
+        /*LoadFiles(Dir, tds);*/
         LoadSubDirectories(Dir, tds);
     }
 
@@ -963,27 +951,13 @@ public partial class MainForm : Form
 
     private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
     {
-        if (chkSettDNS.Checked == true)
-        {
-            AppSettings.Default.bDNSSave = true;
-        }
-        else
-        {
-            AppSettings.Default.bDNSSave = false;
-        }
+        AppSettings.Default.bDNSSave = chkSettDNS.Checked;
         AppSettings.Default.Save();
     }
 
     private void chkAutoLoad_CheckedChanged(object sender, EventArgs e)
     {
-        if (chkAutoLoad.Checked == true)
-        {
-            AppSettings.Default.bAutoUseLastCfg = true;
-        }
-        else
-        {
-            AppSettings.Default.bAutoUseLastCfg = false;
-        }
+        AppSettings.Default.bAutoUseLastCfg = chkAutoLoad.Checked;
         AppSettings.Default.Save();
     }
 
@@ -995,6 +969,26 @@ public partial class MainForm : Form
     private void btnTreeClpsAll_Click(object sender, EventArgs e)
     {
         treeParseDir.CollapseAll();
+    }
+
+    private void btnDfltGamCnfg_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void btnCXXDir_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void rtxtDfltGamCnfg_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void rtxtCXXDir_TextChanged(object sender, EventArgs e)
+    {
+
     }
 }
 
