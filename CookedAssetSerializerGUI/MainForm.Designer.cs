@@ -36,6 +36,8 @@ partial class MainForm {
             this.tTipTree = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnTreeClpsAll = new System.Windows.Forms.Button();
+            this.btnTreeExpAll = new System.Windows.Forms.Button();
             this.prgbarTreeLd = new System.Windows.Forms.ProgressBar();
             this.treeParseDir = new System.Windows.Forms.TreeView();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -119,6 +121,8 @@ partial class MainForm {
             // 
             this.panel1.AutoSize = true;
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel1.Controls.Add(this.btnTreeClpsAll);
+            this.panel1.Controls.Add(this.btnTreeExpAll);
             this.panel1.Controls.Add(this.prgbarTreeLd);
             this.panel1.Controls.Add(this.treeParseDir);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
@@ -127,6 +131,26 @@ partial class MainForm {
             this.panel1.Size = new System.Drawing.Size(218, 711);
             this.panel1.TabIndex = 0;
             this.panel1.Visible = false;
+            // 
+            // btnTreeClpsAll
+            // 
+            this.btnTreeClpsAll.Location = new System.Drawing.Point(88, 7);
+            this.btnTreeClpsAll.Name = "btnTreeClpsAll";
+            this.btnTreeClpsAll.Size = new System.Drawing.Size(75, 23);
+            this.btnTreeClpsAll.TabIndex = 5;
+            this.btnTreeClpsAll.Text = "button2";
+            this.btnTreeClpsAll.UseVisualStyleBackColor = true;
+            this.btnTreeClpsAll.Click += new System.EventHandler(this.btnTreeClpsAll_Click);
+            // 
+            // btnTreeExpAll
+            // 
+            this.btnTreeExpAll.Location = new System.Drawing.Point(7, 7);
+            this.btnTreeExpAll.Name = "btnTreeExpAll";
+            this.btnTreeExpAll.Size = new System.Drawing.Size(75, 23);
+            this.btnTreeExpAll.TabIndex = 4;
+            this.btnTreeExpAll.Text = "button1";
+            this.btnTreeExpAll.UseVisualStyleBackColor = true;
+            this.btnTreeExpAll.Click += new System.EventHandler(this.btnTreeExpAll_Click);
             // 
             // prgbarTreeLd
             // 
@@ -138,12 +162,12 @@ partial class MainForm {
             // treeParseDir
             // 
             this.treeParseDir.CheckBoxes = true;
-            this.treeParseDir.Location = new System.Drawing.Point(0, 3);
+            this.treeParseDir.Location = new System.Drawing.Point(0, 38);
             this.treeParseDir.Name = "treeParseDir";
-            this.treeParseDir.Size = new System.Drawing.Size(215, 669);
+            this.treeParseDir.Size = new System.Drawing.Size(215, 634);
             this.treeParseDir.TabIndex = 2;
+            this.treeParseDir.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeParseDir_AfterCheck);
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
-            this.treeParseDir.AfterCheck += new TreeViewEventHandler(this.treeParseDir_AfterCheck);
             // 
             // panel2
             // 
@@ -1085,4 +1109,6 @@ partial class MainForm {
     private CheckBox chkUserEnumStruct;
     private Label lbNativAssets;
     private CheckBox chkSettDNS;
+    private Button btnTreeClpsAll;
+    private Button btnTreeExpAll;
 }

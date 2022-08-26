@@ -979,6 +979,16 @@ public partial class MainForm : Form
         }
         AppSettings.Default.Save();
     }
+
+    private void btnTreeExpAll_Click(object sender, EventArgs e)
+    {
+        treeParseDir.ExpandAll();
+    }
+
+    private void btnTreeClpsAll_Click(object sender, EventArgs e)
+    {
+        treeParseDir.CollapseAll();
+    }
 }
 
 static class TreeViewExtensions
