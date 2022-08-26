@@ -35,11 +35,20 @@ partial class MainForm {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tTipTree = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.cntxtMainStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.clearAllPathsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restorePathsToDefaultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pauseSerializationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cancelSerializationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btnTreeClpsAll = new System.Windows.Forms.Button();
-            this.btnTreeExpAll = new System.Windows.Forms.Button();
             this.prgbarTreeLd = new System.Windows.Forms.ProgressBar();
             this.treeParseDir = new System.Windows.Forms.TreeView();
+            this.cntxtTreeParse = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
             this.lbAuthors = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -98,7 +107,9 @@ partial class MainForm {
             this.chkUserEnumStruct = new System.Windows.Forms.CheckBox();
             this.lbNativAssets = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
+            this.cntxtMainStrip.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.cntxtTreeParse.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tbRun.SuspendLayout();
@@ -110,6 +121,7 @@ partial class MainForm {
             // 
             this.flowLayoutPanel1.AutoSize = true;
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flowLayoutPanel1.ContextMenuStrip = this.cntxtMainStrip;
             this.flowLayoutPanel1.Controls.Add(this.panel1);
             this.flowLayoutPanel1.Controls.Add(this.panel2);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(2, 2);
@@ -117,12 +129,64 @@ partial class MainForm {
             this.flowLayoutPanel1.Size = new System.Drawing.Size(1200, 717);
             this.flowLayoutPanel1.TabIndex = 40;
             // 
+            // cntxtMainStrip
+            // 
+            this.cntxtMainStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearAllPathsToolStripMenuItem,
+            this.restorePathsToDefaultsToolStripMenuItem,
+            this.pauseSerializationToolStripMenuItem,
+            this.cancelSerializationToolStripMenuItem,
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem,
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem});
+            this.cntxtMainStrip.Name = "cntxtMainStrip";
+            this.cntxtMainStrip.Size = new System.Drawing.Size(277, 158);
+            // 
+            // clearAllPathsToolStripMenuItem
+            // 
+            this.clearAllPathsToolStripMenuItem.Name = "clearAllPathsToolStripMenuItem";
+            this.clearAllPathsToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.clearAllPathsToolStripMenuItem.Text = "Clear all paths";
+            this.clearAllPathsToolStripMenuItem.Click += new System.EventHandler(this.clearAllPathsToolStripMenuItem_Click);
+            // 
+            // restorePathsToDefaultsToolStripMenuItem
+            // 
+            this.restorePathsToDefaultsToolStripMenuItem.Name = "restorePathsToDefaultsToolStripMenuItem";
+            this.restorePathsToDefaultsToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.restorePathsToDefaultsToolStripMenuItem.Text = "Restore paths to defaults";
+            this.restorePathsToDefaultsToolStripMenuItem.Click += new System.EventHandler(this.restorePathsToDefaultsToolStripMenuItem_Click);
+            // 
+            // pauseSerializationToolStripMenuItem
+            // 
+            this.pauseSerializationToolStripMenuItem.Name = "pauseSerializationToolStripMenuItem";
+            this.pauseSerializationToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.pauseSerializationToolStripMenuItem.Text = "Pause Serialization";
+            this.pauseSerializationToolStripMenuItem.Click += new System.EventHandler(this.cancelSerializationToolStripMenuItem_Click);
+            // 
+            // cancelSerializationToolStripMenuItem
+            // 
+            this.cancelSerializationToolStripMenuItem.Name = "cancelSerializationToolStripMenuItem";
+            this.cancelSerializationToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.cancelSerializationToolStripMenuItem.Text = "Cancel Serialization";
+            this.cancelSerializationToolStripMenuItem.Click += new System.EventHandler(this.cancelSerializationToolStripMenuItem_Click_1);
+            // 
+            // restoreAllSettingsToDefaultthisTabToolStripMenuItem
+            // 
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem.Name = "restoreAllSettingsToDefaultthisTabToolStripMenuItem";
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem.Text = "Restore all settings to default (this tab)";
+            this.restoreAllSettingsToDefaultthisTabToolStripMenuItem.Click += new System.EventHandler(this.restoreAllSettingsToDefaultthisTabToolStripMenuItem_Click);
+            // 
+            // restoreAllSettingsToDefaultallTabsToolStripMenuItem
+            // 
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem.Name = "restoreAllSettingsToDefaultallTabsToolStripMenuItem";
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem.Size = new System.Drawing.Size(276, 22);
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem.Text = "Restore all settings to default (all tabs)";
+            this.restoreAllSettingsToDefaultallTabsToolStripMenuItem.Click += new System.EventHandler(this.restoreAllSettingsToDefaultallTabsToolStripMenuItem_Click);
+            // 
             // panel1
             // 
             this.panel1.AutoSize = true;
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.Controls.Add(this.btnTreeClpsAll);
-            this.panel1.Controls.Add(this.btnTreeExpAll);
             this.panel1.Controls.Add(this.prgbarTreeLd);
             this.panel1.Controls.Add(this.treeParseDir);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
@@ -131,26 +195,6 @@ partial class MainForm {
             this.panel1.Size = new System.Drawing.Size(218, 711);
             this.panel1.TabIndex = 0;
             this.panel1.Visible = false;
-            // 
-            // btnTreeClpsAll
-            // 
-            this.btnTreeClpsAll.Location = new System.Drawing.Point(88, 7);
-            this.btnTreeClpsAll.Name = "btnTreeClpsAll";
-            this.btnTreeClpsAll.Size = new System.Drawing.Size(75, 23);
-            this.btnTreeClpsAll.TabIndex = 5;
-            this.btnTreeClpsAll.Text = "button2";
-            this.btnTreeClpsAll.UseVisualStyleBackColor = true;
-            this.btnTreeClpsAll.Click += new System.EventHandler(this.btnTreeClpsAll_Click);
-            // 
-            // btnTreeExpAll
-            // 
-            this.btnTreeExpAll.Location = new System.Drawing.Point(7, 7);
-            this.btnTreeExpAll.Name = "btnTreeExpAll";
-            this.btnTreeExpAll.Size = new System.Drawing.Size(75, 23);
-            this.btnTreeExpAll.TabIndex = 4;
-            this.btnTreeExpAll.Text = "button1";
-            this.btnTreeExpAll.UseVisualStyleBackColor = true;
-            this.btnTreeExpAll.Click += new System.EventHandler(this.btnTreeExpAll_Click);
             // 
             // prgbarTreeLd
             // 
@@ -162,12 +206,43 @@ partial class MainForm {
             // treeParseDir
             // 
             this.treeParseDir.CheckBoxes = true;
-            this.treeParseDir.Location = new System.Drawing.Point(0, 38);
+            this.treeParseDir.ContextMenuStrip = this.cntxtTreeParse;
+            this.treeParseDir.Location = new System.Drawing.Point(0, 7);
             this.treeParseDir.Name = "treeParseDir";
-            this.treeParseDir.Size = new System.Drawing.Size(215, 634);
+            this.treeParseDir.Size = new System.Drawing.Size(215, 665);
             this.treeParseDir.TabIndex = 2;
             this.treeParseDir.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeParseDir_AfterCheck);
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
+            // 
+            // cntxtTreeParse
+            // 
+            this.cntxtTreeParse.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.expandAllToolStripMenuItem,
+            this.collapseAllToolStripMenuItem,
+            this.refreshToolStripMenuItem});
+            this.cntxtTreeParse.Name = "cntxtTreeParse";
+            this.cntxtTreeParse.Size = new System.Drawing.Size(137, 70);
+            // 
+            // expandAllToolStripMenuItem
+            // 
+            this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.expandAllToolStripMenuItem.Text = "Expand All";
+            this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
+            // 
+            // collapseAllToolStripMenuItem
+            // 
+            this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
+            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.collapseAllToolStripMenuItem.Text = "Collapse All";
+            this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
+            // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // panel2
             // 
@@ -1037,7 +1112,9 @@ partial class MainForm {
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
+            this.cntxtMainStrip.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.cntxtTreeParse.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
@@ -1115,6 +1192,15 @@ partial class MainForm {
     private CheckBox chkUserEnumStruct;
     private Label lbNativAssets;
     private CheckBox chkSettDNS;
-    private Button btnTreeClpsAll;
-    private Button btnTreeExpAll;
+    private ContextMenuStrip cntxtTreeParse;
+    private ToolStripMenuItem expandAllToolStripMenuItem;
+    private ToolStripMenuItem collapseAllToolStripMenuItem;
+    private ToolStripMenuItem refreshToolStripMenuItem;
+    private ContextMenuStrip cntxtMainStrip;
+    private ToolStripMenuItem clearAllPathsToolStripMenuItem;
+    private ToolStripMenuItem restorePathsToDefaultsToolStripMenuItem;
+    private ToolStripMenuItem pauseSerializationToolStripMenuItem;
+    private ToolStripMenuItem cancelSerializationToolStripMenuItem;
+    private ToolStripMenuItem restoreAllSettingsToDefaultthisTabToolStripMenuItem;
+    private ToolStripMenuItem restoreAllSettingsToDefaultallTabsToolStripMenuItem;
 }

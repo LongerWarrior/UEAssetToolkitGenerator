@@ -480,18 +480,16 @@ public partial class MainForm : Form
             var configFile = AppSettings.Default.LastUsedCfg;
             if (!File.Exists(configFile))
             {
-                OutputText("Please select a valid file!", rtxtOutput);
+                OutputText("Warning! Unable to find last used config!", rtxtOutput);
                 return;
             }
 
             // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
             try
             {
-                system.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
+                /*system.ClearLists();*/ // I have to do this or else the fucking lists get appended rather than set for some reason
                 jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
                 LoadJSONSettings();
-                AppSettings.Default.LastUsedCfg = configFile;
-                AppSettings.Default.Save();
                 OutputText("Loaded settings from: " + configFile, rtxtOutput);
             }
             catch (Exception exception)
@@ -961,16 +959,6 @@ public partial class MainForm : Form
         AppSettings.Default.Save();
     }
 
-    private void btnTreeExpAll_Click(object sender, EventArgs e)
-    {
-        treeParseDir.ExpandAll();
-    }
-
-    private void btnTreeClpsAll_Click(object sender, EventArgs e)
-    {
-        treeParseDir.CollapseAll();
-    }
-
     private void btnDfltGamCnfg_Click(object sender, EventArgs e)
     {
 
@@ -987,6 +975,56 @@ public partial class MainForm : Form
     }
 
     private void rtxtCXXDir_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void cancelSerializationToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        treeParseDir.ExpandAll();
+    }
+
+    private void collapseAllToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        treeParseDir.CollapseAll();
+    }
+
+    private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        prgbarTreeLd.Value = 0;
+        treeParseDir.Nodes.Clear();
+        if (rtxtParseDir.Text != "" && Directory.Exists(rtxtParseDir.Text))
+            LoadDirectory(rtxtParseDir.Text);
+        else
+            MessageBox.Show("Select Existing Content Directory!!");
+    }
+
+    private void clearAllPathsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void restorePathsToDefaultsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void cancelSerializationToolStripMenuItem_Click_1(object sender, EventArgs e)
+    {
+
+    }
+
+    private void restoreAllSettingsToDefaultthisTabToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void restoreAllSettingsToDefaultallTabsToolStripMenuItem_Click(object sender, EventArgs e)
     {
 
     }
