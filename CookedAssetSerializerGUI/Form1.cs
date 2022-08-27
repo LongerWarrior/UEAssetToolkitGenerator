@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Text;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
+using Serilog;
 using UAssetAPI;
 using UAssetAPI.AssetRegistry;
 
@@ -18,6 +20,12 @@ public partial class Form1 : Form
         });
         
         InitializeComponent();
+
+        Log.Logger = new LoggerConfiguration().Enrich.FromLogContext()
+            .WriteTo.File(
+            Path.Combine(Environment.CurrentDirectory, "Logs", $"CAS-Log-{DateTime.Now:yyyy-MM-dd}.txt"),
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}").CreateLogger();
+
         SetupForm();
         SetupGlobals();
 
@@ -323,6 +331,7 @@ public partial class Form1 : Form
         }
         else
         {
+            btnScanAR.Enabled = !isRunning;
             btnScanAssets.Enabled = !isRunning;
             btnMoveCookedAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
@@ -616,7 +625,8 @@ public partial class Form1 : Form
         SaveSettings();
     }
 
-    private void btnSelectParseDir_Click(object sender, EventArgs e) {
+    private void btnSelectParseDir_Click(object sender, EventArgs e)
+    {
         rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
     }
 
@@ -625,21 +635,22 @@ public partial class Form1 : Form
         rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
     }
 
-    private void btnScanAR_Click(object sender, EventArgs e) {
-
-
+    private void btnScanAR_Click(object sender, EventArgs e)
+    {
         SetupGlobals();
-        Task.Run(() => {
-
+        Task.Run(() =>
+        {
             try {
                 lock (boolLock) isRunning = true;
-                EnableButtons();
+                ToggleButtons();
 
                 var AR = new FAssetRegistryState(@"D:\FSDTest\FSD\AssetRegistry.bin", settings.GlobalUEVersion);
 
                 ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
-                foreach (var data in AR.PreallocatedAssetDataBuffers) {            
-                    if (data.PackageName.ToName().StartsWith("/Game")) {
+                foreach (var data in AR.PreallocatedAssetDataBuffers) 
+                {
+                    if (data.PackageName.ToName().StartsWith("/Game")) 
+                    {
                         ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
                     }
                 }
@@ -647,15 +658,16 @@ public partial class Form1 : Form
                 GC.Collect();
 
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
             }
             catch (Exception exception) {
-                OutputText(exception.ToString());
+                Log.ForContext("Context","AR").Warning(exception, "Failed to read AssetRegistry");
+                OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
-                EnableButtons();
+                ToggleButtons();
                 return;
             }
-            OutputText("Scanned AR!");
+            OutputText("Scanned AR!", rtxtOutput);
         });
     }
 }

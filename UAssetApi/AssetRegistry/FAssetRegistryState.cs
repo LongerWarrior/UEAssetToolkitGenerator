@@ -1,5 +1,8 @@
-﻿namespace UAssetAPI.AssetRegistry;
+﻿using Serilog;
+namespace UAssetAPI.AssetRegistry;
 public class FAssetRegistryState {
+
+    protected static readonly ILogger ARlog = Log.ForContext("Context", "AR");
     //public FAssetDataOld[] PreallocatedAssetDataBuffersOld;
     public FAssetData[] PreallocatedAssetDataBuffers;
     public FDependsNode[] PreallocatedDependsNodeDataBuffers;
@@ -26,6 +29,7 @@ public class FAssetRegistryState {
                     break;
                 }
         }
+        ARlog.Information($"Succefully read Asset Registry");
         reader.Dispose();
     }
 
