@@ -1,68 +1,63 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿namespace UAssetAPI.PropertyTypes;
 
-namespace UAssetAPI.PropertyTypes
+/// <summary>
+/// Describes an IEEE 32-bit floating point variable (<see cref="float"/>).
+/// </summary>
+public class FloatPropertyData : PropertyData
 {
     /// <summary>
-    /// Describes an IEEE 32-bit floating point variable (<see cref="float"/>).
+    /// The float that this property represents.
     /// </summary>
-    public class FloatPropertyData : PropertyData
+    [JsonProperty]
+    [JsonConverter(typeof(FSignedZeroJsonConverter))]
+    public float Value;
+
+    public FloatPropertyData(FName name) : base(name)
     {
-        /// <summary>
-        /// The float that this property represents.
-        /// </summary>
-        [JsonProperty]
-        [JsonConverter(typeof(FSignedZeroJsonConverter))]
-        public float Value;
 
-        public FloatPropertyData(FName name) : base(name)
+    }
+
+    public FloatPropertyData()
+    {
+
+    }
+
+    private static readonly FName CurrentPropertyType = new FName("FloatProperty");
+    public override FName PropertyType { get { return CurrentPropertyType; } }
+
+    public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
+    {
+        if (includeHeader)
         {
-
+            PropertyGuid = reader.ReadPropertyGuid();
         }
 
-        public FloatPropertyData()
+        Value = reader.ReadSingle();
+    }
+
+    public override int Write(AssetBinaryWriter writer, bool includeHeader)
+    {
+        if (includeHeader)
         {
-
+            writer.WritePropertyGuid(PropertyGuid);
         }
 
-        private static readonly FName CurrentPropertyType = new FName("FloatProperty");
-        public override FName PropertyType { get { return CurrentPropertyType; } }
+        writer.Write(Value);
+        return sizeof(float);
+    }
 
-        public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
-        {
-            if (includeHeader)
-            {
-                PropertyGuid = reader.ReadPropertyGuid();
-            }
+    public override string ToString()
+    {
+        return Convert.ToString(Value);
+    }
 
-            Value = reader.ReadSingle();
-        }
+    public override void FromString(string[] d, UAsset asset)
+    {
+        Value = 0;
+        if (float.TryParse(d[0], out float res)) Value = res;
+    }
+    public override JToken ToJson() {
 
-        public override int Write(AssetBinaryWriter writer, bool includeHeader)
-        {
-            if (includeHeader)
-            {
-                writer.WritePropertyGuid(PropertyGuid);
-            }
-
-            writer.Write(Value);
-            return sizeof(float);
-        }
-
-        public override string ToString()
-        {
-            return Convert.ToString(Value);
-        }
-
-        public override void FromString(string[] d, UAsset asset)
-        {
-            Value = 0;
-            if (float.TryParse(d[0], out float res)) Value = res;
-        }
-        public override JToken ToJson() {
-
-            return Value;
-        }
+        return Value;
     }
 }

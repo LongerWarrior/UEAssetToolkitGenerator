@@ -1,72 +1,63 @@
-﻿using System;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using UAssetAPI;
-using UAssetAPI.PropertyTypes;
-using UAssetAPI.StructTypes;
-using static CookedAssetSerializer.SerializationUtils;
+﻿namespace CookedAssetSerializer.AssetTypes;
 
-namespace CookedAssetSerializer.AssetTypes
+public class UserDefinedStructSerializer : Serializer<UserDefinedStructExport>
 {
-    public class UserDefinedStructSerializer : Serializer<UserDefinedStructExport>
+    public UserDefinedStructSerializer(Settings assetSettings, UAsset asset)
     {
-        public UserDefinedStructSerializer(Settings assetSettings, UAsset asset)
+        Settings = assetSettings;
+        Asset = asset;
+        SerializeAsset();
+    }
+
+    private void SerializeAsset()
+    {
+        if (!SetupSerialization()) return;
+
+        if (!SetupAssetInfo()) return;
+
+        SerializeHeaders();
+        
+        AssetData.Add("SuperStruct", Index(ClassExport.SuperIndex.Index, Dict));
+        RefObjects.Add(Index(ClassExport.SuperIndex.Index, Dict));
+        
+        var children = new JArray();
+        foreach (var package in ClassExport.Children) 
         {
-            Settings = assetSettings;
-            Asset = asset;
-            SerializeAsset();
+            if (Asset.Exports[package.Index - 1] is FunctionExport func) 
+            {
+                children.Add(SerializeFunction(func, AssetInfo));
+            }
         }
-
-        private void SerializeAsset()
+        AssetData.Add("Children", children);
+        
+        var childProperties = new JArray();
+        foreach (var property in ClassExport.LoadedProperties) 
         {
-            if (!SetupSerialization()) return;
+            childProperties.Add(SerializeProperty(property, AssetInfo));
+        }
+        AssetData.Add("ChildProperties", childProperties);
+        AssetData.Add("StructFlags", (uint)ClassExport.StructFlags);
 
-            if (!SetupAssetInfo()) return;
-
-            SerializeHeaders();
-            
-            AssetData.Add("SuperStruct", Index(ClassExport.SuperIndex.Index, Dict));
-            RefObjects.Add(Index(ClassExport.SuperIndex.Index, Dict));
-            
-            var children = new JArray();
-            foreach (var package in ClassExport.Children) 
+        var bGuid = false;
+        if (FindPropertyData(ClassExport,"Guid",out PropertyData prop)) 
+        {
+            var guidProp = (StructPropertyData)prop;
+            if (FindPropertyData(guidProp.Value, "Guid", out PropertyData _prop)) 
             {
-                if (Asset.Exports[package.Index - 1] is FunctionExport func) 
-                {
-                    children.Add(SerializeFunction(func, AssetInfo));
-                }
+                var realGuid = (GuidPropertyData)_prop;
+                var guid = realGuid.Value.ToUnsignedInts();
+                AssetData.Add("Guid", guid.Select(x => x.ToString("X8")).Aggregate((a, b) => a + b));
+                bGuid = true;
             }
-            AssetData.Add("Children", children);
-            
-            var childProperties = new JArray();
-            foreach (var property in ClassExport.LoadedProperties) 
-            {
-                childProperties.Add(SerializeProperty(property, AssetInfo));
-            }
-            AssetData.Add("ChildProperties", childProperties);
-            AssetData.Add("StructFlags", (uint)ClassExport.StructFlags);
-
-            var bGuid = false;
-            if (FindPropertyData(ClassExport,"Guid",out PropertyData prop)) 
-            {
-                var guidProp = (StructPropertyData)prop;
-                if (FindPropertyData(guidProp.Value, "Guid", out PropertyData _prop)) 
-                {
-                    var realGuid = (GuidPropertyData)_prop;
-                    var guid = realGuid.Value.ToUnsignedInts();
-                    AssetData.Add("Guid", guid.Select(x => x.ToString("X8")).Aggregate((a, b) => a + b));
-                    bGuid = true;
-                }
-            } 
+        } 
 				
-            if (!bGuid) AssetData.Add("Guid", new Guid("00000000000000000000000000000000"));
+        if (!bGuid) AssetData.Add("Guid", new Guid("00000000000000000000000000000000"));
 
-            AssetData.Add("StructDefaultInstance", SerializaListOfProperties(ClassExport.DefaultStructInstance, AssetInfo, ref RefObjects));
-            AssetData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
-            
-            AssignAssetSerializedData();
-            
-            WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
-        }
+        AssetData.Add("StructDefaultInstance", SerializaListOfProperties(ClassExport.DefaultStructInstance, AssetInfo, ref RefObjects));
+        AssetData.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
+        
+        AssignAssetSerializedData();
+        
+        WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
     }
 }

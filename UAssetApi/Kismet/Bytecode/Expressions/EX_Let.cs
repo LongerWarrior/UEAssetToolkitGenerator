@@ -1,54 +1,51 @@
-﻿using Newtonsoft.Json;
+﻿namespace UAssetAPI.Kismet.Bytecode.Expressions;
 
-namespace UAssetAPI.Kismet.Bytecode.Expressions
+/// <summary>
+/// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.Let"/> instruction.
+/// </summary>
+public class EX_Let : KismetExpression
 {
     /// <summary>
-    /// A single Kismet bytecode instruction, corresponding to the <see cref="EExprToken.Let"/> instruction.
+    /// The token of this expression.
     /// </summary>
-    public class EX_Let : KismetExpression
+    public override EExprToken Token { get { return EExprToken.Let; } }
+
+    /// <summary>
+    /// A pointer to the variable.
+    /// </summary>
+    [JsonProperty]
+    public KismetPropertyPointer Value;
+    public KismetExpression Variable;
+    public KismetExpression Expression;
+
+    public EX_Let()
     {
-        /// <summary>
-        /// The token of this expression.
-        /// </summary>
-        public override EExprToken Token { get { return EExprToken.Let; } }
 
-        /// <summary>
-        /// A pointer to the variable.
-        /// </summary>
-        [JsonProperty]
-        public KismetPropertyPointer Value;
-        public KismetExpression Variable;
-        public KismetExpression Expression;
+    }
 
-        public EX_Let()
-        {
+    /// <summary>
+    /// Reads out the expression from a BinaryReader.
+    /// </summary>
+    /// <param name="reader">The BinaryReader to read from.</param>
+    public override void Read(AssetBinaryReader reader)
+    {
+        Value = reader.XFER_PROP_POINTER();
+        Variable = ExpressionSerializer.ReadExpression(reader);
+        Expression = ExpressionSerializer.ReadExpression(reader);
 
-        }
+    }
 
-        /// <summary>
-        /// Reads out the expression from a BinaryReader.
-        /// </summary>
-        /// <param name="reader">The BinaryReader to read from.</param>
-        public override void Read(AssetBinaryReader reader)
-        {
-            Value = reader.XFER_PROP_POINTER();
-            Variable = ExpressionSerializer.ReadExpression(reader);
-            Expression = ExpressionSerializer.ReadExpression(reader);
-
-        }
-
-        /// <summary>
-        /// Writes the expression to a BinaryWriter.
-        /// </summary>
-        /// <param name="writer">The BinaryWriter to write from.</param>
-        /// <returns>The iCode offset of the data that was written.</returns>
-        public override int Write(AssetBinaryWriter writer)
-        {
-            int offset = 0;
-            offset += writer.XFER_PROP_POINTER(Value);
-            offset += ExpressionSerializer.WriteExpression(Variable, writer);
-            offset += ExpressionSerializer.WriteExpression(Expression, writer);
-            return offset;
-        }
+    /// <summary>
+    /// Writes the expression to a BinaryWriter.
+    /// </summary>
+    /// <param name="writer">The BinaryWriter to write from.</param>
+    /// <returns>The iCode offset of the data that was written.</returns>
+    public override int Write(AssetBinaryWriter writer)
+    {
+        int offset = 0;
+        offset += writer.XFER_PROP_POINTER(Value);
+        offset += ExpressionSerializer.WriteExpression(Variable, writer);
+        offset += ExpressionSerializer.WriteExpression(Expression, writer);
+        return offset;
     }
 }

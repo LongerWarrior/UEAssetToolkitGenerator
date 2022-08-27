@@ -1,20 +1,19 @@
-﻿namespace UAssetAPI.PropertyTypes
+﻿namespace UAssetAPI.PropertyTypes;
+
+public enum TextHistoryType
 {
-    public enum TextHistoryType
-    {
-        None = -1,
-        Base = 0,
-        NamedFormat,
-        OrderedFormat,
-        ArgumentFormat,
-        AsNumber,
-        AsPercent,
-        AsCurrency,
-        AsDate,
-        AsTime,
-        AsDateTime,
-        Transform,
-        StringTableEntry,
-        TextGenerator
-    }
+    None = -1,
+    Base = 0,
+    NamedFormat,
+    OrderedFormat,
+    ArgumentFormat,
+    AsNumber,
+    AsPercent,
+    AsCurrency,
+    AsDate,
+    AsTime,
+    AsDateTime,
+    Transform,
+    StringTableEntry,
+    TextGenerator
 }

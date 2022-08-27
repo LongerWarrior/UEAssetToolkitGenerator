@@ -1,13 +1,10 @@
-﻿using UAssetAPI;
+﻿namespace CookedAssetSerializer.AssetTypes;
 
-namespace CookedAssetSerializer.AssetTypes
+public class PhysicalMaterialSerializer : SimpleAssetSerializer<NormalExport>
 {
-    public class PhysicalMaterialSerializer : SimpleAssetSerializer<NormalExport>
+    public PhysicalMaterialSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        public PhysicalMaterialSerializer(Settings settings, UAsset asset) : base(settings, asset)
-        {
-            Setup(true);
-            SerializeAsset();
-        }
+        Setup(true);
+        SerializeAsset();
     }
 }

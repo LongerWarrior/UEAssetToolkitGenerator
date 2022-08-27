@@ -1,9 +1,7 @@
-﻿namespace Textures.ASTC
+﻿namespace Textures.ASTC;
+public enum EIntegerEncoding
 {
-    public enum EIntegerEncoding
-    {
-        JustBits,
-        Quint,
-        Trit
-    }
+    JustBits,
+    Quint,
+    Trit
 }

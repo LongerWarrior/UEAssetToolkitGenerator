@@ -1,98 +1,92 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.IO;
-using UAssetAPI.PropertyTypes;
+﻿namespace UAssetAPI.StructTypes;
 
-namespace UAssetAPI.StructTypes
+public class BoxPropertyData : PropertyData<VectorPropertyData[]> // Min, Max, IsValid
 {
-    public class BoxPropertyData : PropertyData<VectorPropertyData[]> // Min, Max, IsValid
+    [JsonProperty]
+    public bool IsValid;
+
+    public BoxPropertyData(FName name) : base(name)
     {
-        [JsonProperty]
-        public bool IsValid;
 
-        public BoxPropertyData(FName name) : base(name)
+    }
+
+    public BoxPropertyData()
+    {
+
+    }
+
+    private static readonly FName CurrentPropertyType = new FName("Box");
+    public override bool HasCustomStructSerialization { get { return true; } }
+    public override FName PropertyType { get { return CurrentPropertyType; } }
+
+    public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
+    {
+        if (includeHeader)
         {
-
+            PropertyGuid = reader.ReadPropertyGuid();
         }
 
-        public BoxPropertyData()
+        Value = new VectorPropertyData[2];
+        for (int i = 0; i < 2; i++)
         {
-
+            var next = new VectorPropertyData(Name);
+            next.Read(reader, false, 0);
+            Value[i] = next;
         }
 
-        private static readonly FName CurrentPropertyType = new FName("Box");
-        public override bool HasCustomStructSerialization { get { return true; } }
-        public override FName PropertyType { get { return CurrentPropertyType; } }
+        IsValid = reader.ReadBoolean();
+    }
 
-        public override void Read(AssetBinaryReader reader, bool includeHeader, long leng1, long leng2 = 0)
+    public override int Write(AssetBinaryWriter writer, bool includeHeader)
+    {
+        if (includeHeader)
         {
-            if (includeHeader)
-            {
-                PropertyGuid = reader.ReadPropertyGuid();
-            }
-
-            Value = new VectorPropertyData[2];
-            for (int i = 0; i < 2; i++)
-            {
-                var next = new VectorPropertyData(Name);
-                next.Read(reader, false, 0);
-                Value[i] = next;
-            }
-
-            IsValid = reader.ReadBoolean();
+            writer.WritePropertyGuid(PropertyGuid);
         }
 
-        public override int Write(AssetBinaryWriter writer, bool includeHeader)
+        int totalSize = 0;
+        for (int i = 0; i < 2; i++)
         {
-            if (includeHeader)
-            {
-                writer.WritePropertyGuid(PropertyGuid);
-            }
-
-            int totalSize = 0;
-            for (int i = 0; i < 2; i++)
-            {
-                totalSize += Value[i].Write(writer, includeHeader);
-            }
-            writer.Write(IsValid);
-            return totalSize + sizeof(bool);
+            totalSize += Value[i].Write(writer, includeHeader);
         }
+        writer.Write(IsValid);
+        return totalSize + sizeof(bool);
+    }
 
-        public override void FromString(string[] d, UAsset asset)
+    public override void FromString(string[] d, UAsset asset)
+    {
+        IsValid = d[0].Equals("1") || d[0].ToLower().Equals("true");
+    }
+
+    public override string ToString()
+    {
+        string oup = "(";
+        for (int i = 0; i < Value.Length; i++)
         {
-            IsValid = d[0].Equals("1") || d[0].ToLower().Equals("true");
+            oup += Value[i] + ", ";
         }
+        return oup.Remove(oup.Length - 2) + ")";
+    }
 
-        public override string ToString()
+    protected override void HandleCloned(PropertyData res)
+    {
+        BoxPropertyData cloningProperty = (BoxPropertyData)res;
+
+        VectorPropertyData[] newData = new VectorPropertyData[this.Value.Length];
+        for (int i = 0; i < this.Value.Length; i++)
         {
-            string oup = "(";
-            for (int i = 0; i < Value.Length; i++)
-            {
-                oup += Value[i] + ", ";
-            }
-            return oup.Remove(oup.Length - 2) + ")";
+            newData[i] = (VectorPropertyData)this.Value[i].Clone();
         }
+        cloningProperty.Value = newData;
+    }
 
-        protected override void HandleCloned(PropertyData res)
-        {
-            BoxPropertyData cloningProperty = (BoxPropertyData)res;
+    public override JToken ToJson() {
+        JObject res = new JObject();
 
-            VectorPropertyData[] newData = new VectorPropertyData[this.Value.Length];
-            for (int i = 0; i < this.Value.Length; i++)
-            {
-                newData[i] = (VectorPropertyData)this.Value[i].Clone();
-            }
-            cloningProperty.Value = newData;
-        }
+        res.Add("Min", Value[0].ToJson());
+        res.Add("Max", Value[1].ToJson());
+        res.Add("IsValid", IsValid);
 
-        public override JToken ToJson() {
-            JObject res = new JObject();
-
-            res.Add("Min", Value[0].ToJson());
-            res.Add("Max", Value[1].ToJson());
-            res.Add("IsValid", IsValid);
-
-            return res;
-        }
+        return res;
     }
 }

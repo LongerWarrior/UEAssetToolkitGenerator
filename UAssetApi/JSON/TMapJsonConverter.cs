@@ -1,8 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 
 /*
     The code in this file is modified from mattmc3's dotmore @ https://github.com/mattmc3/dotmore/tree/b032bbf871d46bffd698c9b7a233c533d9d2f0ebs for usage in UAssetAPI.
@@ -30,51 +26,50 @@ using System.Collections.Specialized;
     SOFTWARE.
 */
 
-namespace UAssetAPI
-{
-    public class TMapJsonConverter<TKey, TValue> : JsonConverter
-    {
-        public override bool CanConvert(Type objectType)
-        {
-            return typeof(IOrderedDictionary).IsAssignableFrom(objectType);
-        }
+namespace UAssetAPI;
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+public class TMapJsonConverter<TKey, TValue> : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return typeof(IOrderedDictionary).IsAssignableFrom(objectType);
+    }
+
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        ICollection keys = ((IOrderedDictionary)value).Keys;
+        ICollection values = ((IOrderedDictionary)value).Values;
+        IEnumerator valueEnumerator = values.GetEnumerator();
+
+        writer.WriteStartArray();
+        foreach (object key in keys)
         {
-            ICollection keys = ((IOrderedDictionary)value).Keys;
-            ICollection values = ((IOrderedDictionary)value).Values;
-            IEnumerator valueEnumerator = values.GetEnumerator();
+            valueEnumerator.MoveNext();
 
             writer.WriteStartArray();
-            foreach (object key in keys)
-            {
-                valueEnumerator.MoveNext();
-
-                writer.WriteStartArray();
-                serializer.Serialize(writer, key);
-                serializer.Serialize(writer, valueEnumerator.Current);
-                writer.WriteEndArray();
-            }
+            serializer.Serialize(writer, key);
+            serializer.Serialize(writer, valueEnumerator.Current);
             writer.WriteEndArray();
         }
+        writer.WriteEndArray();
+    }
 
-        public override bool CanRead
+    public override bool CanRead
+    {
+        get { return true; }
+    }
+
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        var dictionary = new TMap<TKey, TValue>();
+        JToken tokens = JToken.Load(reader);
+
+        foreach (var eachToken in tokens)
         {
-            get { return true; }
+            TKey key = eachToken[0].ToObject<TKey>(serializer);
+            TValue value = eachToken[1].ToObject<TValue>(serializer);
+            dictionary.Add(key, value);
         }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var dictionary = new TMap<TKey, TValue>();
-            JToken tokens = JToken.Load(reader);
-
-            foreach (var eachToken in tokens)
-            {
-                TKey key = eachToken[0].ToObject<TKey>(serializer);
-                TValue value = eachToken[1].ToObject<TValue>(serializer);
-                dictionary.Add(key, value);
-            }
-            return dictionary;
-        }
+        return dictionary;
     }
 }

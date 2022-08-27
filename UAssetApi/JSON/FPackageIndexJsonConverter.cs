@@ -1,28 +1,24 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿namespace UAssetAPI;
 
-namespace UAssetAPI
+public class FPackageIndexJsonConverter : JsonConverter
 {
-    public class FPackageIndexJsonConverter : JsonConverter
+    public override bool CanConvert(Type objectType)
     {
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof(FPackageIndex);
-        }
+        return objectType == typeof(FPackageIndex);
+    }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteValue((value as FPackageIndex).Index);
-        }
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        writer.WriteValue((value as FPackageIndex).Index);
+    }
 
-        public override bool CanRead
-        {
-            get { return true; }
-        }
+    public override bool CanRead
+    {
+        get { return true; }
+    }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            return new FPackageIndex(Convert.ToInt32(reader.Value));
-        }
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        return new FPackageIndex(Convert.ToInt32(reader.Value));
     }
 }

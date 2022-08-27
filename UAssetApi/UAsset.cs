@@ -1,1817 +1,1835 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json.Converters;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using UAssetAPI.FieldTypes;
-using UAssetAPI.PropertyTypes;
 
-namespace UAssetAPI
+namespace UAssetAPI;
+
+public class NameMapOutOfRangeException : FormatException
 {
-    public class NameMapOutOfRangeException : FormatException
+    public FString RequiredName;
+
+    public NameMapOutOfRangeException(FString requiredName) : base("Requested name \"" + requiredName + "\" not found in name map")
     {
-        public FString RequiredName;
-
-        public NameMapOutOfRangeException(FString requiredName) : base("Requested name \"" + requiredName + "\" not found in name map")
-        {
-            RequiredName = requiredName;
-        }
+        RequiredName = requiredName;
     }
+}
 
-    public class UnknownEngineVersionException : InvalidOperationException
+public class UnknownEngineVersionException : InvalidOperationException
+{
+    public UnknownEngineVersionException(string message) : base(message)
     {
-        public UnknownEngineVersionException(string message) : base(message)
-        {
 
-        }
     }
+}
 
-    /// <summary>
-    /// Holds basic Unreal version numbers.
-    /// </summary>
-    public struct FEngineVersion
+/// <summary>
+/// Holds basic Unreal version numbers.
+/// </summary>
+public struct FEngineVersion
+{
+    /// <summary>Major version number.</summary>
+    public ushort Major;
+    /// <summary>Minor version number.</summary>
+    public ushort Minor;
+    /// <summary>Patch version number.</summary>
+    public ushort Patch;
+    /// <summary>Changelist number. This is used by the engine to arbitrate when Major/Minor/Patch version numbers match.</summary>
+    public uint Changelist;
+    /// <summary>Branch name.</summary>
+    public FString Branch;
+
+    public void Write(AssetBinaryWriter writer)
     {
-        /// <summary>Major version number.</summary>
-        public ushort Major;
-        /// <summary>Minor version number.</summary>
-        public ushort Minor;
-        /// <summary>Patch version number.</summary>
-        public ushort Patch;
-        /// <summary>Changelist number. This is used by the engine to arbitrate when Major/Minor/Patch version numbers match.</summary>
-        public uint Changelist;
-        /// <summary>Branch name.</summary>
-        public FString Branch;
-
-        public void Write(AssetBinaryWriter writer)
-        {
-            writer.Write(Major);
-            writer.Write(Minor);
-            writer.Write(Patch);
-            writer.Write(Changelist);
-            writer.Write(Branch);
-        }
-
-        public FEngineVersion(AssetBinaryReader reader)
-        {
-            Major = reader.ReadUInt16();
-            Minor = reader.ReadUInt16();
-            Patch = reader.ReadUInt16();
-            Changelist = reader.ReadUInt32();
-            Branch = reader.ReadFString();
-        }
-
-        public FEngineVersion(ushort major, ushort minor, ushort patch, uint changelist, FString branch)
-        {
-            Major = major;
-            Minor = minor;
-            Patch = patch;
-            Changelist = changelist;
-            Branch = branch;
-        }
+        writer.Write(Major);
+        writer.Write(Minor);
+        writer.Write(Patch);
+        writer.Write(Changelist);
+        writer.Write(Branch);
     }
 
-    /// <summary>
-    /// Revision data for an Unreal package file.
-    /// </summary>
-    public class FGenerationInfo
+    public FEngineVersion(AssetBinaryReader reader)
     {
-        /// <summary>Number of exports in the export map for this generation.</summary>
-        public int ExportCount;
-        /// <summary>Number of names in the name map for this generation.</summary>
-        public int NameCount;
-
-        public FGenerationInfo(int exportCount, int nameCount)
-        {
-            ExportCount = exportCount;
-            NameCount = nameCount;
-        }
+        Major = reader.ReadUInt16();
+        Minor = reader.ReadUInt16();
+        Patch = reader.ReadUInt16();
+        Changelist = reader.ReadUInt32();
+        Branch = reader.ReadFString();
     }
 
-
-    public enum EAssetType : sbyte {
-        Uncategorized = -1,
-        Blueprint,
-        WidgetBlueprint,
-        AnimBlueprint,
-        DataTable,
-        StringTable,
-        UserDefinedEnum,
-        UserDefinedStruct,
-        Texture2D,
-        Material,
-        Font,
-        FontFace,
-        BlendSpaceBase,
-        CurveBase,
-        AnimSequence,
-        //CurveLinearColorAtlas,
-        SkeletalMesh,
-        Skeleton,
-        StaticMesh,
-        AnimMontage,
-        CameraAnim,
-        LandscapeGrassType,
-        MaterialInstanceConstant,
-        MaterialParameterCollection,
-        MediaPlayer,
-        MediaTexture,
-        FileMediaSource,
-        PhycialMaterial,
-        SubsurfaceProfile,
-        //Texture2DArray,
-        //TextureCube
-        
-        //MaterialFunction
-        SoundCue,
+    public FEngineVersion(ushort major, ushort minor, ushort patch, uint changelist, FString branch)
+    {
+        Major = major;
+        Minor = minor;
+        Patch = patch;
+        Changelist = changelist;
+        Branch = branch;
     }
-    public class UAsset {
-        public EAssetType assetType = EAssetType.Uncategorized; 
-        public int mainExport = 0;
-        public static Dictionary<int, int> jsonindexes = new Dictionary<int, int>();
+}
 
-        private EAssetType GetAssetType() {
-            if (mainExport != 0) {
-                string type = Exports[mainExport-1].ClassIndex.ToImport(this).ObjectName.ToName();
-                switch (type) {
+/// <summary>
+/// Revision data for an Unreal package file.
+/// </summary>
+public class FGenerationInfo
+{
+    /// <summary>Number of exports in the export map for this generation.</summary>
+    public int ExportCount;
+    /// <summary>Number of names in the name map for this generation.</summary>
+    public int NameCount;
 
-                    case "BlueprintGeneratedClass": return EAssetType.Blueprint;
-                    case "WidgetBlueprintGeneratedClass": return EAssetType.WidgetBlueprint;
-                    case "AnimBlueprintGeneratedClass": return EAssetType.AnimBlueprint;
-
-                    case "DataTable": return EAssetType.DataTable;
-                    case "StringTable": return EAssetType.StringTable;
-                    case "UserDefinedEnum": return EAssetType.UserDefinedEnum;
-                    case "UserDefinedStruct": return EAssetType.UserDefinedStruct;
-
-                    case "TextureCube":
-                    case "Texture2DArray":
-                    case "Texture2D":
-                    case "CurveLinearColorAtlas": return EAssetType.Texture2D;
-
-                    case "Material": return EAssetType.Material;
-                    case "Font": return EAssetType.Font;
-                    case "FontFace": return EAssetType.FontFace;
-
-                    case "BlendSpace":
-                    case "BlendSpace1D":
-                    case "AimOffsetBlendSpace1D":
-                    case "AimOffsetBlendSpace": return EAssetType.BlendSpaceBase;
-
-                    case "CurveFloat":
-                    case "CurveLinearColor":
-                    case "CurveVector": return EAssetType.CurveBase;
-                    
-                    case "AnimSequence": return EAssetType.AnimSequence;
-                    case "SkeletalMesh": return EAssetType.SkeletalMesh;
-                    case "Skeleton": return EAssetType.Skeleton;
-                    case "StaticMesh": return EAssetType.StaticMesh;
-                    case "AnimMontage": return EAssetType.AnimMontage;
-                    case "CameraAnim": return EAssetType.CameraAnim;
-                    case "LandscapeGrassType": return EAssetType.LandscapeGrassType;
-                    case "MaterialInstanceConstant": return EAssetType.MaterialInstanceConstant;
-                    case "MaterialParameterCollection": return EAssetType.MaterialParameterCollection;
-                    case "MediaPlayer": return EAssetType.MediaPlayer;
-                    case "MediaTexture": return EAssetType.MediaTexture;
-                    case "FileMediaSource": return EAssetType.FileMediaSource;
-                    case "PhycialMaterial": return EAssetType.PhycialMaterial;
-                    case "SubsurfaceProfile": return EAssetType.SubsurfaceProfile;
-
-                    case "SoundCue": return EAssetType.SoundCue;
-                    //case "MaterialFunction": return EAssetType.MaterialFunction;
+    public FGenerationInfo(int exportCount, int nameCount)
+    {
+        ExportCount = exportCount;
+        NameCount = nameCount;
+    }
+}
 
 
-                    default: return EAssetType.Uncategorized;
-                }
-            }
-            return EAssetType.Uncategorized;
-        } 
+public enum EAssetType : sbyte {
+    Uncategorized = -1,
+    Blueprint,
+    WidgetBlueprint,
+    AnimBlueprint,
+    DataTable,
+    StringTable,
+    UserDefinedEnum,
+    UserDefinedStruct,
+    Texture2D,
+    Material,
+    Font,
+    FontFace,
+    BlendSpaceBase,
+    CurveBase,
+    AnimSequence,
+    //CurveLinearColorAtlas,
+    SkeletalMesh,
+    Skeleton,
+    StaticMesh,
+    AnimMontage,
+    CameraAnim,
+    LandscapeGrassType,
+    MaterialInstanceConstant,
+    MaterialParameterCollection,
+    MediaPlayer,
+    MediaTexture,
+    FileMediaSource,
+    PhycialMaterial,
+    SubsurfaceProfile,
+    //Texture2DArray,
+    //TextureCube
+    //MaterialFunction
+    SoundCue,
+}
+public class UAsset {
+    public EAssetType assetType = EAssetType.Uncategorized;
 
-        private void GetMainExport() {
-            if (ExportCount == 1) {
-                mainExport = 1;
-            } else {
-                string name = Path.GetFileNameWithoutExtension(FilePath).ToLower();
-                List<int> possiblemainexport = new();
-                List<int> bisasset = new();
-                for (int i = 1; i <= ExportCount; i++) {
-                    if (Exports[i-1].ObjectName.ToName().ToLower() == name + "_c") {
-                        mainExport = i;
-                        return;
-                    }
-                }
-                for (int i = 1; i <= ExportCount; i++) {
-                    if (Exports[i-1].ObjectName.ToName().ToLower() == name) {
-                        possiblemainexport.Add(i);
-                    }
-                    if (Exports[i - 1].bIsAsset) {
-                        bisasset.Add(i);
-                    }
-                }
+    public static Dictionary<string, bool> Options;
+    public int mainExport = 0;
+    public static Dictionary<int, int> jsonindexes = new Dictionary<int, int>();
+
+    private EAssetType GetAssetType() {
+        if (mainExport != 0) {
+            string type = Exports[mainExport-1].ClassIndex.ToImport(this).ObjectName.ToName();
+            switch (type) {
+
+                case "BlueprintGeneratedClass": return EAssetType.Blueprint;
+                case "WidgetBlueprintGeneratedClass": return EAssetType.WidgetBlueprint;
+                case "AnimBlueprintGeneratedClass": return EAssetType.AnimBlueprint;
+
+                case "DataTable": return EAssetType.DataTable;
+                case "StringTable": return EAssetType.StringTable;
+                case "UserDefinedEnum": return EAssetType.UserDefinedEnum;
+                case "UserDefinedStruct": return EAssetType.UserDefinedStruct;
+
+                case "TextureCube":
+                case "Texture2DArray":
+                case "Texture2D":
+                case "CurveLinearColorAtlas": return EAssetType.Texture2D;
+
+                case "Material": return EAssetType.Material;
+                case "Font": return EAssetType.Font;
+                case "FontFace": return EAssetType.FontFace;
+
+                case "BlendSpace":
+                case "BlendSpace1D":
+                case "AimOffsetBlendSpace1D":
+                case "AimOffsetBlendSpace": return EAssetType.BlendSpaceBase;
+
+                case "CurveFloat":
+                case "CurveLinearColor":
+                case "CurveVector": return EAssetType.CurveBase;
                 
-                if (possiblemainexport.Count == 1) {
-                    mainExport = possiblemainexport[0];
+                case "AnimSequence": return EAssetType.AnimSequence;
+                case "SkeletalMesh": return EAssetType.SkeletalMesh;
+                case "Skeleton": return EAssetType.Skeleton;
+                case "StaticMesh": return EAssetType.StaticMesh;
+                case "AnimMontage": return EAssetType.AnimMontage;
+                case "CameraAnim": return EAssetType.CameraAnim;
+                case "LandscapeGrassType": return EAssetType.LandscapeGrassType;
+                case "MaterialInstanceConstant": return EAssetType.MaterialInstanceConstant;
+                case "MaterialParameterCollection": return EAssetType.MaterialParameterCollection;
+                case "MediaPlayer": return EAssetType.MediaPlayer;
+                case "MediaTexture": return EAssetType.MediaTexture;
+                case "FileMediaSource": return EAssetType.FileMediaSource;
+                case "PhycialMaterial": return EAssetType.PhycialMaterial;
+                case "SubsurfaceProfile": return EAssetType.SubsurfaceProfile;
+
+                case "SoundCue": return EAssetType.SoundCue;
+                //case "MaterialFunction": return EAssetType.MaterialFunction;
+
+
+                default: return EAssetType.Uncategorized;
+            }
+        }
+        return EAssetType.Uncategorized;
+    } 
+
+    private void GetMainExport() {
+        if (ExportCount == 1) {
+            mainExport = 1;
+        } else {
+            string name = Path.GetFileNameWithoutExtension(FilePath).ToLower();
+            List<int> possiblemainexport = new();
+            List<int> bisasset = new();
+            for (int i = 1; i <= ExportCount; i++) {
+                if (Exports[i-1].ObjectName.ToName().ToLower() == name + "_c") {
+                    mainExport = i;
                     return;
-                } else {
-                    if (bisasset.Count == 1) {
-                        mainExport = bisasset[0];
-                        return;
-                    }
-                    Console.WriteLine($"Couldn't identify asset type : {this.FilePath}");
                 }
             }
-
+            for (int i = 1; i <= ExportCount; i++) {
+                if (Exports[i-1].ObjectName.ToName().ToLower() == name) {
+                    possiblemainexport.Add(i);
+                }
+                if (Exports[i - 1].bIsAsset) {
+                    bisasset.Add(i);
+                }
+            }
+            
+            if (possiblemainexport.Count == 1) {
+                mainExport = possiblemainexport[0];
+                return;
+            } else {
+                if (bisasset.Count == 1) {
+                    mainExport = bisasset[0];
+                    return;
+                }
+                Console.WriteLine($"Couldn't identify asset type : {this.FilePath}");
+            }
         }
 
+    }
 
-        /// <summary>
-        /// Agent string to provide context in serialized JSON.
-        /// </summary>
-        public string Info = "Serialized with UAssetAPI";
 
-        /// <summary>
-        /// The path of the file on disk that this asset represents. This does not need to be specified for regular parsing.
-        /// </summary>
-        [JsonIgnore]
-        public string FilePath;
+    /// <summary>
+    /// Agent string to provide context in serialized JSON.
+    /// </summary>
+    public string Info = "Serialized with UAssetAPI";
 
-        /// <summary>
-        /// Should the asset be split into separate .uasset, .uexp, and .ubulk files, as opposed to one single .uasset file?
-        /// </summary>
-        public bool UseSeparateBulkDataFiles = false;
+    /// <summary>
+    /// The path of the file on disk that this asset represents. This does not need to be specified for regular parsing.
+    /// </summary>
+    [JsonIgnore]
+    public string FilePath;
 
-        /// <summary>
-        /// The version of the Unreal Engine that will be used to parse this asset.
-        /// </summary>
-        public UE4Version EngineVersion = UE4Version.UNKNOWN;
+    /// <summary>
+    /// Should the asset be split into separate .uasset, .uexp, and .ubulk files, as opposed to one single .uasset file?
+    /// </summary>
+    public bool UseSeparateBulkDataFiles = false;
 
-        /// <summary>
-        /// Checks whether or not this asset maintains binary equality when serialized.
-        /// </summary>
-        /// <returns>Whether or not the asset maintained binary equality.</returns>
-        public bool VerifyBinaryEquality()
+    /// <summary>
+    /// The version of the Unreal Engine that will be used to parse this asset.
+    /// </summary>
+    public UE4Version EngineVersion = UE4Version.UNKNOWN;
+
+    /// <summary>
+    /// Checks whether or not this asset maintains binary equality when serialized.
+    /// </summary>
+    /// <returns>Whether or not the asset maintained binary equality.</returns>
+    public bool VerifyBinaryEquality()
+    {
+        MemoryStream f = this.PathToStream(FilePath);
+        f.Seek(0, SeekOrigin.Begin);
+        MemoryStream newDataStream = WriteData();
+        f.Seek(0, SeekOrigin.Begin);
+
+        if (f.Length != newDataStream.Length) {
+            Debug.WriteLine(f.Length + " - "+ newDataStream.Length);
+            //return false;
+
+        }
+        const int CHUNK_SIZE = 1024;
+        byte[] buffer = new byte[CHUNK_SIZE];
+        byte[] buffer2 = new byte[CHUNK_SIZE];
+        int lastRead1;
+        int leng = 0;
+        bool notbroken = true;
+        while ((lastRead1 = f.Read(buffer, 0, buffer.Length)) > 0)
         {
-            MemoryStream f = this.PathToStream(FilePath);
-            f.Seek(0, SeekOrigin.Begin);
-            MemoryStream newDataStream = WriteData();
-            f.Seek(0, SeekOrigin.Begin);
+            leng += lastRead1;
+            int lastRead2 = newDataStream.Read(buffer2, 0, buffer2.Length);
+            if (lastRead1 != lastRead2) {
 
-            if (f.Length != newDataStream.Length) {
-                Debug.WriteLine(f.Length + " - "+ newDataStream.Length);
-                //return false;
-
+                Debug.WriteLine("Pos1: " + lastRead1 +" Length 1"+ buffer.Length+ "Pos2: " + lastRead2 + " Length 2" + buffer2.Length);
+                return false;
             }
-            const int CHUNK_SIZE = 1024;
-            byte[] buffer = new byte[CHUNK_SIZE];
-            byte[] buffer2 = new byte[CHUNK_SIZE];
-            int lastRead1;
-            int leng = 0;
-            bool notbroken = true;
-            while ((lastRead1 = f.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                leng += lastRead1;
-                int lastRead2 = newDataStream.Read(buffer2, 0, buffer2.Length);
-                if (lastRead1 != lastRead2) {
 
-                    Debug.WriteLine("Pos1: " + lastRead1 +" Length 1"+ buffer.Length+ "Pos2: " + lastRead2 + " Length 2" + buffer2.Length);
-                    return false;
-                }
-
-                if (!buffer.SequenceEqual(buffer2)) { 
-                    
-                    for (int k = 0; k < buffer.Length; k++) {
-                        if (buffer[k] != buffer2[k]) {
-                            Debug.WriteLine("WrongByte - Pos: " + (leng - buffer.Length + k) + " Original: " + buffer[k] + " New: " + buffer2[k]);
-                            notbroken = false;
-                            break;
-                            
-                        }
-                    }
-
-                }
+            if (!buffer.SequenceEqual(buffer2)) { 
                 
-            }
-
-            return notbroken;
-        }
-
-        private void FixNameMapLookupIfNeeded()
-        {
-            if (nameMapIndexList.Count > 0 && nameMapLookup.Count == 0)
-            {
-                for (int i = 0; i < nameMapIndexList.Count; i++)
-                {
-                    nameMapLookup[nameMapIndexList[i].GetHashCode()] = i;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Returns the name map as a read-only list of FStrings.
-        /// </summary>
-        /// <returns>The name map as a read-only list of FStrings.</returns>
-        public IReadOnlyList<FString> GetNameMapIndexList()
-        {
-            FixNameMapLookupIfNeeded();
-            return nameMapIndexList.AsReadOnly();
-        }
-
-        /// <summary>
-        /// Clears the name map. This method should be used with extreme caution, as it may break unparsed references to the name map.
-        /// </summary>
-        public void ClearNameIndexList()
-        {
-            nameMapIndexList = new List<FString>();
-            nameMapLookup = new Dictionary<int, int>();
-        }
-
-        /// <summary>
-        /// Replaces a value in the name map at a particular index.
-        /// </summary>
-        /// <param name="index">The index to overwrite in the name map.</param>
-        /// <param name="value">The value that will be replaced in the name map.</param>
-        public void SetNameReference(int index, FString value)
-        {
-            FixNameMapLookupIfNeeded();
-            nameMapIndexList[index] = value;
-            nameMapLookup[value.GetHashCode()] = index;
-        }
-
-        /// <summary>
-        /// Gets a value in the name map at a particular index.
-        /// </summary>
-        /// <param name="index">The index to return the value at.</param>
-        /// <returns>The value at the index provided.</returns>
-        public FString GetNameReference(int index)
-        {
-            FixNameMapLookupIfNeeded();
-            if (index < 0) return new FString(Convert.ToString(-index));
-            if (index > nameMapIndexList.Count) return new FString(Convert.ToString(index));
-            return nameMapIndexList[index];
-        }
-
-        /// <summary>
-        /// Gets a value in the name map at a particular index, but with the index zero being treated as if it is not valid.
-        /// </summary>
-        /// <param name="index">The index to return the value at.</param>
-        /// <returns>The value at the index provided.</returns>
-        public FString GetNameReferenceWithoutZero(int index)
-        {
-            FixNameMapLookupIfNeeded();
-            if (index <= 0) return new FString(Convert.ToString(-index));
-            if (index > nameMapIndexList.Count) return new FString(Convert.ToString(index));
-            return nameMapIndexList[index];
-        }
-
-        /// <summary>
-        /// Checks whether or not the value exists in the name map.
-        /// </summary>
-        /// <param name="search">The value to search the name map for.</param>
-        /// <returns>true if the value appears in the name map, otherwise false.</returns>
-        public bool NameReferenceContains(FString search)
-        {
-            FixNameMapLookupIfNeeded();
-            return nameMapLookup.ContainsKey(search.GetHashCode());
-        }
-
-        /// <summary>
-        /// Searches the name map for a particular value.
-        /// </summary>
-        /// <param name="search">The value to search the name map for.</param>
-        /// <returns>The index at which the value appears in the name map.</returns>
-        /// <exception cref="UAssetAPI.NameMapOutOfRangeException">Thrown when the value provided does not appear in the name map.</exception>
-        public int SearchNameReference(FString search)
-        {
-            FixNameMapLookupIfNeeded();
-            if (NameReferenceContains(search)) return nameMapLookup[search.GetHashCode()];
-            throw new NameMapOutOfRangeException(search);
-        }
-
-        /// <summary>
-        /// Adds a new value to the name map.
-        /// </summary>
-        /// <param name="name">The value to add to the name map.</param>
-        /// <param name="forceAddDuplicates">Whether or not to add a new entry if the value provided already exists in the name map.</param>
-        /// <returns>The index of the new value in the name map. If the value already existed in the name map beforehand, that index will be returned instead.</returns>
-        /// <exception cref="ArgumentException">Thrown when forceAddDuplicates is false and the value provided is null or empty.</exception>
-        public int AddNameReference(FString name, bool forceAddDuplicates = false)
-        {
-            FixNameMapLookupIfNeeded();
-
-            if (!forceAddDuplicates)
-            {
-                if (name?.Value == null) throw new ArgumentException("Cannot add a null FString to the name map");
-                if (name.Value == string.Empty) throw new ArgumentException("Cannot add an empty FString to the name map");
-                if (NameReferenceContains(name)) return SearchNameReference(name);
-            }
-
-            nameMapIndexList.Add(name);
-            nameMapLookup[name.GetHashCode()] = nameMapIndexList.Count - 1;
-            return nameMapIndexList.Count - 1;
-        }
-
-        /// <summary>
-        /// Adds a new import to the import map. This is equivalent to adding directly to the <see cref="Imports"/> list.
-        /// </summary>
-        /// <param name="li">The new import to add to the import map.</param>
-        /// <returns>The FPackageIndex corresponding to the newly-added import.</returns>
-        public FPackageIndex AddImport(Import li)
-        {
-            Imports.Add(li);
-            return FPackageIndex.FromImport(Imports.Count - 1);
-        }
-
-        /// <summary>
-        /// Searches for and returns this asset's ClassExport, if one exists.
-        /// </summary>
-        /// <returns>The asset's ClassExport if one exists, otherwise null.</returns>
-        public ClassExport GetClassExport()
-        {
-            foreach (Export cat in Exports)
-            {
-                if (cat is ClassExport bgcCat) return bgcCat;
-            }
-            return null;
-        }
-
-        public EnumExport GetEnumExport() {
-            foreach (Export cat in Exports) {
-                if (cat is EnumExport bgcCat) return bgcCat;
-            }
-            return null;
-        }
-
-        public StringTableExport GetStringTableExport() {
-            foreach (Export cat in Exports) {
-                if (cat is StringTableExport bgcCat) return bgcCat;
-            }
-            return null;
-        }
-
-        public DataTableExport GetDataTableExport() {
-            foreach (Export cat in Exports) {
-                if (cat is DataTableExport bgcCat) return bgcCat;
-            }
-            return null;
-        }
-
-
-        public bool IsThereAnyExportWithClass( string klassname) {
-            foreach (Export cat in Exports) {
-                string name = cat.ClassIndex.ToImport(this).ObjectName.ToName();
-                if ( name == klassname) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool IsThereAnyExportEndWithClass(string klassname) {
-            foreach (Export cat in Exports) {
-                if (cat.ClassIndex.ToImport(this).ObjectName.ToName().EndsWith(klassname)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Finds the class path and export name of the SuperStruct of this asset, if it exists.
-        /// </summary>
-        /// <param name="parentClassPath">The class path of the SuperStruct of this asset, if it exists.</param>
-        /// <param name="parentClassExportName">The export name of the SuperStruct of this asset, if it exists.</param>
-        public void GetParentClass(out FName parentClassPath, out FName parentClassExportName)
-        {
-            parentClassPath = null;
-            parentClassExportName = null;
-
-            var bgcCat = GetClassExport();
-            if (bgcCat == null) return;
-
-            Import parentClassLink = bgcCat.SuperStruct.ToImport(this);
-            if (parentClassLink == null) return;
-            if (parentClassLink.OuterIndex.Index >= 0) return;
-
-            parentClassExportName = parentClassLink.ObjectName;
-            parentClassPath = parentClassLink.OuterIndex.ToImport(this).ObjectName;
-        }
-
-        /// <summary>
-        /// Fetches the version of a custom version in this asset.
-        /// </summary>
-        /// <param name="key">The GUID of the custom version to retrieve.</param>
-        /// <returns>The version of the retrieved custom version.</returns>
-        public int GetCustomVersion(Guid key)
-        {
-            for (int i = 0; i < CustomVersionContainer.Count; i++)
-            {
-                CustomVersion custVer = CustomVersionContainer[i];
-                if (custVer.Key == key)
-                {
-                    return custVer.Version;
-                }
-            }
-
-            return -1; // https://github.com/EpicGames/UnrealEngine/blob/99b6e203a15d04fc7bbbf554c421a985c1ccb8f1/Engine/Source/Runtime/Core/Private/Serialization/Archive.cpp#L578
-        }
-
-        /// <summary>
-        /// Fetches the version of a custom version in this asset.
-        /// </summary>
-        /// <param name="friendlyName">The friendly name of the custom version to retrieve.</param>
-        /// <returns>The version of the retrieved custom version.</returns>
-        public int GetCustomVersion(string friendlyName)
-        {
-            for (int i = 0; i < CustomVersionContainer.Count; i++)
-            {
-                CustomVersion custVer = CustomVersionContainer[i];
-                if (custVer.FriendlyName == friendlyName)
-                {
-                    return custVer.Version;
-                }
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Fetches a custom version's enum value based off of its type.
-        /// </summary>
-        /// <typeparam name="T">The enum type of the custom version to retrieve.</typeparam>
-        /// <returns>The enum value of the requested custom version.</returns>
-        /// <exception cref="ArgumentException">Thrown when T is not an enumerated type.</exception>
-        public T GetCustomVersion<T>()
-        {
-            Type customVersionEnumType = typeof(T);
-            if (!customVersionEnumType.IsEnum) throw new ArgumentException("T must be an enumerated type");
-
-            for (int i = 0; i < CustomVersionContainer.Count; i++)
-            {
-                CustomVersion custVer = CustomVersionContainer[i];
-                if (custVer.FriendlyName == customVersionEnumType.Name)
-                {
-                    return (T)(object)custVer.Version;
-                }
-            }
-
-            // Try and guess the custom version based off the engine version
-            T[] allVals = (T[])Enum.GetValues(customVersionEnumType);
-            for (int i = allVals.Length - 1; i >= 0; i--)
-            {
-                T val = allVals[i];
-                var attributes = customVersionEnumType.GetMember(val.ToString())?[0]?.GetCustomAttributes(typeof(IntroducedAttribute), false);
-                if (attributes == null || attributes.Length <= 0) continue;
-                if (EngineVersion >= ((IntroducedAttribute)attributes[0]).IntroducedVersion) return val;
-            }
-
-            return (T)(object)-1;
-        }
-
-        /// <summary>
-        /// Searches for an import in the import map based off of certain parameters.
-        /// </summary>
-        /// <param name="classPackage">The ClassPackage that the requested import will have.</param>
-        /// <param name="className">The ClassName that the requested import will have.</param>
-        /// <param name="outerIndex">The CuterIndex that the requested import will have.</param>
-        /// <param name="objectName">The ObjectName that the requested import will have.</param>
-        /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
-        public int SearchForImport(FName classPackage, FName className, FPackageIndex outerIndex, FName objectName)
-        {
-            int currentPos = 0;
-            for (int i = 0; i < Imports.Count; i++)
-            {
-                currentPos--;
-                if (classPackage == Imports[i].ClassPackage
-                    && className == Imports[i].ClassName
-                    && outerIndex == Imports[i].OuterIndex
-                    && objectName == Imports[i].ObjectName)
-                {
-                    return currentPos;
+                for (int k = 0; k < buffer.Length; k++) {
+                    if (buffer[k] != buffer2[k]) {
+                        Debug.WriteLine("WrongByte - Pos: " + (leng - buffer.Length + k) + " Original: " + buffer[k] + " New: " + buffer2[k]);
+                        notbroken = false;
+                        break;
+                        
+                    }
                 }
 
             }
-
-            return 0;
+            
         }
 
-        /// <summary>
-        /// Searches for an import in the import map based off of certain parameters.
-        /// </summary>
-        /// <param name="classPackage">The ClassPackage that the requested import will have.</param>
-        /// <param name="className">The ClassName that the requested import will have.</param>
-        /// <param name="objectName">The ObjectName that the requested import will have.</param>
-        /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
-        public int SearchForImport(FName classPackage, FName className, FName objectName)
-        {
-            int currentPos = 0;
-            for (int i = 0; i < Imports.Count; i++)
-            {
-                currentPos--;
-                if (classPackage == Imports[i].ClassPackage
-                    && className == Imports[i].ClassName
-                    && objectName == Imports[i].ObjectName)
-                {
-                    return currentPos;
-                }
+        return notbroken;
+    }
 
+    private void FixNameMapLookupIfNeeded()
+    {
+        if (nameMapIndexList.Count > 0 && nameMapLookup.Count == 0)
+        {
+            for (int i = 0; i < nameMapIndexList.Count; i++)
+            {
+                nameMapLookup[nameMapIndexList[i].GetHashCode()] = i;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Returns the name map as a read-only list of FStrings.
+    /// </summary>
+    /// <returns>The name map as a read-only list of FStrings.</returns>
+    public IReadOnlyList<FString> GetNameMapIndexList()
+    {
+        FixNameMapLookupIfNeeded();
+        return nameMapIndexList.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Clears the name map. This method should be used with extreme caution, as it may break unparsed references to the name map.
+    /// </summary>
+    public void ClearNameIndexList()
+    {
+        nameMapIndexList = new List<FString>();
+        nameMapLookup = new Dictionary<int, int>();
+    }
+
+    /// <summary>
+    /// Replaces a value in the name map at a particular index.
+    /// </summary>
+    /// <param name="index">The index to overwrite in the name map.</param>
+    /// <param name="value">The value that will be replaced in the name map.</param>
+    public void SetNameReference(int index, FString value)
+    {
+        FixNameMapLookupIfNeeded();
+        nameMapIndexList[index] = value;
+        nameMapLookup[value.GetHashCode()] = index;
+    }
+
+    /// <summary>
+    /// Gets a value in the name map at a particular index.
+    /// </summary>
+    /// <param name="index">The index to return the value at.</param>
+    /// <returns>The value at the index provided.</returns>
+    public FString GetNameReference(int index)
+    {
+        FixNameMapLookupIfNeeded();
+        if (index < 0) return new FString(Convert.ToString(-index));
+        if (index > nameMapIndexList.Count) return new FString(Convert.ToString(index));
+        return nameMapIndexList[index];
+    }
+
+    /// <summary>
+    /// Gets a value in the name map at a particular index, but with the index zero being treated as if it is not valid.
+    /// </summary>
+    /// <param name="index">The index to return the value at.</param>
+    /// <returns>The value at the index provided.</returns>
+    public FString GetNameReferenceWithoutZero(int index)
+    {
+        FixNameMapLookupIfNeeded();
+        if (index <= 0) return new FString(Convert.ToString(-index));
+        if (index > nameMapIndexList.Count) return new FString(Convert.ToString(index));
+        return nameMapIndexList[index];
+    }
+
+    /// <summary>
+    /// Checks whether or not the value exists in the name map.
+    /// </summary>
+    /// <param name="search">The value to search the name map for.</param>
+    /// <returns>true if the value appears in the name map, otherwise false.</returns>
+    public bool NameReferenceContains(FString search)
+    {
+        FixNameMapLookupIfNeeded();
+        return nameMapLookup.ContainsKey(search.GetHashCode());
+    }
+
+    /// <summary>
+    /// Searches the name map for a particular value.
+    /// </summary>
+    /// <param name="search">The value to search the name map for.</param>
+    /// <returns>The index at which the value appears in the name map.</returns>
+    /// <exception cref="UAssetAPI.NameMapOutOfRangeException">Thrown when the value provided does not appear in the name map.</exception>
+    public int SearchNameReference(FString search)
+    {
+        FixNameMapLookupIfNeeded();
+        if (NameReferenceContains(search)) return nameMapLookup[search.GetHashCode()];
+        throw new NameMapOutOfRangeException(search);
+    }
+
+    /// <summary>
+    /// Adds a new value to the name map.
+    /// </summary>
+    /// <param name="name">The value to add to the name map.</param>
+    /// <param name="forceAddDuplicates">Whether or not to add a new entry if the value provided already exists in the name map.</param>
+    /// <returns>The index of the new value in the name map. If the value already existed in the name map beforehand, that index will be returned instead.</returns>
+    /// <exception cref="ArgumentException">Thrown when forceAddDuplicates is false and the value provided is null or empty.</exception>
+    public int AddNameReference(FString name, bool forceAddDuplicates = false)
+    {
+        FixNameMapLookupIfNeeded();
+
+        if (!forceAddDuplicates)
+        {
+            if (name?.Value == null) throw new ArgumentException("Cannot add a null FString to the name map");
+            if (name.Value == string.Empty) throw new ArgumentException("Cannot add an empty FString to the name map");
+            if (NameReferenceContains(name)) return SearchNameReference(name);
+        }
+
+        nameMapIndexList.Add(name);
+        nameMapLookup[name.GetHashCode()] = nameMapIndexList.Count - 1;
+        return nameMapIndexList.Count - 1;
+    }
+
+    /// <summary>
+    /// Adds a new import to the import map. This is equivalent to adding directly to the <see cref="Imports"/> list.
+    /// </summary>
+    /// <param name="li">The new import to add to the import map.</param>
+    /// <returns>The FPackageIndex corresponding to the newly-added import.</returns>
+    public FPackageIndex AddImport(Import li)
+    {
+        Imports.Add(li);
+        return FPackageIndex.FromImport(Imports.Count - 1);
+    }
+
+    /// <summary>
+    /// Searches for and returns this asset's ClassExport, if one exists.
+    /// </summary>
+    /// <returns>The asset's ClassExport if one exists, otherwise null.</returns>
+    public ClassExport GetClassExport()
+    {
+        foreach (Export cat in Exports)
+        {
+            if (cat is ClassExport bgcCat) return bgcCat;
+        }
+        return null;
+    }
+
+    public EnumExport GetEnumExport() {
+        foreach (Export cat in Exports) {
+            if (cat is EnumExport bgcCat) return bgcCat;
+        }
+        return null;
+    }
+
+    public StringTableExport GetStringTableExport() {
+        foreach (Export cat in Exports) {
+            if (cat is StringTableExport bgcCat) return bgcCat;
+        }
+        return null;
+    }
+
+    public DataTableExport GetDataTableExport() {
+        foreach (Export cat in Exports) {
+            if (cat is DataTableExport bgcCat) return bgcCat;
+        }
+        return null;
+    }
+
+
+    public bool IsThereAnyExportWithClass( string klassname) {
+        foreach (Export cat in Exports) {
+            string name = cat.ClassIndex.ToImport(this).ObjectName.ToName();
+            if ( name == klassname) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool IsThereAnyExportEndWithClass(string klassname) {
+        foreach (Export cat in Exports) {
+            if (cat.ClassIndex.ToImport(this).ObjectName.ToName().EndsWith(klassname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Finds the class path and export name of the SuperStruct of this asset, if it exists.
+    /// </summary>
+    /// <param name="parentClassPath">The class path of the SuperStruct of this asset, if it exists.</param>
+    /// <param name="parentClassExportName">The export name of the SuperStruct of this asset, if it exists.</param>
+    public void GetParentClass(out FName parentClassPath, out FName parentClassExportName)
+    {
+        parentClassPath = null;
+        parentClassExportName = null;
+
+        var bgcCat = GetClassExport();
+        if (bgcCat == null) return;
+
+        Import parentClassLink = bgcCat.SuperStruct.ToImport(this);
+        if (parentClassLink == null) return;
+        if (parentClassLink.OuterIndex.Index >= 0) return;
+
+        parentClassExportName = parentClassLink.ObjectName;
+        parentClassPath = parentClassLink.OuterIndex.ToImport(this).ObjectName;
+    }
+
+    /// <summary>
+    /// Fetches the version of a custom version in this asset.
+    /// </summary>
+    /// <param name="key">The GUID of the custom version to retrieve.</param>
+    /// <returns>The version of the retrieved custom version.</returns>
+    public int GetCustomVersion(Guid key)
+    {
+        for (int i = 0; i < CustomVersionContainer.Count; i++)
+        {
+            CustomVersion custVer = CustomVersionContainer[i];
+            if (custVer.Key == key)
+            {
+                return custVer.Version;
+            }
+        }
+
+        return -1; // https://github.com/EpicGames/UnrealEngine/blob/99b6e203a15d04fc7bbbf554c421a985c1ccb8f1/Engine/Source/Runtime/Core/Private/Serialization/Archive.cpp#L578
+    }
+
+    /// <summary>
+    /// Fetches the version of a custom version in this asset.
+    /// </summary>
+    /// <param name="friendlyName">The friendly name of the custom version to retrieve.</param>
+    /// <returns>The version of the retrieved custom version.</returns>
+    public int GetCustomVersion(string friendlyName)
+    {
+        for (int i = 0; i < CustomVersionContainer.Count; i++)
+        {
+            CustomVersion custVer = CustomVersionContainer[i];
+            if (custVer.FriendlyName == friendlyName)
+            {
+                return custVer.Version;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Fetches a custom version's enum value based off of its type.
+    /// </summary>
+    /// <typeparam name="T">The enum type of the custom version to retrieve.</typeparam>
+    /// <returns>The enum value of the requested custom version.</returns>
+    /// <exception cref="ArgumentException">Thrown when T is not an enumerated type.</exception>
+    public T GetCustomVersion<T>()
+    {
+        Type customVersionEnumType = typeof(T);
+        if (!customVersionEnumType.IsEnum) throw new ArgumentException("T must be an enumerated type");
+
+        for (int i = 0; i < CustomVersionContainer.Count; i++)
+        {
+            CustomVersion custVer = CustomVersionContainer[i];
+            if (custVer.FriendlyName == customVersionEnumType.Name)
+            {
+                return (T)(object)custVer.Version;
+            }
+        }
+
+        // Try and guess the custom version based off the engine version
+        T[] allVals = (T[])Enum.GetValues(customVersionEnumType);
+        for (int i = allVals.Length - 1; i >= 0; i--)
+        {
+            T val = allVals[i];
+            var attributes = customVersionEnumType.GetMember(val.ToString())?[0]?.GetCustomAttributes(typeof(IntroducedAttribute), false);
+            if (attributes == null || attributes.Length <= 0) continue;
+            if (EngineVersion >= ((IntroducedAttribute)attributes[0]).IntroducedVersion) return val;
+        }
+
+        return (T)(object)-1;
+    }
+
+    /// <summary>
+    /// Searches for an import in the import map based off of certain parameters.
+    /// </summary>
+    /// <param name="classPackage">The ClassPackage that the requested import will have.</param>
+    /// <param name="className">The ClassName that the requested import will have.</param>
+    /// <param name="outerIndex">The CuterIndex that the requested import will have.</param>
+    /// <param name="objectName">The ObjectName that the requested import will have.</param>
+    /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
+    public int SearchForImport(FName classPackage, FName className, FPackageIndex outerIndex, FName objectName)
+    {
+        int currentPos = 0;
+        for (int i = 0; i < Imports.Count; i++)
+        {
+            currentPos--;
+            if (classPackage == Imports[i].ClassPackage
+                && className == Imports[i].ClassName
+                && outerIndex == Imports[i].OuterIndex
+                && objectName == Imports[i].ObjectName)
+            {
+                return currentPos;
             }
 
-            return 0;
         }
 
-        /// <summary>
-        /// Searches for an import in the import map based off of certain parameters.
-        /// </summary>
-        /// <param name="objectName">The ObjectName that the requested import will have.</param>
-        /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
-        public int SearchForImport(FName objectName)
+        return 0;
+    }
+
+    /// <summary>
+    /// Searches for an import in the import map based off of certain parameters.
+    /// </summary>
+    /// <param name="classPackage">The ClassPackage that the requested import will have.</param>
+    /// <param name="className">The ClassName that the requested import will have.</param>
+    /// <param name="objectName">The ObjectName that the requested import will have.</param>
+    /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
+    public int SearchForImport(FName classPackage, FName className, FName objectName)
+    {
+        int currentPos = 0;
+        for (int i = 0; i < Imports.Count; i++)
         {
-            int currentPos = 0;
-            for (int i = 0; i < Imports.Count; i++)
+            currentPos--;
+            if (classPackage == Imports[i].ClassPackage
+                && className == Imports[i].ClassName
+                && objectName == Imports[i].ObjectName)
             {
-                currentPos--;
-                if (objectName == Imports[i].ObjectName) return currentPos;
+                return currentPos;
             }
 
-            return 0;
         }
 
-        /// <summary>
-        /// The package file version number when this package was saved.
-        /// </summary>
-        /// <remarks>
-        ///     The lower 16 bits stores the UE3 engine version, while the upper 16 bits stores the UE4/licensee version. For newer packages this is -7.
-        ///     <list type="table">
-        ///         <listheader>
-        ///             <version>Version</version>
-        ///             <description>Description</description>
-        ///         </listheader>
-        ///         <item>
-        ///             <version>-2</version>
-        ///             <description>indicates presence of enum-based custom versions</description>
-        ///         </item>
-        ///         <item>
-        ///             <version>-3</version>
-        ///             <description>indicates guid-based custom versions</description>
-        ///         </item>
-        ///         <item>
-        ///             <version>-4</version>
-        ///             <description>indicates removal of the UE3 version. Packages saved with this ID cannot be loaded in older engine versions</description>
-        ///         </item>
-        ///         <item>
-        ///             <version>-5</version>
-        ///             <description>indicates the replacement of writing out the "UE3 version" so older versions of engine can gracefully fail to open newer packages</description>
-        ///         </item>
-        ///         <item>
-        ///             <version>-6</version>
-        ///             <description>indicates optimizations to how custom versions are being serialized</description>
-        ///         </item>
-        ///         <item>
-        ///             <version>-7</version>
-        ///             <description>indicates the texture allocation info has been removed from the summary</description>
-        ///         </item>
-        ///     </list>
-        /// </remarks>
-        public int LegacyFileVersion;
+        return 0;
+    }
 
-        /// <summary>
-        /// Should this asset not serialize its engine and custom versions?
-        /// </summary>
-        public bool IsUnversioned;
-
-        /// <summary>
-        /// The licensee file version. Used by some games to add their own Engine-level versioning.
-        /// </summary>
-        public int FileVersionLicenseeUE4;
-
-        /// <summary>
-        /// All the custom versions stored in the archive.
-        /// </summary>
-        public List<CustomVersion> CustomVersionContainer = null;
-
-        /// <summary>
-        /// Map of object imports. UAssetAPI used to call these "links."
-        /// </summary>
-        public List<Import> Imports;
-
-        /// <summary>
-        /// Map of object exports. UAssetAPI used to call these "categories."
-        /// </summary>
-        public List<Export> Exports;
-
-        /// <summary>
-        /// List of dependency lists for each export.
-        /// </summary>
-        public List<int[]> DependsMap;
-
-        /// <summary>
-        /// List of packages that are soft referenced by this package.
-        /// </summary>
-        public List<FString> SoftPackageReferenceList;
-
-        /// <summary>
-        /// Uncertain
-        /// </summary>
-        public List<int> AssetRegistryData;
-
-        /// <summary>
-        /// Tile information used by WorldComposition.
-        /// Defines properties necessary for tile positioning in the world.
-        /// </summary>
-        public FWorldTileInfo WorldTileInfo;
-
-        /// <summary>
-        /// List of imports and exports that must be serialized before other exports...all packed together, see <see cref="Export.FirstExportDependency"/>.
-        /// </summary>
-        public List<FPackageIndex> PreloadDependencies;
-
-        /// <summary>
-        /// Data about previous versions of this package.
-        /// </summary>
-        public List<FGenerationInfo> Generations;
-
-        /// <summary>
-        /// Current ID for this package. Effectively unused.
-        /// </summary>
-        public Guid PackageGuid;
-
-        /// <summary>
-        /// Engine version this package was saved with. This may differ from CompatibleWithEngineVersion for assets saved with a hotfix release.
-        /// </summary>
-        public FEngineVersion RecordedEngineVersion;
-
-        /// <summary>
-        /// Engine version this package is compatible with. Assets saved by Hotfix releases and engine versions that maintain binary compatibility will have
-        /// a CompatibleWithEngineVersion.Patch that matches the original release (as opposed to SavedByEngineVersion which will have a patch version of the new release).
-        /// </summary>
-        public FEngineVersion RecordedCompatibleWithEngineVersion;
-
-        /// <summary>
-        /// Streaming install ChunkIDs
-        /// </summary>
-        public int[] ChunkIDs;
-
-        /// <summary>
-        /// The flags for this package.
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public EPackageFlags PackageFlags;
-
-        /// <summary>
-        /// Value that is used by the Unreal Engine to determine if the package was saved by Epic, a licensee, modder, etc.
-        /// </summary>
-        public uint PackageSource;
-
-        /// <summary>
-        /// The Generic Browser folder name that this package lives in. Usually "None" in cooked assets.
-        /// </summary>
-        public FString FolderName;
-
-        /// <summary>
-        /// In MapProperties that have StructProperties as their keys or values, there is no universal, context-free way to determine the type of the struct. To that end, this dictionary maps MapProperty names to the type of the structs within them (tuple of key struct type and value struct type) if they are not None-terminated property lists.
-        /// </summary>
-        [JsonIgnore]
-        public Dictionary<string, Tuple<FName, FName>> MapStructTypeOverride = new Dictionary<string, Tuple<FName, FName>>()
+    /// <summary>
+    /// Searches for an import in the import map based off of certain parameters.
+    /// </summary>
+    /// <param name="objectName">The ObjectName that the requested import will have.</param>
+    /// <returns>The index of the requested import in the name map, or zero if one could not be found.</returns>
+    public int SearchForImport(FName objectName)
+    {
+        int currentPos = 0;
+        for (int i = 0; i < Imports.Count; i++)
         {
-            { "ColorDatabase", new Tuple<FName, FName>(null, new FName("LinearColor")) },
-            { "PlayerCharacterIDs", new Tuple<FName, FName>(new FName("Guid"), null) },
-            { "m_PerConditionValueToNodeMap", new Tuple<FName, FName>(new FName("Guid"), null) },
-            { "BindingIdToReferences", new Tuple<FName, FName>(new FName("Guid"), null) },
-            { "UserParameterRedirects", new Tuple<FName, FName>(new FName("NiagaraVariable"), new FName("NiagaraVariable"))},
-            { "Tracks", new Tuple<FName, FName>(new FName("MovieSceneTrackIdentifier"), null)},
-            { "SubSequences", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
-            { "Hierarchy", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
-            { "TrackSignatureToTrackIdentifier", new Tuple<FName, FName>(new FName("Guid"),new FName("MovieSceneTrackIdentifier"))},
-            { "ItemsToRefund", new Tuple<FName, FName>(new FName("Guid"), null) },
-            //{ "Resources", new Tuple<FName, FName>(new FName("Guid"), null) },
-            { "PlayerCharacterIDMap", new Tuple<FName, FName>(new FName("Guid"), null) },
-        };
+            currentPos--;
+            if (objectName == Imports[i].ObjectName) return currentPos;
+        }
 
-        [JsonIgnore]
-        public Dictionary<string, FName> SetStructTypeOverride = new Dictionary<string, FName>()
+        return 0;
+    }
+
+    /// <summary>
+    /// The package file version number when this package was saved.
+    /// </summary>
+    /// <remarks>
+    ///     The lower 16 bits stores the UE3 engine version, while the upper 16 bits stores the UE4/licensee version. For newer packages this is -7.
+    ///     <list type="table">
+    ///         <listheader>
+    ///             <version>Version</version>
+    ///             <description>Description</description>
+    ///         </listheader>
+    ///         <item>
+    ///             <version>-2</version>
+    ///             <description>indicates presence of enum-based custom versions</description>
+    ///         </item>
+    ///         <item>
+    ///             <version>-3</version>
+    ///             <description>indicates guid-based custom versions</description>
+    ///         </item>
+    ///         <item>
+    ///             <version>-4</version>
+    ///             <description>indicates removal of the UE3 version. Packages saved with this ID cannot be loaded in older engine versions</description>
+    ///         </item>
+    ///         <item>
+    ///             <version>-5</version>
+    ///             <description>indicates the replacement of writing out the "UE3 version" so older versions of engine can gracefully fail to open newer packages</description>
+    ///         </item>
+    ///         <item>
+    ///             <version>-6</version>
+    ///             <description>indicates optimizations to how custom versions are being serialized</description>
+    ///         </item>
+    ///         <item>
+    ///             <version>-7</version>
+    ///             <description>indicates the texture allocation info has been removed from the summary</description>
+    ///         </item>
+    ///     </list>
+    /// </remarks>
+    public int LegacyFileVersion;
+
+    /// <summary>
+    /// Should this asset not serialize its engine and custom versions?
+    /// </summary>
+    public bool IsUnversioned;
+
+    /// <summary>
+    /// The licensee file version. Used by some games to add their own Engine-level versioning.
+    /// </summary>
+    public int FileVersionLicenseeUE4;
+
+    /// <summary>
+    /// All the custom versions stored in the archive.
+    /// </summary>
+    public List<CustomVersion> CustomVersionContainer = null;
+
+    /// <summary>
+    /// Map of object imports. UAssetAPI used to call these "links."
+    /// </summary>
+    public List<Import> Imports;
+
+    /// <summary>
+    /// Map of object exports. UAssetAPI used to call these "categories."
+    /// </summary>
+    public List<Export> Exports;
+
+    /// <summary>
+    /// List of dependency lists for each export.
+    /// </summary>
+    public List<int[]> DependsMap;
+
+    /// <summary>
+    /// List of packages that are soft referenced by this package.
+    /// </summary>
+    public List<FString> SoftPackageReferenceList;
+
+    /// <summary>
+    /// Uncertain
+    /// </summary>
+    public List<int> AssetRegistryData;
+
+    /// <summary>
+    /// Tile information used by WorldComposition.
+    /// Defines properties necessary for tile positioning in the world.
+    /// </summary>
+    public FWorldTileInfo WorldTileInfo;
+
+    /// <summary>
+    /// List of imports and exports that must be serialized before other exports...all packed together, see <see cref="Export.FirstExportDependency"/>.
+    /// </summary>
+    public List<FPackageIndex> PreloadDependencies;
+
+    /// <summary>
+    /// Data about previous versions of this package.
+    /// </summary>
+    public List<FGenerationInfo> Generations;
+
+    /// <summary>
+    /// Current ID for this package. Effectively unused.
+    /// </summary>
+    public Guid PackageGuid;
+
+    /// <summary>
+    /// Engine version this package was saved with. This may differ from CompatibleWithEngineVersion for assets saved with a hotfix release.
+    /// </summary>
+    public FEngineVersion RecordedEngineVersion;
+
+    /// <summary>
+    /// Engine version this package is compatible with. Assets saved by Hotfix releases and engine versions that maintain binary compatibility will have
+    /// a CompatibleWithEngineVersion.Patch that matches the original release (as opposed to SavedByEngineVersion which will have a patch version of the new release).
+    /// </summary>
+    public FEngineVersion RecordedCompatibleWithEngineVersion;
+
+    /// <summary>
+    /// Streaming install ChunkIDs
+    /// </summary>
+    public int[] ChunkIDs;
+
+    /// <summary>
+    /// The flags for this package.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public EPackageFlags PackageFlags;
+
+    /// <summary>
+    /// Value that is used by the Unreal Engine to determine if the package was saved by Epic, a licensee, modder, etc.
+    /// </summary>
+    public uint PackageSource;
+
+    /// <summary>
+    /// The Generic Browser folder name that this package lives in. Usually "None" in cooked assets.
+    /// </summary>
+    public FString FolderName;
+
+    /// <summary>
+    /// In MapProperties that have StructProperties as their keys or values, there is no universal, context-free way to determine the type of the struct. To that end, this dictionary maps MapProperty names to the type of the structs within them (tuple of key struct type and value struct type) if they are not None-terminated property lists.
+    /// </summary>
+    [JsonIgnore]
+    public Dictionary<string, Tuple<FName, FName>> MapStructTypeOverride = new Dictionary<string, Tuple<FName, FName>>()
+    {
+        { "ColorDatabase", new Tuple<FName, FName>(null, new FName("LinearColor")) },
+        { "PlayerCharacterIDs", new Tuple<FName, FName>(new FName("Guid"), null) },
+        { "m_PerConditionValueToNodeMap", new Tuple<FName, FName>(new FName("Guid"), null) },
+        { "BindingIdToReferences", new Tuple<FName, FName>(new FName("Guid"), null) },
+        { "UserParameterRedirects", new Tuple<FName, FName>(new FName("NiagaraVariable"), new FName("NiagaraVariable"))},
+        { "Tracks", new Tuple<FName, FName>(new FName("MovieSceneTrackIdentifier"), null)},
+        { "SubSequences", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
+        { "Hierarchy", new Tuple<FName, FName>(new FName("MovieSceneSequenceID"), null)},
+        { "TrackSignatureToTrackIdentifier", new Tuple<FName, FName>(new FName("Guid"),new FName("MovieSceneTrackIdentifier"))},
+        { "ItemsToRefund", new Tuple<FName, FName>(new FName("Guid"), null) },
+        //{ "Resources", new Tuple<FName, FName>(new FName("Guid"), null) },
+        { "PlayerCharacterIDMap", new Tuple<FName, FName>(new FName("Guid"), null) },
+    };
+
+    [JsonIgnore]
+    public Dictionary<string, FName> SetStructTypeOverride = new Dictionary<string, FName>()
 {
-            { "AnimSequenceInstances", new FName("Guid")},
+        { "AnimSequenceInstances", new FName("Guid")},
 
-        };
+    };
 
-        /// <summary>
-        /// External programs often improperly specify name map hashes, so in this map we can preserve those changes to avoid confusion.
-        /// </summary>
-        [JsonIgnore]
-        public Dictionary<FString, uint> OverrideNameMapHashes;
+    /// <summary>
+    /// External programs often improperly specify name map hashes, so in this map we can preserve those changes to avoid confusion.
+    /// </summary>
+    [JsonIgnore]
+    public Dictionary<FString, uint> OverrideNameMapHashes;
 
-        /// <summary>This is called "TotalHeaderSize" in UE4 where header refers to the whole summary, whereas in UAssetAPI "header" refers to just the data before the start of the name map</summary>
-        internal int SectionSixOffset = 0;
+    /// <summary>This is called "TotalHeaderSize" in UE4 where header refers to the whole summary, whereas in UAssetAPI "header" refers to just the data before the start of the name map</summary>
+    internal int SectionSixOffset = 0;
 
-        /// <summary>Number of names used in this package</summary>
-        internal int NameCount = 0;
+    /// <summary>Number of names used in this package</summary>
+    internal int NameCount = 0;
 
-        /// <summary>Location into the file on disk for the name data</summary>
-        internal int NameOffset;
+    /// <summary>Location into the file on disk for the name data</summary>
+    internal int NameOffset;
 
-        /// <summary>Number of gatherable text data items in this package</summary>
-        [JsonProperty]
-        internal int GatherableTextDataCount;
+    /// <summary>Number of gatherable text data items in this package</summary>
+    [JsonProperty]
+    internal int GatherableTextDataCount;
 
-        /// <summary>Location into the file on disk for the gatherable text data items</summary>
-        [JsonProperty]
-        internal int GatherableTextDataOffset;
+    /// <summary>Location into the file on disk for the gatherable text data items</summary>
+    [JsonProperty]
+    internal int GatherableTextDataOffset;
 
-        /// <summary>Number of exports contained in this package</summary>
-        internal int ExportCount = 0;
+    /// <summary>Number of exports contained in this package</summary>
+    internal int ExportCount = 0;
 
-        /// <summary>Location into the file on disk for the "Export Details" data</summary>
-        internal int ExportOffset = 0;
+    /// <summary>Location into the file on disk for the "Export Details" data</summary>
+    internal int ExportOffset = 0;
 
-        /// <summary>Number of imports contained in this package</summary>
-        internal int ImportCount = 0;
+    /// <summary>Number of imports contained in this package</summary>
+    internal int ImportCount = 0;
 
-        /// <summary>Location into the file on disk for the ImportMap data</summary>
-        internal int ImportOffset = 0;
+    /// <summary>Location into the file on disk for the ImportMap data</summary>
+    internal int ImportOffset = 0;
 
-        /// <summary>Location into the file on disk for the DependsMap data</summary>
-        internal int DependsOffset = 0;
+    /// <summary>Location into the file on disk for the DependsMap data</summary>
+    internal int DependsOffset = 0;
 
-        /// <summary>Number of soft package references contained in this package</summary>
-        internal int SoftPackageReferencesCount = 0;
+    /// <summary>Number of soft package references contained in this package</summary>
+    internal int SoftPackageReferencesCount = 0;
 
-        /// <summary>Location into the file on disk for the soft package reference list</summary>
-        internal int SoftPackageReferencesOffset = 0;
+    /// <summary>Location into the file on disk for the soft package reference list</summary>
+    internal int SoftPackageReferencesOffset = 0;
 
-        /// <summary>Location into the file on disk for the SearchableNamesMap data</summary>
-        [JsonProperty]
-        internal int SearchableNamesOffset;
+    /// <summary>Location into the file on disk for the SearchableNamesMap data</summary>
+    [JsonProperty]
+    internal int SearchableNamesOffset;
 
-        /// <summary>Thumbnail table offset</summary>
-        [JsonProperty]
-        internal int ThumbnailTableOffset;
+    /// <summary>Thumbnail table offset</summary>
+    [JsonProperty]
+    internal int ThumbnailTableOffset;
 
-        /// <summary>Should be zero</summary>
-        [JsonProperty]
-        internal uint CompressionFlags;
+    /// <summary>Should be zero</summary>
+    [JsonProperty]
+    internal uint CompressionFlags;
 
-        /// <summary>Location into the file on disk for the asset registry tag data</summary>
-        internal int AssetRegistryDataOffset;
+    /// <summary>Location into the file on disk for the asset registry tag data</summary>
+    internal int AssetRegistryDataOffset;
 
-        /// <summary>Offset to the location in the file where the bulkdata starts</summary>
-        internal long BulkDataStartOffset;
+    /// <summary>Offset to the location in the file where the bulkdata starts</summary>
+    internal long BulkDataStartOffset;
 
-        /// <summary>Offset to the location in the file where the FWorldTileInfo data start</summary>
-        internal int WorldTileInfoDataOffset;
+    /// <summary>Offset to the location in the file where the FWorldTileInfo data start</summary>
+    internal int WorldTileInfoDataOffset;
 
-        /// <summary>Number of preload dependencies contained in this package</summary>
-        internal int PreloadDependencyCount;
+    /// <summary>Number of preload dependencies contained in this package</summary>
+    internal int PreloadDependencyCount;
 
-        /// <summary>Location into the file on disk for the preload dependency data</summary>
-        internal int PreloadDependencyOffset;
+    /// <summary>Location into the file on disk for the preload dependency data</summary>
+    internal int PreloadDependencyOffset;
 
-        [JsonProperty]
-        internal bool doWeHaveDependsMap = true;
-        [JsonProperty]
-        internal bool doWeHaveSoftPackageReferences = true;
-        [JsonProperty]
-        internal bool doWeHaveAssetRegistryData = true;
-        [JsonProperty]
-        internal bool doWeHaveWorldTileInfo = true;
+    [JsonProperty]
+    internal bool doWeHaveDependsMap = true;
+    [JsonProperty]
+    internal bool doWeHaveSoftPackageReferences = true;
+    [JsonProperty]
+    internal bool doWeHaveAssetRegistryData = true;
+    [JsonProperty]
+    internal bool doWeHaveWorldTileInfo = true;
 
-        /// <summary>
-        /// Internal list of name map entries. Do not directly add values to here under any circumstances; use <see cref="AddNameReference"/> instead
-        /// </summary>
-        [JsonProperty("NameMap")]
-        private List<FString> nameMapIndexList;
+    /// <summary>
+    /// Internal list of name map entries. Do not directly add values to here under any circumstances; use <see cref="AddNameReference"/> instead
+    /// </summary>
+    [JsonProperty("NameMap")]
+    private List<FString> nameMapIndexList;
 
-        /// <summary>
-        /// Internal lookup for name map entries. Do not directly add values to here under any circumstances; use <see cref="AddNameReference"/> instead
-        /// </summary>
-        private Dictionary<int, int> nameMapLookup = new Dictionary<int, int>();
+    /// <summary>
+    /// Internal lookup for name map entries. Do not directly add values to here under any circumstances; use <see cref="AddNameReference"/> instead
+    /// </summary>
+    private Dictionary<int, int> nameMapLookup = new Dictionary<int, int>();
 
-        /// <summary>
-        /// Copies a portion of a stream to another stream.
-        /// </summary>
-        /// <param name="input">The input stream.</param>
-        /// <param name="output">The output stream.</param>
-        /// <param name="start">The offset in the input stream to start copying from.</param>
-        /// <param name="leng">The length in bytes of the data to be copied.</param>
-        private static void CopySplitUp(Stream input, Stream output, int start, int leng)
+    /// <summary>
+    /// Copies a portion of a stream to another stream.
+    /// </summary>
+    /// <param name="input">The input stream.</param>
+    /// <param name="output">The output stream.</param>
+    /// <param name="start">The offset in the input stream to start copying from.</param>
+    /// <param name="leng">The length in bytes of the data to be copied.</param>
+    private static void CopySplitUp(Stream input, Stream output, int start, int leng)
+    {
+        input.Seek(start, SeekOrigin.Begin);
+        output.Seek(0, SeekOrigin.Begin);
+
+        byte[] buffer = new byte[32768];
+        int read;
+        while (leng > 0 && (read = input.Read(buffer, 0, Math.Min(buffer.Length, leng))) > 0)
         {
-            input.Seek(start, SeekOrigin.Begin);
-            output.Seek(0, SeekOrigin.Begin);
+            output.Write(buffer, 0, read);
+            leng -= read;
+        }
+    }
 
-            byte[] buffer = new byte[32768];
-            int read;
-            while (leng > 0 && (read = input.Read(buffer, 0, Math.Min(buffer.Length, leng))) > 0)
+    /// <summary>
+    /// Magic number for the .uasset format
+    /// </summary>
+    private static readonly uint UASSET_MAGIC = 2653586369;
+
+    /// <summary>
+    /// Reads the initial portion of the asset (everything before the name map).
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+    /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
+    private void ReadHeader(AssetBinaryReader reader)
+    {
+        reader.BaseStream.Seek(0, SeekOrigin.Begin);
+        if (reader.ReadUInt32() != UASSET_MAGIC) throw new FormatException("File signature mismatch");
+
+        LegacyFileVersion = reader.ReadInt32();
+        if (LegacyFileVersion != -4)
+        {
+            reader.ReadInt32(); // LegacyUE3Version for backwards-compatibility with UE3 games: always 864 in versioned assets, always 0 in unversioned assets
+        }
+
+        UE4Version fileVersionUE4 = (UE4Version)reader.ReadInt32();
+        if (fileVersionUE4 > UE4Version.UNKNOWN)
+        {
+            IsUnversioned = false;
+            EngineVersion = fileVersionUE4;
+        }
+        else
+        {
+            IsUnversioned = true;
+            if (EngineVersion == UE4Version.UNKNOWN) throw new UnknownEngineVersionException("Cannot begin serialization of an unversioned asset before an engine version is manually specified");
+        }
+
+        FileVersionLicenseeUE4 = reader.ReadInt32();
+
+        // Custom versions container
+        int numCustomVersions = 0;
+        if (LegacyFileVersion <= -2)
+        {
+            // TODO: support for enum-based custom versions
+            if (CustomVersionContainer == null) CustomVersionContainer = new List<CustomVersion>();
+
+            numCustomVersions = reader.ReadInt32();
+            for (int i = 0; i < numCustomVersions; i++)
             {
-                output.Write(buffer, 0, read);
-                leng -= read;
+                var customVersionID = new Guid(reader.ReadBytes(16));
+                var customVersionNumber = reader.ReadInt32();
+                CustomVersionContainer.Add(new CustomVersion(customVersionID, customVersionNumber));
             }
         }
 
-        /// <summary>
-        /// Magic number for the .uasset format
-        /// </summary>
-        private static readonly uint UASSET_MAGIC = 2653586369;
-
-        /// <summary>
-        /// Reads the initial portion of the asset (everything before the name map).
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
-        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
-        private void ReadHeader(AssetBinaryReader reader)
+        SectionSixOffset = reader.ReadInt32(); // 24
+        FolderName = reader.ReadFString();
+        PackageFlags = (EPackageFlags)reader.ReadUInt32();
+        NameCount = reader.ReadInt32();
+        NameOffset = reader.ReadInt32();
+        if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
         {
-            reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            if (reader.ReadUInt32() != UASSET_MAGIC) throw new FormatException("File signature mismatch");
+            GatherableTextDataCount = reader.ReadInt32();
+            GatherableTextDataOffset = reader.ReadInt32();
+        }
 
-            LegacyFileVersion = reader.ReadInt32();
-            if (LegacyFileVersion != -4)
+        ExportCount = reader.ReadInt32();
+        ExportOffset = reader.ReadInt32(); // 61
+        ImportCount = reader.ReadInt32(); // 65
+        ImportOffset = reader.ReadInt32(); // 69 (haha funny)
+        DependsOffset = reader.ReadInt32(); // 73
+        if (EngineVersion >= UE4Version.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
+        {
+            SoftPackageReferencesCount = reader.ReadInt32(); // 77
+            SoftPackageReferencesOffset = reader.ReadInt32(); // 81
+        }
+        if (EngineVersion >= UE4Version.VER_UE4_ADDED_SEARCHABLE_NAMES)
+        {
+            SearchableNamesOffset = reader.ReadInt32();
+        }
+        ThumbnailTableOffset = reader.ReadInt32();
+
+        PackageGuid = new Guid(reader.ReadBytes(16));
+
+        Generations = new List<FGenerationInfo>();
+        int generationCount = reader.ReadInt32();
+        for (int i = 0; i < generationCount; i++)
+        {
+            int genNumExports = reader.ReadInt32();
+            int genNumNames = reader.ReadInt32();
+            Generations.Add(new FGenerationInfo(genNumExports, genNumNames));
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_ENGINE_VERSION_OBJECT)
+        {
+            RecordedEngineVersion = new FEngineVersion(reader);
+        }
+        else
+        {
+            RecordedEngineVersion = new FEngineVersion(4, 0, 0, reader.ReadUInt32(), FString.FromString(""));
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION)
+        {
+            RecordedCompatibleWithEngineVersion = new FEngineVersion(reader);
+        }
+        else
+        {
+            RecordedCompatibleWithEngineVersion = RecordedEngineVersion;
+        }
+
+        CompressionFlags = reader.ReadUInt32();
+        int numCompressedChunks = reader.ReadInt32();
+        if (numCompressedChunks > 0) throw new FormatException("Asset has package-level compression and is likely too old to be parsed");
+
+        PackageSource = reader.ReadUInt32();
+
+        int numAdditionalPackagesToCook = reader.ReadInt32(); // unused
+        if (numAdditionalPackagesToCook > 0) throw new FormatException("Asset has AdditionalPackagesToCook and is likely too old to be parsed");
+
+        if (LegacyFileVersion > -7)
+        {
+            int numTextureAllocations = reader.ReadInt32(); // unused
+            if (numTextureAllocations > 0) throw new FormatException("Asset has texture allocation info and is likely too old to be parsed");
+        }
+
+        AssetRegistryDataOffset = reader.ReadInt32();
+        BulkDataStartOffset = reader.ReadInt64();
+
+        if (EngineVersion >= UE4Version.VER_UE4_WORLD_LEVEL_INFO)
+        {
+            WorldTileInfoDataOffset = reader.ReadInt32();
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS)
+        {
+            int numChunkIDs = reader.ReadInt32();
+            ChunkIDs = new int[numChunkIDs];
+            for (int i = 0; i < numChunkIDs; i++)
             {
-                reader.ReadInt32(); // LegacyUE3Version for backwards-compatibility with UE3 games: always 864 in versioned assets, always 0 in unversioned assets
+                ChunkIDs[i] = reader.ReadInt32();
             }
+        }
+        else if (EngineVersion >= UE4Version.VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE)
+        {
+            ChunkIDs = new int[1];
+            ChunkIDs[0] = reader.ReadInt32();
+        }
 
-            UE4Version fileVersionUE4 = (UE4Version)reader.ReadInt32();
-            if (fileVersionUE4 > UE4Version.UNKNOWN)
+        if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+        {
+            PreloadDependencyCount = reader.ReadInt32();
+            PreloadDependencyOffset = reader.ReadInt32();
+        }
+    }
+
+    /// <summary>
+    /// Reads an asset into memory.
+    /// </summary>
+    /// <param name="reader">The input reader.</param>
+    /// <param name="manualSkips">An array of export indexes to skip parsing. For most applications, this should be left blank.</param>
+    /// <param name="forceReads">An array of export indexes that must be read, overriding entries in the manualSkips parameter. For most applications, this should be left blank.</param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+    /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
+    public void Read(AssetBinaryReader reader, bool onlyheader = false, int[] manualSkips = null, int[] forceReads = null)
+    {
+        // Header
+        ReadHeader(reader);
+
+        // Name map
+        reader.BaseStream.Seek(NameOffset, SeekOrigin.Begin);
+
+        OverrideNameMapHashes = new Dictionary<FString, uint>();
+        ClearNameIndexList();
+        for (int i = 0; i < NameCount; i++)
+        {
+            FString nameInMap = reader.ReadNameMapString(out uint hashes);
+            if (hashes == 0) OverrideNameMapHashes[nameInMap] = 0;
+            AddNameReference(nameInMap, true);
+        }
+
+        // Imports
+        Imports = new List<Import>();
+        if (ImportOffset > 0)
+        {
+            reader.BaseStream.Seek(ImportOffset, SeekOrigin.Begin);
+            for (int i = 0; i < ImportCount; i++)
             {
-                IsUnversioned = false;
-                EngineVersion = fileVersionUE4;
-            }
-            else
-            {
-                IsUnversioned = true;
-                if (EngineVersion == UE4Version.UNKNOWN) throw new UnknownEngineVersionException("Cannot begin serialization of an unversioned asset before an engine version is manually specified");
-            }
-
-            FileVersionLicenseeUE4 = reader.ReadInt32();
-
-            // Custom versions container
-            int numCustomVersions = 0;
-            if (LegacyFileVersion <= -2)
-            {
-                // TODO: support for enum-based custom versions
-                if (CustomVersionContainer == null) CustomVersionContainer = new List<CustomVersion>();
-
-                numCustomVersions = reader.ReadInt32();
-                for (int i = 0; i < numCustomVersions; i++)
-                {
-                    var customVersionID = new Guid(reader.ReadBytes(16));
-                    var customVersionNumber = reader.ReadInt32();
-                    CustomVersionContainer.Add(new CustomVersion(customVersionID, customVersionNumber));
-                }
-            }
-
-            SectionSixOffset = reader.ReadInt32(); // 24
-            FolderName = reader.ReadFString();
-            PackageFlags = (EPackageFlags)reader.ReadUInt32();
-            NameCount = reader.ReadInt32();
-            NameOffset = reader.ReadInt32();
-            if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
-            {
-                GatherableTextDataCount = reader.ReadInt32();
-                GatherableTextDataOffset = reader.ReadInt32();
-            }
-
-            ExportCount = reader.ReadInt32();
-            ExportOffset = reader.ReadInt32(); // 61
-            ImportCount = reader.ReadInt32(); // 65
-            ImportOffset = reader.ReadInt32(); // 69 (haha funny)
-            DependsOffset = reader.ReadInt32(); // 73
-            if (EngineVersion >= UE4Version.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
-            {
-                SoftPackageReferencesCount = reader.ReadInt32(); // 77
-                SoftPackageReferencesOffset = reader.ReadInt32(); // 81
-            }
-            if (EngineVersion >= UE4Version.VER_UE4_ADDED_SEARCHABLE_NAMES)
-            {
-                SearchableNamesOffset = reader.ReadInt32();
-            }
-            ThumbnailTableOffset = reader.ReadInt32();
-
-            PackageGuid = new Guid(reader.ReadBytes(16));
-
-            Generations = new List<FGenerationInfo>();
-            int generationCount = reader.ReadInt32();
-            for (int i = 0; i < generationCount; i++)
-            {
-                int genNumExports = reader.ReadInt32();
-                int genNumNames = reader.ReadInt32();
-                Generations.Add(new FGenerationInfo(genNumExports, genNumNames));
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_ENGINE_VERSION_OBJECT)
-            {
-                RecordedEngineVersion = new FEngineVersion(reader);
-            }
-            else
-            {
-                RecordedEngineVersion = new FEngineVersion(4, 0, 0, reader.ReadUInt32(), FString.FromString(""));
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION)
-            {
-                RecordedCompatibleWithEngineVersion = new FEngineVersion(reader);
-            }
-            else
-            {
-                RecordedCompatibleWithEngineVersion = RecordedEngineVersion;
-            }
-
-            CompressionFlags = reader.ReadUInt32();
-            int numCompressedChunks = reader.ReadInt32();
-            if (numCompressedChunks > 0) throw new FormatException("Asset has package-level compression and is likely too old to be parsed");
-
-            PackageSource = reader.ReadUInt32();
-
-            int numAdditionalPackagesToCook = reader.ReadInt32(); // unused
-            if (numAdditionalPackagesToCook > 0) throw new FormatException("Asset has AdditionalPackagesToCook and is likely too old to be parsed");
-
-            if (LegacyFileVersion > -7)
-            {
-                int numTextureAllocations = reader.ReadInt32(); // unused
-                if (numTextureAllocations > 0) throw new FormatException("Asset has texture allocation info and is likely too old to be parsed");
-            }
-
-            AssetRegistryDataOffset = reader.ReadInt32();
-            BulkDataStartOffset = reader.ReadInt64();
-
-            if (EngineVersion >= UE4Version.VER_UE4_WORLD_LEVEL_INFO)
-            {
-                WorldTileInfoDataOffset = reader.ReadInt32();
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS)
-            {
-                int numChunkIDs = reader.ReadInt32();
-                ChunkIDs = new int[numChunkIDs];
-                for (int i = 0; i < numChunkIDs; i++)
-                {
-                    ChunkIDs[i] = reader.ReadInt32();
-                }
-            }
-            else if (EngineVersion >= UE4Version.VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE)
-            {
-                ChunkIDs = new int[1];
-                ChunkIDs[0] = reader.ReadInt32();
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
-            {
-                PreloadDependencyCount = reader.ReadInt32();
-                PreloadDependencyOffset = reader.ReadInt32();
+                Imports.Add(new Import(reader.ReadFName(), reader.ReadFName(), new FPackageIndex(reader.ReadInt32()), reader.ReadFName()));
             }
         }
 
-        /// <summary>
-        /// Reads an asset into memory.
-        /// </summary>
-        /// <param name="reader">The input reader.</param>
-        /// <param name="manualSkips">An array of export indexes to skip parsing. For most applications, this should be left blank.</param>
-        /// <param name="forceReads">An array of export indexes that must be read, overriding entries in the manualSkips parameter. For most applications, this should be left blank.</param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
-        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
-        public void Read(AssetBinaryReader reader, bool onlyheader = false, int[] manualSkips = null, int[] forceReads = null)
+        // Export details
+        Exports = new List<Export>();
+        if (ExportOffset > 0)
         {
-            // Header
-            ReadHeader(reader);
-
-            // Name map
-            reader.BaseStream.Seek(NameOffset, SeekOrigin.Begin);
-
-            OverrideNameMapHashes = new Dictionary<FString, uint>();
-            ClearNameIndexList();
-            for (int i = 0; i < NameCount; i++)
+            reader.BaseStream.Seek(ExportOffset, SeekOrigin.Begin);
+            for (int i = 0; i < ExportCount; i++)
             {
-                FString nameInMap = reader.ReadNameMapString(out uint hashes);
-                if (hashes == 0) OverrideNameMapHashes[nameInMap] = 0;
-                AddNameReference(nameInMap, true);
-            }
-
-            // Imports
-            Imports = new List<Import>();
-            if (ImportOffset > 0)
-            {
-                reader.BaseStream.Seek(ImportOffset, SeekOrigin.Begin);
-                for (int i = 0; i < ImportCount; i++)
+                var newExport = new Export(this, new byte[0]);
+                newExport.ClassIndex = new FPackageIndex(reader.ReadInt32());
+                newExport.SuperIndex = new FPackageIndex(reader.ReadInt32());
+                if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
                 {
-                    Imports.Add(new Import(reader.ReadFName(), reader.ReadFName(), new FPackageIndex(reader.ReadInt32()), reader.ReadFName()));
+                    newExport.TemplateIndex = new FPackageIndex(reader.ReadInt32());
                 }
-            }
-
-            // Export details
-            Exports = new List<Export>();
-            if (ExportOffset > 0)
-            {
-                reader.BaseStream.Seek(ExportOffset, SeekOrigin.Begin);
-                for (int i = 0; i < ExportCount; i++)
+                newExport.OuterIndex = new FPackageIndex(reader.ReadInt32());
+                newExport.ObjectName = reader.ReadFName();
+                newExport.ObjectFlags = (EObjectFlags)reader.ReadUInt32();
+                if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
                 {
-                    var newExport = new Export(this, new byte[0]);
-                    newExport.ClassIndex = new FPackageIndex(reader.ReadInt32());
-                    newExport.SuperIndex = new FPackageIndex(reader.ReadInt32());
-                    if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
-                    {
-                        newExport.TemplateIndex = new FPackageIndex(reader.ReadInt32());
-                    }
-                    newExport.OuterIndex = new FPackageIndex(reader.ReadInt32());
-                    newExport.ObjectName = reader.ReadFName();
-                    newExport.ObjectFlags = (EObjectFlags)reader.ReadUInt32();
-                    if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
-                    {
-                        newExport.SerialSize = reader.ReadInt32();
-                        newExport.SerialOffset = reader.ReadInt32();
-                    }
-                    else
-                    {
-                        newExport.SerialSize = reader.ReadInt64();
-                        newExport.SerialOffset = reader.ReadInt64();
-                    }
-                    newExport.bForcedExport = reader.ReadInt32() == 1;
-                    newExport.bNotForClient = reader.ReadInt32() == 1;
-                    newExport.bNotForServer = reader.ReadInt32() == 1;
-                    newExport.PackageGuid = new Guid(reader.ReadBytes(16));
-                    newExport.PackageFlags = (EPackageFlags)reader.ReadUInt32();
-                    if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
-                    {
-                        newExport.bNotAlwaysLoadedForEditorGame = reader.ReadInt32() == 1;
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
-                    {
-                        newExport.bIsAsset = reader.ReadInt32() == 1;
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
-                    {
-                        newExport.FirstExportDependency = reader.ReadInt32();
-                        newExport.SerializationBeforeSerializationDependencies = reader.ReadInt32();
-                        newExport.CreateBeforeSerializationDependencies = reader.ReadInt32();
-                        newExport.SerializationBeforeCreateDependencies = reader.ReadInt32();
-                        newExport.CreateBeforeCreateDependencies = reader.ReadInt32();
-                    }
-
-                    Exports.Add(newExport);
+                    newExport.SerialSize = reader.ReadInt32();
+                    newExport.SerialOffset = reader.ReadInt32();
                 }
-            }
-
-            // DependsMap
-            DependsMap = new List<int[]>();
-            if (DependsOffset > 0)
-            {
-                reader.BaseStream.Seek(DependsOffset, SeekOrigin.Begin);
-                for (int i = 0; i < ExportCount; i++)
+                else
                 {
-                    int size = reader.ReadInt32();
-                    int[] data = new int[size];
-                    for (int j = 0; j < size; j++)
-                    {
-                        data[j] = reader.ReadInt32();
-                    }
-                    DependsMap.Add(data);
+                    newExport.SerialSize = reader.ReadInt64();
+                    newExport.SerialOffset = reader.ReadInt64();
                 }
-            }
-            else
-            {
-                doWeHaveDependsMap = false;
-            }
-
-            // SoftPackageReferenceList
-            SoftPackageReferenceList = new List<FString>();
-            if (SoftPackageReferencesOffset > 0)
-            {
-                reader.BaseStream.Seek(SoftPackageReferencesOffset, SeekOrigin.Begin);
-                for (int i = 0; i < SoftPackageReferencesCount; i++)
+                newExport.bForcedExport = reader.ReadIntBoolean();
+                newExport.bNotForClient = reader.ReadIntBoolean();
+                newExport.bNotForServer = reader.ReadIntBoolean();
+                newExport.PackageGuid = new Guid(reader.ReadBytes(16));
+                newExport.PackageFlags = (EPackageFlags)reader.ReadUInt32();
+                if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
                 {
-                    SoftPackageReferenceList.Add(reader.ReadFString());
+                    newExport.bNotAlwaysLoadedForEditorGame = reader.ReadIntBoolean();
                 }
-            }
-            else
-            {
-                doWeHaveSoftPackageReferences = false;
-            }
+                if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
+                {
+                    newExport.bIsAsset = reader.ReadIntBoolean();
+                }
+                if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+                {
+                    newExport.FirstExportDependency = reader.ReadInt32();
+                    newExport.SerializationBeforeSerializationDependencies = reader.ReadInt32();
+                    newExport.CreateBeforeSerializationDependencies = reader.ReadInt32();
+                    newExport.SerializationBeforeCreateDependencies = reader.ReadInt32();
+                    newExport.CreateBeforeCreateDependencies = reader.ReadInt32();
+                }
 
-            // AssetRegistryData
-            AssetRegistryData = new List<int>();
-            if (AssetRegistryDataOffset > 0)
+                Exports.Add(newExport);
+            }
+        }
+
+        // DependsMap
+        DependsMap = new List<int[]>();
+        if (DependsOffset > 0)
+        {
+            reader.BaseStream.Seek(DependsOffset, SeekOrigin.Begin);
+            for (int i = 0; i < ExportCount; i++)
             {
-                reader.BaseStream.Seek(AssetRegistryDataOffset, SeekOrigin.Begin);
-                int numAssets = reader.ReadInt32();
+                int size = reader.ReadInt32();
+                int[] data = new int[size];
+                for (int j = 0; j < size; j++)
+                {
+                    data[j] = reader.ReadInt32();
+                }
+                DependsMap.Add(data);
+            }
+        }
+        else
+        {
+            doWeHaveDependsMap = false;
+        }
+
+        // SoftPackageReferenceList
+        SoftPackageReferenceList = new List<FString>();
+        if (SoftPackageReferencesOffset > 0)
+        {
+            reader.BaseStream.Seek(SoftPackageReferencesOffset, SeekOrigin.Begin);
+            for (int i = 0; i < SoftPackageReferencesCount; i++)
+            {
+                SoftPackageReferenceList.Add(reader.ReadFString());
+            }
+        }
+        else
+        {
+            doWeHaveSoftPackageReferences = false;
+        }
+
+        // AssetRegistryData
+        AssetRegistryData = new List<int>();
+        if (AssetRegistryDataOffset > 0)
+        {
+            reader.BaseStream.Seek(AssetRegistryDataOffset, SeekOrigin.Begin);
+            int numAssets = reader.ReadInt32();
 #pragma warning disable CS0162 // Unreachable code detected
-                for (int i = 0; i < numAssets; i++)
-                {
-                    throw new NotImplementedException("Asset registry data is not yet supported. Please let me know if you see this error message");
-                }
+            for (int i = 0; i < numAssets; i++)
+            {
+                throw new NotImplementedException("Asset registry data is not yet supported. Please let me know if you see this error message");
+            }
 #pragma warning restore CS0162 // Unreachable code detected
-            }
-            else
+        }
+        else
+        {
+            doWeHaveAssetRegistryData = false;
+        }
+
+        // WorldTileInfoDataOffset
+        WorldTileInfo = null;
+        if (WorldTileInfoDataOffset > 0)
+        {
+            //reader.BaseStream.Seek(WorldTileInfoDataOffset, SeekOrigin.Begin);
+            WorldTileInfo = new FWorldTileInfo();
+            WorldTileInfo.Read(reader, this);
+        }
+        else
+        {
+            doWeHaveWorldTileInfo = false;
+        }
+
+        // PreloadDependencies
+        if (this.UseSeparateBulkDataFiles)
+        {
+            reader.BaseStream.Seek(PreloadDependencyOffset, SeekOrigin.Begin);
+            PreloadDependencies = new List<FPackageIndex>();
+            for (int i = 0; i < PreloadDependencyCount; i++)
             {
-                doWeHaveAssetRegistryData = false;
+                PreloadDependencies.Add(new FPackageIndex(reader.ReadInt32()));
             }
+        }
 
-            // WorldTileInfoDataOffset
-            WorldTileInfo = null;
-            if (WorldTileInfoDataOffset > 0)
-            {
-                //reader.BaseStream.Seek(WorldTileInfoDataOffset, SeekOrigin.Begin);
-                WorldTileInfo = new FWorldTileInfo();
-                WorldTileInfo.Read(reader, this);
-            }
-            else
-            {
-                doWeHaveWorldTileInfo = false;
-            }
+        GetMainExport();
+        assetType = GetAssetType();
 
-            // PreloadDependencies
-            if (this.UseSeparateBulkDataFiles)
-            {
-                reader.BaseStream.Seek(PreloadDependencyOffset, SeekOrigin.Begin);
-                PreloadDependencies = new List<FPackageIndex>();
-                for (int i = 0; i < PreloadDependencyCount; i++)
-                {
-                    PreloadDependencies.Add(new FPackageIndex(reader.ReadInt32()));
-                }
-            }
-
-            GetMainExport();
-            assetType = GetAssetType();
-
-
-            if (!onlyheader) {
-                // Export data
-                if (SectionSixOffset > 0 && Exports.Count > 0) {
-                    for (int i = 0; i < Exports.Count; i++) {
-                        reader.BaseStream.Seek(Exports[i].SerialOffset, SeekOrigin.Begin);
-                        if (manualSkips != null && manualSkips.Contains(i)) {
-                            if (forceReads == null || !forceReads.Contains(i)) {
-                                Exports[i] = Exports[i].ConvertToChildExport<RawExport>();
-                                ((RawExport)Exports[i]).Data = reader.ReadBytes((int)Exports[i].SerialSize);
-                                continue;
-                            }
-                        }
-
-                        try {
-                            long nextStarting = reader.BaseStream.Length - 4;
-                            if ((Exports.Count - 1) > i) nextStarting = Exports[i + 1].SerialOffset;
-
-                            FName exportClassTypeName = Exports[i].GetExportClassType();
-                            string exportClassType = exportClassTypeName.Value.Value;
-                            switch (exportClassType) {
-                                case "Level":
-                                    Exports[i] = Exports[i].ConvertToChildExport<LevelExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "UserDefinedStruct":
-                                    Exports[i] = Exports[i].ConvertToChildExport<UserDefinedStructExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "StringTable":
-                                    Exports[i] = Exports[i].ConvertToChildExport<StringTableExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "Enum":
-                                case "UserDefinedEnum":
-                                    Exports[i] = Exports[i].ConvertToChildExport<EnumExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "Function":
-                                    Exports[i] = Exports[i].ConvertToChildExport<FunctionExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "Font":
-                                    Exports[i] = Exports[i].ConvertToChildExport<FontExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "SoundCue":
-                                    Exports[i] = Exports[i].ConvertToChildExport<SoundCueExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "FontFace":
-                                    Exports[i] = Exports[i].ConvertToChildExport<FontFaceExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "World":
-                                    Exports[i] = Exports[i].ConvertToChildExport<WorldExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "BodySetup":
-                                    Exports[i] = Exports[i].ConvertToChildExport<BodySetupExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "BlendSpace":
-                                case "BlendSpace1D":
-                                case "AimOffsetBlendSpace1D":
-                                case "AimOffsetBlendSpace":
-                                    Exports[i] = Exports[i].ConvertToChildExport<BlendSpaceBaseExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "FileMediaSource":
-                                    Exports[i] = Exports[i].ConvertToChildExport<FileMediaSourceExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "CurveFloat":
-                                case "CurveLinearColor":
-                                case "CurveVector":
-                                    Exports[i] = Exports[i].ConvertToChildExport<CurveBaseExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "Texture2D":
-                                case "TextureCube":
-                                case "Texture2DArray":
-                                case "CurveLinearColorAtlas":
-                                    Exports[i] = Exports[i].ConvertToChildExport<Texture2DExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "Skeleton":
-                                        Exports[i] = Exports[i].ConvertToChildExport<SkeletonExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                case "StaticMesh":
-                                    Exports[i] = Exports[i].ConvertToChildExport<StaticMeshExport>();
-                                    Exports[i].Read(reader, (int)nextStarting);
-                                    break;
-                                default:
-                                    if (exportClassType.EndsWith("DataTable")) {
-                                        Exports[i] = Exports[i].ConvertToChildExport<DataTableExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    } else if (exportClassType.StartsWith("SoundNode")) {
-                                        Exports[i] = Exports[i].ConvertToChildExport<SoundNodeExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    }
-
-                                    /*else if (exportClassType == "PhysicsAsset") {
-                                        Exports[i] = Exports[i].ConvertToChildExport<PhysicsAssetExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    } else if (exportClassType == "SkeletalMesh") {
-                                        Exports[i] = Exports[i].ConvertToChildExport<SkeletalMeshExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    } else if (exportClassType == "MorphTarget") {
-                                        Exports[i] = Exports[i].ConvertToChildExport<MorphTargetExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    }*/
-                                    else if (exportClassType.EndsWith("BlueprintGeneratedClass")) {
-                                        var bgc = Exports[i].ConvertToChildExport<ClassExport>();
-                                        Exports[i] = bgc;
-                                        Exports[i].Read(reader, (int)nextStarting);
-
-                                        // Check to see if we can add some new map type overrides
-                                        if (bgc.LoadedProperties != null) {
-                                            foreach (FProperty entry in bgc.LoadedProperties) {
-                                                if (entry is FMapProperty fMapEntry) {
-                                                    FName keyOverride = null;
-                                                    FName valueOverride = null;
-                                                    if (fMapEntry.KeyProp is FStructProperty keyPropStruc && keyPropStruc.Struct.IsImport()) keyOverride = keyPropStruc.Struct.ToImport(this).ObjectName;
-                                                    if (fMapEntry.ValueProp is FStructProperty valuePropStruc && valuePropStruc.Struct.IsImport()) valueOverride = valuePropStruc.Struct.ToImport(this).ObjectName;
-
-                                                    this.MapStructTypeOverride.Add(fMapEntry.Name.Value.Value, new Tuple<FName, FName>(keyOverride, valueOverride));
-                                                }
-                                            }
-                                        }
-                                    } else if (MainSerializer.PropertyTypeRegistry.ContainsKey(exportClassType)) {
-                                        Exports[i] = Exports[i].ConvertToChildExport<PropertyExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    } else {
-                                        Exports[i] = Exports[i].ConvertToChildExport<NormalExport>();
-                                        Exports[i].Read(reader, (int)nextStarting);
-                                    }
-                                    break;
-                            }
-
-                            long extrasLen = nextStarting - reader.BaseStream.Position;
-                            if (extrasLen < 0) {
-                                throw new FormatException("Invalid padding at end of export " + (i + 1) + ": " + extrasLen + " bytes");
-                            } else {
-                                Exports[i].Extras = reader.ReadBytes((int)extrasLen);
-                            }
-                        }
-                        catch (Exception ex) {
-#if DEBUG
-                        Debug.WriteLine("\nFailed to parse export " + (i + 1) + ": " + ex.ToString());
-#endif
-                            reader.BaseStream.Seek(Exports[i].SerialOffset, SeekOrigin.Begin);
+        if (!onlyheader) {
+            // Export data
+            if (SectionSixOffset > 0 && Exports.Count > 0) {
+                for (int i = 0; i < Exports.Count; i++) {
+                    reader.BaseStream.Seek(Exports[i].SerialOffset, SeekOrigin.Begin);
+                    if (manualSkips != null && manualSkips.Contains(i)) {
+                        if (forceReads == null || !forceReads.Contains(i)) {
                             Exports[i] = Exports[i].ConvertToChildExport<RawExport>();
                             ((RawExport)Exports[i]).Data = reader.ReadBytes((int)Exports[i].SerialSize);
+                            continue;
                         }
+                    }
+
+                    try {
+                        long nextStarting = reader.BaseStream.Length - 4;
+                        if ((Exports.Count - 1) > i) nextStarting = Exports[i + 1].SerialOffset;
+
+                        FName exportClassTypeName = Exports[i].GetExportClassType();
+                        string exportClassType = exportClassTypeName.Value.Value;
+                        switch (exportClassType) {
+                            case "Level":
+                                Exports[i] = Exports[i].ConvertToChildExport<LevelExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "UserDefinedStruct":
+                                Exports[i] = Exports[i].ConvertToChildExport<UserDefinedStructExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "StringTable":
+                                Exports[i] = Exports[i].ConvertToChildExport<StringTableExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "Enum":
+                            case "UserDefinedEnum":
+                                Exports[i] = Exports[i].ConvertToChildExport<EnumExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "Function":
+                                Exports[i] = Exports[i].ConvertToChildExport<FunctionExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "Font":
+                                Exports[i] = Exports[i].ConvertToChildExport<FontExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "SoundCue":
+                                Exports[i] = Exports[i].ConvertToChildExport<SoundCueExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "FontFace":
+                                Exports[i] = Exports[i].ConvertToChildExport<FontFaceExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "World":
+                                Exports[i] = Exports[i].ConvertToChildExport<WorldExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "BodySetup":
+                                Exports[i] = Exports[i].ConvertToChildExport<BodySetupExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "BlendSpace":
+                            case "BlendSpace1D":
+                            case "AimOffsetBlendSpace1D":
+                            case "AimOffsetBlendSpace":
+                                Exports[i] = Exports[i].ConvertToChildExport<BlendSpaceBaseExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "FileMediaSource":
+                                Exports[i] = Exports[i].ConvertToChildExport<FileMediaSourceExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "CurveFloat":
+                            case "CurveLinearColor":
+                            case "CurveVector":
+                                Exports[i] = Exports[i].ConvertToChildExport<CurveBaseExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "Texture2D":
+                            case "TextureCube":
+                            case "Texture2DArray":
+                            case "CurveLinearColorAtlas":
+                                Exports[i] = Exports[i].ConvertToChildExport<Texture2DExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "Skeleton":
+                                    Exports[i] = Exports[i].ConvertToChildExport<SkeletonExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "StaticMesh":
+                                Exports[i] = Exports[i].ConvertToChildExport<StaticMeshExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "SkeletalMesh":
+                                Exports[i] = Exports[i].ConvertToChildExport<SkeletalMeshExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "MorphTarget":
+                                Exports[i] = Exports[i].ConvertToChildExport<MorphTargetExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            case "PhysicsAsset":
+                                Exports[i] = Exports[i].ConvertToChildExport<PhysicsAssetExport>();
+                                Exports[i].Read(reader, (int)nextStarting);
+                                break;
+                            default:
+                                if (exportClassType.EndsWith("DataTable")) {
+                                    Exports[i] = Exports[i].ConvertToChildExport<DataTableExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                } else if (exportClassType.StartsWith("SoundNode")) {
+                                    Exports[i] = Exports[i].ConvertToChildExport<SoundNodeExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                }
+                                else if (exportClassType.EndsWith("BlueprintGeneratedClass")) {
+                                    var bgc = Exports[i].ConvertToChildExport<ClassExport>();
+                                    Exports[i] = bgc;
+                                    Exports[i].Read(reader, (int)nextStarting);
+
+                                    // Check to see if we can add some new map type overrides
+                                    if (bgc.LoadedProperties != null) {
+                                        foreach (FProperty entry in bgc.LoadedProperties) {
+                                            if (entry is FMapProperty fMapEntry) {
+                                                FName keyOverride = null;
+                                                FName valueOverride = null;
+                                                if (fMapEntry.KeyProp is FStructProperty keyPropStruc && keyPropStruc.Struct.IsImport()) keyOverride = keyPropStruc.Struct.ToImport(this).ObjectName;
+                                                if (fMapEntry.ValueProp is FStructProperty valuePropStruc && valuePropStruc.Struct.IsImport()) valueOverride = valuePropStruc.Struct.ToImport(this).ObjectName;
+
+                                                this.MapStructTypeOverride.Add(fMapEntry.Name.Value.Value, new Tuple<FName, FName>(keyOverride, valueOverride));
+                                            }
+                                        }
+                                    }
+                                } else if (MainSerializer.PropertyTypeRegistry.ContainsKey(exportClassType)) {
+                                    Exports[i] = Exports[i].ConvertToChildExport<PropertyExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                } else {
+                                    Exports[i] = Exports[i].ConvertToChildExport<NormalExport>();
+                                    Exports[i].Read(reader, (int)nextStarting);
+                                }
+                                break;
+                        }
+
+                        long extrasLen = nextStarting - reader.BaseStream.Position;
+                        if (extrasLen < 0) {
+                            throw new FormatException("Invalid padding at end of export " + (i + 1) + ": " + extrasLen + " bytes");
+                        } else {
+                            Exports[i].Extras = reader.ReadBytes((int)extrasLen);
+                        }
+                    }
+                    catch (Exception ex) {
+#if DEBUG
+                    Debug.WriteLine("\nFailed to parse export " + (i + 1) + ": " + ex.ToString());
+#endif
+                        reader.BaseStream.Seek(Exports[i].SerialOffset, SeekOrigin.Begin);
+                        Exports[i] = Exports[i].ConvertToChildExport<RawExport>();
+                        ((RawExport)Exports[i]).Data = reader.ReadBytes((int)Exports[i].SerialSize);
                     }
                 }
             }
         }
+    }
 
-        /// <summary>
-        /// Serializes the initial portion of the asset from memory.
-        /// </summary>
-        /// <returns>A byte array which represents the serialized binary data of the initial portion of the asset.</returns>
-        private byte[] MakeHeader()
+    /// <summary>
+    /// Serializes the initial portion of the asset from memory.
+    /// </summary>
+    /// <returns>A byte array which represents the serialized binary data of the initial portion of the asset.</returns>
+    private byte[] MakeHeader()
+    {
+        var stre = new MemoryStream(this.NameOffset);
+        AssetBinaryWriter writer = new AssetBinaryWriter(stre, this);
+
+        writer.Write(UAsset.UASSET_MAGIC);
+        writer.Write(LegacyFileVersion);
+        if (LegacyFileVersion != 4)
         {
-            var stre = new MemoryStream(this.NameOffset);
-            AssetBinaryWriter writer = new AssetBinaryWriter(stre, this);
+            writer.Write(IsUnversioned ? 0 : 864);
+        }
 
-            writer.Write(UAsset.UASSET_MAGIC);
-            writer.Write(LegacyFileVersion);
-            if (LegacyFileVersion != 4)
-            {
-                writer.Write(IsUnversioned ? 0 : 864);
-            }
+        if (IsUnversioned)
+        {
+            writer.Write(0);
+        }
+        else
+        {
+            writer.Write((int)EngineVersion);
+        }
 
+        writer.Write(FileVersionLicenseeUE4);
+        if (LegacyFileVersion <= -2)
+        {
             if (IsUnversioned)
             {
                 writer.Write(0);
             }
             else
-            {
-                writer.Write((int)EngineVersion);
-            }
-
-            writer.Write(FileVersionLicenseeUE4);
-            if (LegacyFileVersion <= -2)
-            {
-                if (IsUnversioned)
+            { 
+                // TODO: support for enum-based custom versions
+                writer.Write(CustomVersionContainer.Count);
+                for (int i = 0; i < CustomVersionContainer.Count; i++)
                 {
-                    writer.Write(0);
+                    writer.Write(CustomVersionContainer[i].Key.ToByteArray());
+                    writer.Write(CustomVersionContainer[i].Version);
+                }
+            }
+        }
+
+        writer.Write(SectionSixOffset);
+        writer.Write(FolderName);
+        writer.Write((uint)PackageFlags);
+        writer.Write(NameCount);
+        writer.Write(NameOffset);
+        if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
+        {
+            writer.Write(GatherableTextDataCount);
+            writer.Write(GatherableTextDataOffset);
+        }
+        writer.Write(ExportCount);
+        writer.Write(ExportOffset); // 61
+        writer.Write(ImportCount); // 65
+        writer.Write(ImportOffset); // 69 (haha funny)
+        writer.Write(DependsOffset); // 73
+        if (EngineVersion >= UE4Version.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
+        {
+            writer.Write(SoftPackageReferencesCount); // 77
+            writer.Write(SoftPackageReferencesOffset); // 81
+        }
+        if (EngineVersion >= UE4Version.VER_UE4_ADDED_SEARCHABLE_NAMES)
+        {
+            writer.Write(SearchableNamesOffset);
+        }
+        writer.Write(ThumbnailTableOffset);
+
+        writer.Write(PackageGuid.ToByteArray());
+        writer.Write(Generations.Count);
+        for (int i = 0; i < Generations.Count; i++)
+        {
+            Generations[i].ExportCount = ExportCount;
+            Generations[i].NameCount = NameCount;
+            writer.Write(Generations[i].ExportCount);
+            writer.Write(Generations[i].NameCount);
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_ENGINE_VERSION_OBJECT)
+        {
+            RecordedEngineVersion.Write(writer);
+        }
+        else
+        {
+            writer.Write(RecordedEngineVersion.Changelist);
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION)
+        {
+            RecordedCompatibleWithEngineVersion.Write(writer);
+        }
+
+        writer.Write(CompressionFlags);
+        writer.Write((int)0); // numCompressedChunks
+        writer.Write(PackageSource);
+        writer.Write((int)0); // numAdditionalPackagesToCook
+
+        if (LegacyFileVersion > -7)
+        {
+            writer.Write((int)0); // numTextureAllocations
+        }
+
+        writer.Write(AssetRegistryDataOffset);
+        writer.Write(BulkDataStartOffset);
+
+        if (EngineVersion >= UE4Version.VER_UE4_WORLD_LEVEL_INFO)
+        {
+            writer.Write(WorldTileInfoDataOffset);
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS)
+        {
+            writer.Write(ChunkIDs.Length);
+            for (int i = 0; i < ChunkIDs.Length; i++)
+            {
+                writer.Write(ChunkIDs[i]);
+            }
+        }
+        else if (EngineVersion >= UE4Version.VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE)
+        {
+            writer.Write(ChunkIDs[0]);
+        }
+
+        if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+        {
+            writer.Write(PreloadDependencyCount);
+            writer.Write(PreloadDependencyOffset);
+        }
+
+        return stre.ToArray();
+    }
+
+    /// <summary>
+    /// Serializes an asset from memory.
+    /// </summary>
+    /// <returns>A stream that the asset has been serialized to.</returns>
+    public MemoryStream WriteData()
+    {
+        var stre = new MemoryStream();
+        AssetBinaryWriter writer = new AssetBinaryWriter(stre, this);
+
+        // Header
+        writer.Seek(0, SeekOrigin.Begin);
+        writer.Write(MakeHeader());
+
+        // Name map
+        this.NameOffset = (int)writer.BaseStream.Position;
+        this.NameCount = this.nameMapIndexList.Count;
+        for (int i = 0; i < this.nameMapIndexList.Count; i++)
+        {
+            writer.Write(nameMapIndexList[i]);
+
+            if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+            {
+                if (OverrideNameMapHashes != null && OverrideNameMapHashes.ContainsKey(nameMapIndexList[i]))
+                {
+                    writer.Write(OverrideNameMapHashes[nameMapIndexList[i]]);
                 }
                 else
-                { 
-                    // TODO: support for enum-based custom versions
-                    writer.Write(CustomVersionContainer.Count);
-                    for (int i = 0; i < CustomVersionContainer.Count; i++)
-                    {
-                        writer.Write(CustomVersionContainer[i].Key.ToByteArray());
-                        writer.Write(CustomVersionContainer[i].Version);
-                    }
-                }
-            }
-
-            writer.Write(SectionSixOffset);
-            writer.Write(FolderName);
-            writer.Write((uint)PackageFlags);
-            writer.Write(NameCount);
-            writer.Write(NameOffset);
-            if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
-            {
-                writer.Write(GatherableTextDataCount);
-                writer.Write(GatherableTextDataOffset);
-            }
-            writer.Write(ExportCount);
-            writer.Write(ExportOffset); // 61
-            writer.Write(ImportCount); // 65
-            writer.Write(ImportOffset); // 69 (haha funny)
-            writer.Write(DependsOffset); // 73
-            if (EngineVersion >= UE4Version.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
-            {
-                writer.Write(SoftPackageReferencesCount); // 77
-                writer.Write(SoftPackageReferencesOffset); // 81
-            }
-            if (EngineVersion >= UE4Version.VER_UE4_ADDED_SEARCHABLE_NAMES)
-            {
-                writer.Write(SearchableNamesOffset);
-            }
-            writer.Write(ThumbnailTableOffset);
-
-            writer.Write(PackageGuid.ToByteArray());
-            writer.Write(Generations.Count);
-            for (int i = 0; i < Generations.Count; i++)
-            {
-                Generations[i].ExportCount = ExportCount;
-                Generations[i].NameCount = NameCount;
-                writer.Write(Generations[i].ExportCount);
-                writer.Write(Generations[i].NameCount);
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_ENGINE_VERSION_OBJECT)
-            {
-                RecordedEngineVersion.Write(writer);
-            }
-            else
-            {
-                writer.Write(RecordedEngineVersion.Changelist);
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION)
-            {
-                RecordedCompatibleWithEngineVersion.Write(writer);
-            }
-
-            writer.Write(CompressionFlags);
-            writer.Write((int)0); // numCompressedChunks
-            writer.Write(PackageSource);
-            writer.Write((int)0); // numAdditionalPackagesToCook
-
-            if (LegacyFileVersion > -7)
-            {
-                writer.Write((int)0); // numTextureAllocations
-            }
-
-            writer.Write(AssetRegistryDataOffset);
-            writer.Write(BulkDataStartOffset);
-
-            if (EngineVersion >= UE4Version.VER_UE4_WORLD_LEVEL_INFO)
-            {
-                writer.Write(WorldTileInfoDataOffset);
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS)
-            {
-                writer.Write(ChunkIDs.Length);
-                for (int i = 0; i < ChunkIDs.Length; i++)
                 {
-                    writer.Write(ChunkIDs[i]);
+                    writer.Write(CRCGenerator.GenerateHash(nameMapIndexList[i]));
                 }
             }
-            else if (EngineVersion >= UE4Version.VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE)
-            {
-                writer.Write(ChunkIDs[0]);
-            }
-
-            if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
-            {
-                writer.Write(PreloadDependencyCount);
-                writer.Write(PreloadDependencyOffset);
-            }
-
-            return stre.ToArray();
         }
 
-        /// <summary>
-        /// Serializes an asset from memory.
-        /// </summary>
-        /// <returns>A stream that the asset has been serialized to.</returns>
-        public MemoryStream WriteData()
+        // Imports
+        if (this.Imports.Count > 0)
         {
-            var stre = new MemoryStream();
-            AssetBinaryWriter writer = new AssetBinaryWriter(stre, this);
-
-            // Header
-            writer.Seek(0, SeekOrigin.Begin);
-            writer.Write(MakeHeader());
-
-            // Name map
-            this.NameOffset = (int)writer.BaseStream.Position;
-            this.NameCount = this.nameMapIndexList.Count;
-            for (int i = 0; i < this.nameMapIndexList.Count; i++)
+            this.ImportOffset = (int)writer.BaseStream.Position;
+            this.ImportCount = this.Imports.Count;
+            for (int i = 0; i < this.Imports.Count; i++)
             {
-                writer.Write(nameMapIndexList[i]);
+                writer.Write(this.Imports[i].ClassPackage);
+                writer.Write(this.Imports[i].ClassName);
+                writer.Write(this.Imports[i].OuterIndex.Index);
+                writer.Write(this.Imports[i].ObjectName);
+            }
+        }
+        else
+        {
+            this.ImportOffset = 0;
+        }
 
-                if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+        // Export details
+        if (this.Exports.Count > 0)
+        {
+            this.ExportOffset = (int)writer.BaseStream.Position;
+            this.ExportCount = this.Exports.Count;
+            for (int i = 0; i < this.Exports.Count; i++)
+            {
+                Export us = this.Exports[i];
+                writer.Write(us.ClassIndex.Index);
+                writer.Write(us.SuperIndex.Index);
+                if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
                 {
-                    if (OverrideNameMapHashes != null && OverrideNameMapHashes.ContainsKey(nameMapIndexList[i]))
-                    {
-                        writer.Write(OverrideNameMapHashes[nameMapIndexList[i]]);
-                    }
-                    else
-                    {
-                        writer.Write(CRCGenerator.GenerateHash(nameMapIndexList[i]));
-                    }
+                    writer.Write(us.TemplateIndex.Index);
+                }
+                writer.Write(us.OuterIndex.Index);
+                writer.Write(us.ObjectName);
+                writer.Write((uint)us.ObjectFlags);
+                if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
+                {
+                    writer.Write((int)us.SerialSize);
+                    writer.Write((int)us.SerialOffset);
+                }
+                else
+                {
+                    writer.Write(us.SerialSize);
+                    writer.Write(us.SerialOffset);
+                }
+                writer.Write(us.bForcedExport ? 1 : 0);
+                writer.Write(us.bNotForClient ? 1 : 0);
+                writer.Write(us.bNotForServer ? 1 : 0);
+                writer.Write(us.PackageGuid.ToByteArray());
+                writer.Write((uint)us.PackageFlags);
+                if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
+                {
+                    writer.Write(us.bNotAlwaysLoadedForEditorGame ? 1 : 0);
+                }
+                if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
+                {
+                    writer.Write(us.bIsAsset ? 1 : 0);
+                }
+                if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+                {
+                    writer.Write(us.FirstExportDependency);
+                    writer.Write(us.SerializationBeforeSerializationDependencies);
+                    writer.Write(us.CreateBeforeSerializationDependencies);
+                    writer.Write(us.SerializationBeforeCreateDependencies);
+                    writer.Write(us.CreateBeforeCreateDependencies);
                 }
             }
+        }
+        else
+        {
+            this.ExportOffset = 0;
+        }
 
-            // Imports
-            if (this.Imports.Count > 0)
+        // DependsMap
+        if (this.doWeHaveDependsMap)
+        {
+            this.DependsOffset = (int)writer.BaseStream.Position;
+            for (int i = 0; i < this.Exports.Count; i++)
             {
-                this.ImportOffset = (int)writer.BaseStream.Position;
-                this.ImportCount = this.Imports.Count;
-                for (int i = 0; i < this.Imports.Count; i++)
+                if (i >= this.DependsMap.Count) this.DependsMap.Add(new int[0]);
+
+                int[] currentData = this.DependsMap[i];
+                writer.Write(currentData.Length);
+                for (int j = 0; j < currentData.Length; j++)
                 {
-                    writer.Write(this.Imports[i].ClassPackage);
-                    writer.Write(this.Imports[i].ClassName);
-                    writer.Write(this.Imports[i].OuterIndex.Index);
-                    writer.Write(this.Imports[i].ObjectName);
+                    writer.Write(currentData[j]);
                 }
             }
-            else
-            {
-                this.ImportOffset = 0;
-            }
+        }
+        else
+        {
+            this.DependsOffset = 0;
+        }
 
-            // Export details
-            if (this.Exports.Count > 0)
+        // SoftPackageReferenceList
+        if (this.doWeHaveSoftPackageReferences)
+        {
+            this.SoftPackageReferencesOffset = (int)writer.BaseStream.Position;
+            this.SoftPackageReferencesCount = this.SoftPackageReferenceList.Count;
+            for (int i = 0; i < this.SoftPackageReferenceList.Count; i++)
             {
-                this.ExportOffset = (int)writer.BaseStream.Position;
-                this.ExportCount = this.Exports.Count;
-                for (int i = 0; i < this.Exports.Count; i++)
-                {
-                    Export us = this.Exports[i];
-                    writer.Write(us.ClassIndex.Index);
-                    writer.Write(us.SuperIndex.Index);
-                    if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
-                    {
-                        writer.Write(us.TemplateIndex.Index);
-                    }
-                    writer.Write(us.OuterIndex.Index);
-                    writer.Write(us.ObjectName);
-                    writer.Write((uint)us.ObjectFlags);
-                    if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
-                    {
-                        writer.Write((int)us.SerialSize);
-                        writer.Write((int)us.SerialOffset);
-                    }
-                    else
-                    {
-                        writer.Write(us.SerialSize);
-                        writer.Write(us.SerialOffset);
-                    }
-                    writer.Write(us.bForcedExport ? 1 : 0);
-                    writer.Write(us.bNotForClient ? 1 : 0);
-                    writer.Write(us.bNotForServer ? 1 : 0);
-                    writer.Write(us.PackageGuid.ToByteArray());
-                    writer.Write((uint)us.PackageFlags);
-                    if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
-                    {
-                        writer.Write(us.bNotAlwaysLoadedForEditorGame ? 1 : 0);
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
-                    {
-                        writer.Write(us.bIsAsset ? 1 : 0);
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
-                    {
-                        writer.Write(us.FirstExportDependency);
-                        writer.Write(us.SerializationBeforeSerializationDependencies);
-                        writer.Write(us.CreateBeforeSerializationDependencies);
-                        writer.Write(us.SerializationBeforeCreateDependencies);
-                        writer.Write(us.CreateBeforeCreateDependencies);
-                    }
-                }
+                writer.Write(this.SoftPackageReferenceList[i]);
             }
-            else
-            {
-                this.ExportOffset = 0;
-            }
+        }
+        else
+        {
+            this.SoftPackageReferencesOffset = 0;
+        }
 
-            // DependsMap
-            if (this.doWeHaveDependsMap)
-            {
-                this.DependsOffset = (int)writer.BaseStream.Position;
-                for (int i = 0; i < this.Exports.Count; i++)
-                {
-                    if (i >= this.DependsMap.Count) this.DependsMap.Add(new int[0]);
-
-                    int[] currentData = this.DependsMap[i];
-                    writer.Write(currentData.Length);
-                    for (int j = 0; j < currentData.Length; j++)
-                    {
-                        writer.Write(currentData[j]);
-                    }
-                }
-            }
-            else
-            {
-                this.DependsOffset = 0;
-            }
-
-            // SoftPackageReferenceList
-            if (this.doWeHaveSoftPackageReferences)
-            {
-                this.SoftPackageReferencesOffset = (int)writer.BaseStream.Position;
-                this.SoftPackageReferencesCount = this.SoftPackageReferenceList.Count;
-                for (int i = 0; i < this.SoftPackageReferenceList.Count; i++)
-                {
-                    writer.Write(this.SoftPackageReferenceList[i]);
-                }
-            }
-            else
-            {
-                this.SoftPackageReferencesOffset = 0;
-            }
-
-            // AssetRegistryData
-            if (this.doWeHaveAssetRegistryData)
-            {
-                this.AssetRegistryDataOffset = (int)writer.BaseStream.Position;
-                writer.Write(this.AssetRegistryData.Count);
+        // AssetRegistryData
+        if (this.doWeHaveAssetRegistryData)
+        {
+            this.AssetRegistryDataOffset = (int)writer.BaseStream.Position;
+            writer.Write(this.AssetRegistryData.Count);
 #pragma warning disable CS0162 // Unreachable code detected
-                for (int i = 0; i < this.AssetRegistryData.Count; i++)
-                {
-                    throw new NotImplementedException("Asset registry data is not yet supported. Please let me know if you see this error message");
-                }
+            for (int i = 0; i < this.AssetRegistryData.Count; i++)
+            {
+                throw new NotImplementedException("Asset registry data is not yet supported. Please let me know if you see this error message");
+            }
 #pragma warning restore CS0162 // Unreachable code detected
-            }
-            else
-            {
-                this.AssetRegistryDataOffset = 0;
-            }
-
-            // WorldTileInfo
-            if (this.doWeHaveWorldTileInfo)
-            {
-                this.WorldTileInfoDataOffset = (int)writer.BaseStream.Position;
-                WorldTileInfo.Write(writer, this);
-            }
-            else
-            {
-                this.WorldTileInfoDataOffset = 0;
-            }
-
-            // PreloadDependencies
-            this.PreloadDependencyOffset = (int)writer.BaseStream.Position;
-            if (this.UseSeparateBulkDataFiles)
-            {
-                this.PreloadDependencyCount = this.PreloadDependencies.Count;
-                for (int i = 0; i < this.PreloadDependencies.Count; i++)
-                {
-                    writer.Write(this.PreloadDependencies[i].Index);
-                }
-            }
-            else
-            {
-                this.PreloadDependencyCount = -1;
-            }
-
-            // Export data
-            int oldOffset = this.SectionSixOffset;
-            this.SectionSixOffset = (int)writer.BaseStream.Position;
-            long[] categoryStarts = new long[this.Exports.Count];
-            if (this.Exports.Count > 0)
-            {
-                for (int i = 0; i < this.Exports.Count; i++)
-                {
-                    categoryStarts[i] = writer.BaseStream.Position;
-                    Export us = this.Exports[i];
-                    us.Write(writer);
-                    writer.Write(us.Extras);
-                }
-            }
-            writer.Write(new byte[] { 0xC1, 0x83, 0x2A, 0x9E });
-
-            this.BulkDataStartOffset = (int)stre.Length - 4;
-
-            // Rewrite Section 3
-            if (this.Exports.Count > 0)
-            {
-                writer.Seek(this.ExportOffset, SeekOrigin.Begin);
-                for (int i = 0; i < this.Exports.Count; i++)
-                {
-                    Export us = this.Exports[i];
-                    long nextLoc = this.BulkDataStartOffset;
-                    if ((this.Exports.Count - 1) > i) nextLoc = categoryStarts[i + 1];
-
-                    us.SerialOffset = categoryStarts[i];
-                    us.SerialSize = nextLoc - categoryStarts[i];
-
-                    writer.Write(us.ClassIndex.Index);
-                    writer.Write(us.SuperIndex.Index);
-                    if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
-                    {
-                        writer.Write(us.TemplateIndex.Index);
-                    }
-                    writer.Write(us.OuterIndex.Index);
-                    writer.Write(us.ObjectName);
-                    writer.Write((uint)us.ObjectFlags);
-                    if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
-                    {
-                        writer.Write((int)us.SerialSize);
-                        writer.Write((int)us.SerialOffset);
-                    }
-                    else
-                    {
-                        writer.Write(us.SerialSize);
-                        writer.Write(us.SerialOffset);
-                    }
-                    writer.Write(us.bForcedExport ? 1 : 0);
-                    writer.Write(us.bNotForClient ? 1 : 0);
-                    writer.Write(us.bNotForServer ? 1 : 0);
-                    writer.Write(us.PackageGuid.ToByteArray());
-                    writer.Write((uint)us.PackageFlags);
-                    if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
-                    {
-                        writer.Write(us.bNotAlwaysLoadedForEditorGame ? 1 : 0);
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
-                    {
-                        writer.Write(us.bIsAsset ? 1 : 0);
-                    }
-                    if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
-                    {
-                        writer.Write(us.FirstExportDependency);
-                        writer.Write(us.SerializationBeforeSerializationDependencies);
-                        writer.Write(us.CreateBeforeSerializationDependencies);
-                        writer.Write(us.SerializationBeforeCreateDependencies);
-                        writer.Write(us.CreateBeforeCreateDependencies);
-                    }
-                }
-            }
-
-            // Rewrite Header
-            writer.Seek(0, SeekOrigin.Begin);
-            writer.Write(MakeHeader());
-
-            writer.Seek(0, SeekOrigin.Begin);
-            return stre;
+        }
+        else
+        {
+            this.AssetRegistryDataOffset = 0;
         }
 
-        /// <summary>
-        /// Creates a MemoryStream from an asset path.
-        /// </summary>
-        /// <param name="p">The path to the input file.</param>
-        /// <returns>A new MemoryStream that stores the binary data of the input file.</returns>
-        public MemoryStream PathToStream(string p)
+        // WorldTileInfo
+        if (this.doWeHaveWorldTileInfo)
         {
-            using (FileStream origStream = File.Open(p, FileMode.Open))
-            {
-                MemoryStream completeStream = new MemoryStream();
-                origStream.CopyTo(completeStream);
+            this.WorldTileInfoDataOffset = (int)writer.BaseStream.Position;
+            WorldTileInfo.Write(writer, this);
+        }
+        else
+        {
+            this.WorldTileInfoDataOffset = 0;
+        }
 
-                UseSeparateBulkDataFiles = false;
-                try
+        // PreloadDependencies
+        this.PreloadDependencyOffset = (int)writer.BaseStream.Position;
+        if (this.UseSeparateBulkDataFiles)
+        {
+            this.PreloadDependencyCount = this.PreloadDependencies.Count;
+            for (int i = 0; i < this.PreloadDependencies.Count; i++)
+            {
+                writer.Write(this.PreloadDependencies[i].Index);
+            }
+        }
+        else
+        {
+            this.PreloadDependencyCount = -1;
+        }
+
+        // Export data
+        int oldOffset = this.SectionSixOffset;
+        this.SectionSixOffset = (int)writer.BaseStream.Position;
+        long[] categoryStarts = new long[this.Exports.Count];
+        if (this.Exports.Count > 0)
+        {
+            for (int i = 0; i < this.Exports.Count; i++)
+            {
+                categoryStarts[i] = writer.BaseStream.Position;
+                Export us = this.Exports[i];
+                us.Write(writer);
+                writer.Write(us.Extras);
+            }
+        }
+        writer.Write(new byte[] { 0xC1, 0x83, 0x2A, 0x9E });
+
+        this.BulkDataStartOffset = (int)stre.Length - 4;
+
+        // Rewrite Section 3
+        if (this.Exports.Count > 0)
+        {
+            writer.Seek(this.ExportOffset, SeekOrigin.Begin);
+            for (int i = 0; i < this.Exports.Count; i++)
+            {
+                Export us = this.Exports[i];
+                long nextLoc = this.BulkDataStartOffset;
+                if ((this.Exports.Count - 1) > i) nextLoc = categoryStarts[i + 1];
+
+                us.SerialOffset = categoryStarts[i];
+                us.SerialSize = nextLoc - categoryStarts[i];
+
+                writer.Write(us.ClassIndex.Index);
+                writer.Write(us.SuperIndex.Index);
+                if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
                 {
-                    var targetFile = Path.ChangeExtension(p, "uexp");
-                    if (File.Exists(targetFile))
+                    writer.Write(us.TemplateIndex.Index);
+                }
+                writer.Write(us.OuterIndex.Index);
+                writer.Write(us.ObjectName);
+                writer.Write((uint)us.ObjectFlags);
+                if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
+                {
+                    writer.Write((int)us.SerialSize);
+                    writer.Write((int)us.SerialOffset);
+                }
+                else
+                {
+                    writer.Write(us.SerialSize);
+                    writer.Write(us.SerialOffset);
+                }
+                writer.Write(us.bForcedExport ? 1 : 0);
+                writer.Write(us.bNotForClient ? 1 : 0);
+                writer.Write(us.bNotForServer ? 1 : 0);
+                writer.Write(us.PackageGuid.ToByteArray());
+                writer.Write((uint)us.PackageFlags);
+                if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
+                {
+                    writer.Write(us.bNotAlwaysLoadedForEditorGame ? 1 : 0);
+                }
+                if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
+                {
+                    writer.Write(us.bIsAsset ? 1 : 0);
+                }
+                if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+                {
+                    writer.Write(us.FirstExportDependency);
+                    writer.Write(us.SerializationBeforeSerializationDependencies);
+                    writer.Write(us.CreateBeforeSerializationDependencies);
+                    writer.Write(us.SerializationBeforeCreateDependencies);
+                    writer.Write(us.CreateBeforeCreateDependencies);
+                }
+            }
+        }
+
+        // Rewrite Header
+        writer.Seek(0, SeekOrigin.Begin);
+        writer.Write(MakeHeader());
+
+        writer.Seek(0, SeekOrigin.Begin);
+        return stre;
+    }
+
+    /// <summary>
+    /// Creates a MemoryStream from an asset path.
+    /// </summary>
+    /// <param name="p">The path to the input file.</param>
+    /// <returns>A new MemoryStream that stores the binary data of the input file.</returns>
+    public MemoryStream PathToStream(string p)
+    {
+        using (FileStream origStream = File.Open(p, FileMode.Open))
+        {
+            MemoryStream completeStream = new MemoryStream();
+            origStream.CopyTo(completeStream);
+
+            UseSeparateBulkDataFiles = false;
+            try
+            {
+                var targetFile = Path.ChangeExtension(p, "uexp");
+                if (File.Exists(targetFile))
+                {
+                    using (FileStream newStream = File.Open(targetFile, FileMode.Open))
                     {
-                        using (FileStream newStream = File.Open(targetFile, FileMode.Open))
-                        {
+                        completeStream.Seek(0, SeekOrigin.End);
+                        newStream.CopyTo(completeStream);
+                        UseSeparateBulkDataFiles = true;
+                    }
+                }
+            }
+            catch (FileNotFoundException) { }
+
+            completeStream.Seek(0, SeekOrigin.Begin);
+            return completeStream;
+        }
+    }
+
+    public MemoryStream PathToStream(string p, bool onlyheader) {
+        using (FileStream origStream = File.Open(p, FileMode.Open)) {
+            MemoryStream completeStream = new MemoryStream();
+            origStream.CopyTo(completeStream);
+
+            if (!onlyheader) {
+                UseSeparateBulkDataFiles = false;
+                try {
+                    var targetFile = Path.ChangeExtension(p, "uexp");
+                    if (File.Exists(targetFile)) {
+                        using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
                             completeStream.Seek(0, SeekOrigin.End);
                             newStream.CopyTo(completeStream);
                             UseSeparateBulkDataFiles = true;
@@ -1819,207 +1837,183 @@ namespace UAssetAPI
                     }
                 }
                 catch (FileNotFoundException) { }
-
-                completeStream.Seek(0, SeekOrigin.Begin);
-                return completeStream;
             }
+            completeStream.Seek(0, SeekOrigin.Begin);
+            return completeStream;
         }
+        
+    }
 
-        public MemoryStream PathToStream(string p, bool onlyheader) {
-            using (FileStream origStream = File.Open(p, FileMode.Open)) {
-                MemoryStream completeStream = new MemoryStream();
-                origStream.CopyTo(completeStream);
+    /// <summary>
+    /// Creates a BinaryReader from an asset path.
+    /// </summary>
+    /// <param name="p">The path to the input file.</param>
+    /// <returns>A new BinaryReader that stores the binary data of the input file.</returns>
+    public AssetBinaryReader PathToReader(string p)
+    {
+        return new AssetBinaryReader(PathToStream(p), this);
+    }
 
-                if (!onlyheader) {
-                    UseSeparateBulkDataFiles = false;
-                    try {
-                        var targetFile = Path.ChangeExtension(p, "uexp");
-                        if (File.Exists(targetFile)) {
-                            using (FileStream newStream = File.Open(targetFile, FileMode.Open)) {
-                                completeStream.Seek(0, SeekOrigin.End);
-                                newStream.CopyTo(completeStream);
-                                UseSeparateBulkDataFiles = true;
-                            }
-                        }
-                    }
-                    catch (FileNotFoundException) { }
-                }
-                completeStream.Seek(0, SeekOrigin.Begin);
-                return completeStream;
-            }
-        }
+    public AssetBinaryReader PathToReader(string p, bool onlyheader) {
+        return new AssetBinaryReader(PathToStream(p, onlyheader), this);
+    }
 
-        /// <summary>
-        /// Creates a BinaryReader from an asset path.
-        /// </summary>
-        /// <param name="p">The path to the input file.</param>
-        /// <returns>A new BinaryReader that stores the binary data of the input file.</returns>
-        public AssetBinaryReader PathToReader(string p)
+    /// <summary>
+    /// Serializes and writes an asset to disk from memory.
+    /// </summary>
+    /// <param name="outputPath">The path on disk to write the asset to.</param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when <see cref="EngineVersion"/> is unspecified.</exception>
+    public void Write(string outputPath)
+    {
+        if (EngineVersion == UE4Version.UNKNOWN) throw new UnknownEngineVersionException("Cannot begin serialization before an engine version is specified");
+
+        MemoryStream newData = WriteData();
+
+        if (this.UseSeparateBulkDataFiles && this.Exports.Count > 0)
         {
-            return new AssetBinaryReader(PathToStream(p), this);
-        }
-
-        public AssetBinaryReader PathToReader(string p, bool onlyheader) {
-            return new AssetBinaryReader(PathToStream(p, onlyheader), this);
-        }
-
-        /// <summary>
-        /// Serializes and writes an asset to disk from memory.
-        /// </summary>
-        /// <param name="outputPath">The path on disk to write the asset to.</param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when <see cref="EngineVersion"/> is unspecified.</exception>
-        public void Write(string outputPath)
-        {
-            if (EngineVersion == UE4Version.UNKNOWN) throw new UnknownEngineVersionException("Cannot begin serialization before an engine version is specified");
-
-            MemoryStream newData = WriteData();
-
-            if (this.UseSeparateBulkDataFiles && this.Exports.Count > 0)
+            long breakingOffPoint = this.Exports[0].SerialOffset;
+            using (FileStream f = File.Open(outputPath, FileMode.Create, FileAccess.Write))
             {
-                long breakingOffPoint = this.Exports[0].SerialOffset;
-                using (FileStream f = File.Open(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    CopySplitUp(newData, f, 0, (int)breakingOffPoint);
-                }
-
-                using (FileStream f = File.Open(Path.ChangeExtension(outputPath, "uexp"), FileMode.Create, FileAccess.Write))
-                {
-                    CopySplitUp(newData, f, (int)breakingOffPoint, (int)(newData.Length - breakingOffPoint));
-                }
+                CopySplitUp(newData, f, 0, (int)breakingOffPoint);
             }
-            else
+
+            using (FileStream f = File.Open(Path.ChangeExtension(outputPath, "uexp"), FileMode.Create, FileAccess.Write))
             {
-                using (FileStream f = File.Open(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    newData.CopyTo(f);
-                }
+                CopySplitUp(newData, f, (int)breakingOffPoint, (int)(newData.Length - breakingOffPoint));
             }
         }
-
-        internal static JsonSerializerSettings jsonSettings = new JsonSerializerSettings
+        else
         {
-            TypeNameHandling = TypeNameHandling.Objects,
-            NullValueHandling = NullValueHandling.Include,
-            FloatParseHandling = FloatParseHandling.Double,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            Converters = new List<JsonConverter>()
+            using (FileStream f = File.Open(outputPath, FileMode.Create, FileAccess.Write))
             {
-                new FSignedZeroJsonConverter(),
-                new FNameJsonConverter(),
-                new FStringJsonConverter(),
-                new FPackageIndexJsonConverter(),
-                new StringEnumConverter()
+                newData.CopyTo(f);
             }
-        };
-
-        /// <summary>
-        /// Serializes this asset as JSON.
-        /// </summary>
-        /// <param name="jsonFormatting">The formatting to use for the returned JSON string.</param>
-        /// <returns>A serialized JSON string that represents the asset.</returns>
-        public string SerializeJson(Formatting jsonFormatting = Formatting.None)
-        {
-            Info = "Serialized with UAssetAPI " + typeof(PropertyData).Assembly.GetName().Version + (string.IsNullOrEmpty(UAPUtils.CurrentCommit) ? "" : (" (" + UAPUtils.CurrentCommit + ")"));
-            return JsonConvert.SerializeObject(this, jsonFormatting, jsonSettings);
         }
+    }
 
-        /// <summary>
-        /// Reads an asset from serialized JSON and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
-        /// </summary>
-        /// <param name="json">A serialized JSON string to parse.</param>
-        public static UAsset DeserializeJson(string json)
+    internal static JsonSerializerSettings jsonSettings = new JsonSerializerSettings
+    {
+        TypeNameHandling = TypeNameHandling.Objects,
+        NullValueHandling = NullValueHandling.Include,
+        FloatParseHandling = FloatParseHandling.Double,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+        Converters = new List<JsonConverter>()
         {
-            UAsset res = JsonConvert.DeserializeObject<UAsset>(json, jsonSettings);
-            foreach (Export ex in res.Exports) ex.Asset = res;
-            return res;
+            new FSignedZeroJsonConverter(),
+            new FNameJsonConverter(),
+            new FStringJsonConverter(),
+            new FPackageIndexJsonConverter(),
+            new StringEnumConverter()
         }
+    };
 
-        /// <summary>
-        /// Reads an asset from serialized JSON and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
-        /// </summary>
-        /// <param name="stream">A stream containing serialized JSON string to parse.</param>
-        public static UAsset DeserializeJson(Stream stream)
+    /// <summary>
+    /// Serializes this asset as JSON.
+    /// </summary>
+    /// <param name="jsonFormatting">The formatting to use for the returned JSON string.</param>
+    /// <returns>A serialized JSON string that represents the asset.</returns>
+    public string SerializeJson(Formatting jsonFormatting = Formatting.None)
+    {
+        Info = "Serialized with UAssetAPI " + typeof(PropertyData).Assembly.GetName().Version + (string.IsNullOrEmpty(UAPUtils.CurrentCommit) ? "" : (" (" + UAPUtils.CurrentCommit + ")"));
+        return JsonConvert.SerializeObject(this, jsonFormatting, jsonSettings);
+    }
+
+    /// <summary>
+    /// Reads an asset from serialized JSON and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+    /// </summary>
+    /// <param name="json">A serialized JSON string to parse.</param>
+    public static UAsset DeserializeJson(string json)
+    {
+        UAsset res = JsonConvert.DeserializeObject<UAsset>(json, jsonSettings);
+        foreach (Export ex in res.Exports) ex.Asset = res;
+        return res;
+    }
+
+    /// <summary>
+    /// Reads an asset from serialized JSON and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+    /// </summary>
+    /// <param name="stream">A stream containing serialized JSON string to parse.</param>
+    public static UAsset DeserializeJson(Stream stream)
+    {
+        var serializer = JsonSerializer.Create(jsonSettings);
+        UAsset res;
+
+        using (var sr = new StreamReader(stream))
         {
-            var serializer = JsonSerializer.Create(jsonSettings);
-            UAsset res;
-
-            using (var sr = new StreamReader(stream))
+            using (var jsonTextReader = new JsonTextReader(sr))
             {
-                using (var jsonTextReader = new JsonTextReader(sr))
-                {
-                    res = serializer.Deserialize<UAsset>(jsonTextReader);
-                }
+                res = serializer.Deserialize<UAsset>(jsonTextReader);
             }
-
-            foreach (Export ex in res.Exports) ex.Asset = res;
-            return res;
         }
 
-        /// <summary>
-        /// Reads an asset from disk and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
-        /// </summary>
-        /// <param name="path">The path of the asset file on disk that this instance will read from.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
-        /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
-        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
-        public UAsset(string path, UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
-        {
-            this.FilePath = path;
-            EngineVersion = engineVersion;
-            CustomVersionContainer = defaultCustomVersionContainer;
+        foreach (Export ex in res.Exports) ex.Asset = res;
+        return res;
+    }
 
-            Read(PathToReader(path));
-        }
-        /// <summary>
-        /// Reads an asset from disk and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
-        /// </summary>
-        /// <param name="path">The path of the asset file on disk that this instance will read from.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
-        /// <param name="onlyheader">True if u want to parse only header file.</param>
-        /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
-        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
-        public UAsset(string path, UE4Version engineVersion = UE4Version.UNKNOWN, bool onlyheader=false, List<CustomVersion> defaultCustomVersionContainer = null) {
-            this.FilePath = path;
-            EngineVersion = engineVersion;
-            CustomVersionContainer = defaultCustomVersionContainer;
+    /// <summary>
+    /// Reads an asset from disk and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+    /// </summary>
+    /// <param name="path">The path of the asset file on disk that this instance will read from.</param>
+    /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
+    /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+    /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
+    public UAsset(string path, UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
+    {
+        this.FilePath = path;
+        EngineVersion = engineVersion;
+        CustomVersionContainer = defaultCustomVersionContainer;
 
-            Read(PathToReader(path,onlyheader),onlyheader);
-        }
+        Read(PathToReader(path));
+    }
+    /// <summary>
+    /// Reads an asset from disk and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+    /// </summary>
+    /// <param name="path">The path of the asset file on disk that this instance will read from.</param>
+    /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
+    /// <param name="onlyheader">True if u want to parse only header file.</param>
+    /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+    /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
+    public UAsset(string path, UE4Version engineVersion = UE4Version.UNKNOWN, bool onlyheader=false, List<CustomVersion> defaultCustomVersionContainer = null) {
+        this.FilePath = path;
+        EngineVersion = engineVersion;
+        CustomVersionContainer = defaultCustomVersionContainer;
 
-        /// <summary>
-        /// Reads an asset from a BinaryReader and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
-        /// </summary>
-        /// <param name="reader">The asset's BinaryReader that this instance will read from.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
-        /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
-        /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
-        /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
-        public UAsset(AssetBinaryReader reader, UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
-        {
-            EngineVersion = engineVersion;
-            CustomVersionContainer = defaultCustomVersionContainer;
-            Read(reader);
-        }
+        Read(PathToReader(path,onlyheader),onlyheader);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UAsset"/> class. This instance will store no asset data and does not represent any asset in particular until the <see cref="Read"/> method is manually called.
-        /// </summary>
-        /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
-        /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
-        public UAsset(UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
-        {
-            EngineVersion = engineVersion;
-            CustomVersionContainer = defaultCustomVersionContainer;
-        }
+    /// <summary>
+    /// Reads an asset from a BinaryReader and initializes a new instance of the <see cref="UAsset"/> class to store its data in memory.
+    /// </summary>
+    /// <param name="reader">The asset's BinaryReader that this instance will read from.</param>
+    /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
+    /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
+    /// <exception cref="UnknownEngineVersionException">Thrown when this is an unversioned asset and <see cref="EngineVersion"/> is unspecified.</exception>
+    /// <exception cref="FormatException">Throw when the asset cannot be parsed correctly.</exception>
+    public UAsset(AssetBinaryReader reader, UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
+    {
+        EngineVersion = engineVersion;
+        CustomVersionContainer = defaultCustomVersionContainer;
+        Read(reader);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UAsset"/> class. This instance will store no asset data and does not represent any asset in particular until the <see cref="Read"/> method is manually called.
-        /// </summary>
-        public UAsset()
-        {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UAsset"/> class. This instance will store no asset data and does not represent any asset in particular until the <see cref="Read"/> method is manually called.
+    /// </summary>
+    /// <param name="engineVersion">The version of the Unreal Engine that will be used to parse this asset. If the asset is versioned, this can be left unspecified.</param>
+    /// <param name="defaultCustomVersionContainer">A list of custom versions to parse this asset with. A list of custom versions will automatically be derived from the engine version while parsing if necessary, but you may manually specify them anyways if you wish. If the asset is versioned, this can be left unspecified.</param>
+    public UAsset(UE4Version engineVersion = UE4Version.UNKNOWN, List<CustomVersion> defaultCustomVersionContainer = null)
+    {
+        EngineVersion = engineVersion;
+        CustomVersionContainer = defaultCustomVersionContainer;
+    }
 
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UAsset"/> class. This instance will store no asset data and does not represent any asset in particular until the <see cref="Read"/> method is manually called.
+    /// </summary>
+    public UAsset()
+    {
+
     }
 }

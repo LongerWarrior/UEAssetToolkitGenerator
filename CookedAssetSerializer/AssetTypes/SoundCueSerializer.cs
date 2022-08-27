@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using UAssetAPI;
-using static UAssetAPI.Kismet.KismetSerializer;
+﻿using static UAssetAPI.Kismet.KismetSerializer;
 
 namespace CookedAssetSerializer.AssetTypes
 {

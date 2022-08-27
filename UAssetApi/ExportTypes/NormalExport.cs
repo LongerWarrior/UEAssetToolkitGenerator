@@ -1,117 +1,111 @@
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using UAssetAPI.PropertyTypes;
+namespace UAssetAPI;
 
-namespace UAssetAPI
+/// <summary>
+/// A regular export, with no special serialization. Serialized as a None-terminated property list.
+/// </summary>
+public class NormalExport : Export
 {
+    public List<PropertyData> Data;
+
     /// <summary>
-    /// A regular export, with no special serialization. Serialized as a None-terminated property list.
+    /// Gets or sets the value associated with the specified key. This operation loops linearly, so it may not be suitable for high-performance environments.
     /// </summary>
-    public class NormalExport : Export
+    /// <param name="key">The key associated with the value to get or set.</param>
+    public PropertyData this[FName key]
     {
-        public List<PropertyData> Data;
-
-        /// <summary>
-        /// Gets or sets the value associated with the specified key. This operation loops linearly, so it may not be suitable for high-performance environments.
-        /// </summary>
-        /// <param name="key">The key associated with the value to get or set.</param>
-        public PropertyData this[FName key]
+        get
         {
-            get
+            for (int i = 0; i < Data.Count; i++)
             {
-                for (int i = 0; i < Data.Count; i++)
-                {
-                    if (Data[i].Name == key) return Data[i];
-                }
-                return null;
+                if (Data[i].Name == key) return Data[i];
             }
-            set
+            return null;
+        }
+        set
+        {
+            for (int i = 0; i < Data.Count; i++)
             {
-                for (int i = 0; i < Data.Count; i++)
+                if (Data[i].Name == key)
                 {
-                    if (Data[i].Name == key)
-                    {
-                        Data[i] = value;
-                        Data[i].Name = key;
-                        break;
-                    }
+                    Data[i] = value;
+                    Data[i].Name = key;
+                    break;
                 }
             }
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the value associated with the specified key. This operation loops linearly, so it may not be suitable for high-performance environments.
-        /// </summary>
-        /// <param name="key">The key associated with the value to get or set.</param>
-        public PropertyData this[string key]
+    /// <summary>
+    /// Gets or sets the value associated with the specified key. This operation loops linearly, so it may not be suitable for high-performance environments.
+    /// </summary>
+    /// <param name="key">The key associated with the value to get or set.</param>
+    public PropertyData this[string key]
+    {
+        get
         {
-            get
-            {
-                return this[FName.FromString(key)];
-            }
-            set
-            {
-                this[FName.FromString(key)] = value;
-            }
+            return this[FName.FromString(key)];
         }
-
-
-        /// <summary>
-        /// Gets or sets the value at the specified index.
-        /// </summary>
-        /// <param name="index">The index of the value to get or set.</param>
-        public PropertyData this[int index]
+        set
         {
-            get
-            {
-                return Data[index];
-            }
-            set
-            {
-                Data[index] = value;
-            }
+            this[FName.FromString(key)] = value;
         }
+    }
 
-        public NormalExport(Export super)
+
+    /// <summary>
+    /// Gets or sets the value at the specified index.
+    /// </summary>
+    /// <param name="index">The index of the value to get or set.</param>
+    public PropertyData this[int index]
+    {
+        get
         {
-            Asset = super.Asset;
-            Extras = super.Extras;
+            return Data[index];
         }
-
-        public NormalExport(UAsset asset, byte[] extras) : base(asset, extras)
+        set
         {
-
+            Data[index] = value;
         }
+    }
 
-        public NormalExport(List<PropertyData> data, UAsset asset, byte[] extras) : base(asset, extras)
+    public NormalExport(Export super)
+    {
+        Asset = super.Asset;
+        Extras = super.Extras;
+    }
+
+    public NormalExport(UAsset asset, byte[] extras) : base(asset, extras)
+    {
+
+    }
+
+    public NormalExport(List<PropertyData> data, UAsset asset, byte[] extras) : base(asset, extras)
+    {
+        Data = data;
+    }
+
+    public NormalExport()
+    {
+
+    }
+
+    public override void Read(AssetBinaryReader reader, int nextStarting = 0)
+    {
+        Data = new List<PropertyData>();
+        PropertyData bit;
+        while ((bit = MainSerializer.Read(reader, true)) != null)
         {
-            Data = data;
+            Data.Add(bit);
         }
+    }
 
-        public NormalExport()
+    public override void Write(AssetBinaryWriter writer)
+    {
+        for (int j = 0; j < Data.Count; j++)
         {
-
+            PropertyData current = Data[j];
+            MainSerializer.Write(current, writer, true);
         }
-
-        public override void Read(AssetBinaryReader reader, int nextStarting = 0)
-        {
-            Data = new List<PropertyData>();
-            PropertyData bit;
-            while ((bit = MainSerializer.Read(reader, true)) != null)
-            {
-                Data.Add(bit);
-            }
-        }
-
-        public override void Write(AssetBinaryWriter writer)
-        {
-            for (int j = 0; j < Data.Count; j++)
-            {
-                PropertyData current = Data[j];
-                MainSerializer.Write(current, writer, true);
-            }
-            writer.Write(new FName("None"));
-        }
+        writer.Write(new FName("None"));
     }
 }
