@@ -35,7 +35,7 @@ public class MaterialSerializer : Serializer<NormalExport>
         PopulateCachedExpressionDataEntries(ref ClassExport.Data);
         SerializeReferencedFunctions(ClassExport.Data, out var functions);
             
-        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
         RefObjects = new List<int>();
         AssetData.Add("AssetObjectData", properties);

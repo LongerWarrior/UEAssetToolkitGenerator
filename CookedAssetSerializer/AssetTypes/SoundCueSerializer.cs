@@ -7,7 +7,7 @@ namespace CookedAssetSerializer.AssetTypes
         public SoundCueSerializer(Settings settings, UAsset asset) : base(settings, asset)
         {
             DisableGeneration.Add("FirstNode");
-            Setup(true);
+            if (!Setup()) return;
             SoundGraphData = new Dictionary<int, List<int>>();
             SerializeAsset(new JProperty("SoundCueGraph", string.Join(Environment.NewLine, ClassExport.GetCueGraph())));
         }

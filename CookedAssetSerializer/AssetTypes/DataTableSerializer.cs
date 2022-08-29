@@ -4,8 +4,9 @@ public class DataTableSerializer : SimpleAssetSerializer<DataTableExport>
 {
     public DataTableSerializer(Settings settings, UAsset asset) : base(settings, asset)
     {
-        Setup(true);
-        SerializeAsset(null, SerializeDataTable(ClassExport.Table));
+        if (!Setup()) return;
+        SerializeAsset(null, SerializeDataTable(ClassExport.Table), null, 
+            null, false, true);
     }
 
     private JProperty SerializeDataTable(UDataTable table) 

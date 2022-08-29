@@ -1,6 +1,5 @@
 ﻿using System.Security.Cryptography;
 
-
 namespace CookedAssetSerializer.AssetTypes;
 
 public class StaticMeshSerializer : Serializer<StaticMeshExport>
@@ -25,7 +24,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         var path2 = Path.ChangeExtension(OutPath, "fbx");
         if (!File.Exists(path2)) 
         {
-            Console.WriteLine("Error. File doesn't exist: " + path2);
+            IsSkipped = true;
             return;
         }
 
@@ -35,7 +34,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         
         //AssignAssetSerializedData();
         
-        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
         RefObjects = new List<int>();
         AssetData.Add("AssetObjectData", properties);
@@ -71,18 +70,9 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
 
         using (var md5 = MD5.Create()) 
         {
-            // TODO: Can probably remove this check as it is already being done above
-            if (File.Exists(path2))
-            {
-                using var stream1 = File.OpenRead(path2);
-                var hash = md5.ComputeHash(stream1).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
-                AssetData.Add("ModelFileHash", hash);
-            } 
-            else 
-            {
-                Console.WriteLine(path2);
-                return;
-            }
+            using var stream1 = File.OpenRead(path2);
+            var hash = md5.ComputeHash(stream1).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
+            AssetData.Add("ModelFileHash", hash);
         }
         
         AssignAssetSerializedData();

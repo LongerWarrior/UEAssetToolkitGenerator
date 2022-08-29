@@ -48,7 +48,7 @@ public class BlendSpaceSerializer : Serializer<BlendSpaceBaseExport>
         };
         PopulateParameters(ref ClassExport.Data, interpolationParameterNames);
         
-        var properties = SerializaListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         AssetData.Add("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset));
         properties.Add("SkeletonGuid", GuidToJson(ClassExport.SkeletonGuid));
         properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct<int>()));

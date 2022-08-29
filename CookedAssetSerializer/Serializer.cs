@@ -5,6 +5,8 @@ namespace CookedAssetSerializer;
 public class Serializer<T> where T: Export
 {
     protected Settings Settings;
+
+    public bool IsSkipped;
     
     protected UAsset Asset;
     private string AssetName;
@@ -37,18 +39,26 @@ public class Serializer<T> where T: Export
         OutPath = Path.Join(Settings.JSONDir, AssetPath) + ".json";
 
         Directory.CreateDirectory(Path.GetDirectoryName(OutPath));
-        if (!Settings.RefreshAssets && File.Exists(OutPath)) return false;
+        if (!Settings.RefreshAssets && File.Exists(OutPath))
+        {
+            IsSkipped = true;
+            return false;
+        }
 
         Asset = new UAsset(fullAssetPath, Settings.GlobalUEVersion, false);
 
-        FixIndexes(Dict, Asset);
+        /*Dict = */FixIndexes(Dict, Asset);
 
         return true;
     }
     
     protected bool SetupAssetInfo()
     {
-        if (Asset.Exports[Asset.mainExport - 1] is RawExport) { Debug.WriteLine("Raw "+Asset.FilePath); return false; }
+        if (Asset.Exports[Asset.mainExport - 1] is RawExport)
+        {
+            Debug.WriteLine("Raw " + Asset.FilePath); 
+            return false;
+        }
         ClassExport = (T)Asset.Exports[Asset.mainExport - 1];
         if (ClassExport == null) return false;
         ClassName = ClassExport.ClassIndex.ToImport(Asset).ObjectName.ToName();

@@ -710,7 +710,7 @@ namespace UAssetGUI
         {
             if (!existsUnsavedChanges) return;
 
-            DialogResult res = MessageBox.Show("Do you want to save your changes?", DisplayVersion, MessageBoxButtons.YesNoCancel);
+            DialogResult res = MessageBox.Show(@"Do you want to save your changes?", DisplayVersion, MessageBoxButtons.YesNoCancel);
             switch(res)
             {
                 case DialogResult.Yes:

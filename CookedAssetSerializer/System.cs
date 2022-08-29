@@ -1,4 +1,6 @@
-﻿namespace CookedAssetSerializer;
+﻿using System.Text;
+
+namespace CookedAssetSerializer;
 
 public class System
 {
@@ -6,10 +8,12 @@ public class System
 
     private int AssetTotal;
     private int AssetCount;
+    StreamWriter Writer;
 
     public System(Settings settings)
     {
         Settings = settings;
+        Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -37,7 +41,7 @@ public class System
         var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
-        AssetCount = 0;
+        AssetCount = 1;
         foreach (var file in files)
         {
             var type = GetAssetType(file, Settings.GlobalUEVersion);
@@ -61,8 +65,9 @@ public class System
             allTypes.Add("\"" + entry.Key + "\",");
         }
 
-        File.WriteAllText(Settings.JSONDir + "\\AssetTypes.json", jTypes.ToString());
-        File.WriteAllText(Settings.JSONDir + "\\AllTypes.txt", string.Join("\n", allTypes));
+        File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
+        File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
+        Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
@@ -85,7 +90,7 @@ public class System
             }
 
             var relativePath = Path.GetRelativePath(Settings.ContentDir, file);
-            var newPath = Path.Combine(Settings.OutputDir, relativePath);
+            var newPath = Path.Combine(Settings.CookedDir, relativePath);
 
             PrintOutput(newPath, "GetCookedAssets");
 
@@ -103,6 +108,7 @@ public class System
             if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
         }
+        Writer.Close();
     }
     
     public void SerializeAssets()
@@ -122,101 +128,130 @@ public class System
                 continue;
             }
 
-            PrintOutput(file, "SerializeAssets");
-
+            bool skip = false;
             if (asset.assetType != EAssetType.Uncategorized)
             {
-                switch (asset.assetType)
+                if (Settings.DummyAssets.Contains(asset.assetType))
                 {
-                    case EAssetType.Blueprint:
-                    case EAssetType.WidgetBlueprint:
-                    case EAssetType.AnimBlueprint:
-                        new BlueprintSerializer(Settings, asset, false);
-                        break;
-                    case EAssetType.DataTable:
-                        new DataTableSerializer(Settings, asset);
-                        break;
-                    case EAssetType.StringTable:
-                        new StringTableSerializer(Settings, asset);
-                        break;
-                    case EAssetType.UserDefinedStruct:
-                        new UserDefinedStructSerializer(Settings, asset);
-                        break;
-                    case EAssetType.BlendSpaceBase:
-                        new BlendSpaceSerializer(Settings, asset);
-                        break;
-                    case EAssetType.AnimMontage:
-                    case EAssetType.CameraAnim:
-                    case EAssetType.LandscapeGrassType:
-                    case EAssetType.MediaPlayer:
-                    case EAssetType.MediaTexture:
-                    case EAssetType.SubsurfaceProfile:
-                        var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                        if (!sas.Setup(false, false)) break;
-                        sas.SerializeAsset();
-                        break;
-                    case EAssetType.Skeleton:
-                        new SkeletonSerializer(Settings, asset);
-                        break;
-                    case EAssetType.MaterialParameterCollection:
-                        new MaterialParameterCollectionSerializer(Settings, asset);
-                        break;
-                    case EAssetType.PhycialMaterial:
-                        new PhysicalMaterialSerializer(Settings, asset);
-                        break;
-                    case EAssetType.Material:
-                        new MaterialSerializer(Settings, asset);
-                        break;
-                    case EAssetType.MaterialInstanceConstant:
-                        new MaterialInstanceConstantSerializer(Settings, asset);
-                        break;
-                    case EAssetType.UserDefinedEnum:
-                        new UserDefinedEnumSerializer(Settings, asset);
-                        break;
-                    case EAssetType.SoundCue:
-                        new SoundCueSerializer(Settings, asset);
-                        break;
-                    case EAssetType.Font:
-                        new FontSerializer(Settings, asset);
-                        break;
-                    case EAssetType.FontFace:
-                        new FontFaceSerializer(Settings, asset);
-                        break;
-                    case EAssetType.CurveBase:
-                        new CurveBaseSerializer(Settings, asset);
-                        break;
-                    case EAssetType.Texture2D:
-                        new Texture2DSerializer(Settings, asset);
-                        break;
-                    case EAssetType.SkeletalMesh:
-                        new SkeletalMeshSerializer(Settings, asset);
-                        break;
-                    case EAssetType.FileMediaSource:
-                        new FileMediaSourceSerializer(Settings, asset);
-                        break;
-                    case EAssetType.StaticMesh:
-                        new StaticMeshSerializer(Settings, asset);
-                        break;
+                    if (Settings.DummyWithProps) skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                    else skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                }
+                else
+                {
+                    switch (asset.assetType)
+                    {
+                        case EAssetType.Blueprint:
+                        case EAssetType.WidgetBlueprint:
+                        case EAssetType.AnimBlueprint:
+                            skip = CheckDeleteAsset(asset, new BlueprintSerializer(Settings, asset, false).IsSkipped);
+                            break;
+                        case EAssetType.DataTable:
+                            skip = CheckDeleteAsset(asset, new DataTableSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.StringTable:
+                            skip = CheckDeleteAsset(asset, new StringTableSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.UserDefinedStruct:
+                            skip = CheckDeleteAsset(asset, new UserDefinedStructSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.BlendSpaceBase:
+                            skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.AnimSequence:
+                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.AnimMontage:
+                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.CameraAnim:
+                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.LandscapeGrassType:
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.MediaPlayer:
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.MediaTexture:
+                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.SubsurfaceProfile:
+                            skip = CheckDeleteAsset(asset, new SubsurfaceProfileSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.Skeleton:
+                            skip = CheckDeleteAsset(asset, new SkeletonSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.MaterialParameterCollection:
+                            skip = CheckDeleteAsset(asset, new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.PhycialMaterial:
+                            skip = CheckDeleteAsset(asset, new PhysicalMaterialSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.Material:
+                            skip = CheckDeleteAsset(asset, new MaterialSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.MaterialInstanceConstant:
+                            skip = CheckDeleteAsset(asset, new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.UserDefinedEnum:
+                            skip = CheckDeleteAsset(asset, new UserDefinedEnumSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.SoundCue:
+                            skip = CheckDeleteAsset(asset, new SoundCueSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.Font:
+                            skip = CheckDeleteAsset(asset, new FontSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.FontFace:
+                            skip = CheckDeleteAsset(asset, new FontFaceSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.CurveBase:
+                            skip = CheckDeleteAsset(asset, new CurveBaseSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.Texture2D:
+                            skip = CheckDeleteAsset(asset, new Texture2DSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.SkeletalMesh:
+                            skip = CheckDeleteAsset(asset, new SkeletalMeshSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.FileMediaSource:
+                            skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(Settings, asset).IsSkipped);
+                            break;
+                        case EAssetType.StaticMesh:
+                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(Settings, asset).IsSkipped);
+                            break;
+                    }
                 }
             }
             else
             {
                 if (asset.mainExport == 0) continue;
-                var aType = GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset);
-                if (!Settings.SimpleAssets.Contains(aType)) continue;
-                var sas = new SimpleAssetSerializer<NormalExport>(Settings, asset);
-                if (!sas.Setup()) continue;
-                sas.SerializeAsset();
+                if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
+                skip = CheckDeleteAsset(asset, new UncategorizedSerializer(Settings, asset).IsSkipped);
             }
+            
+            if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+            else PrintOutput(file, "SerializeAssets");
         }
+        Writer.Close();
+    }
+
+    public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
+    {
+        if (isSkipped && Settings.DeleteAssets.Contains(asset.assetType)) 
+        {
+            File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
+            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
+            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+        }
+        return isSkipped;
     }
 
     private void PrintOutput(string output, string type = "debug")
     {
-        Console.WriteLine(output);
-        var filename = type == "debug" ? "debug" : "output";
-        using var sw = File.AppendText(Path.Combine(Settings.JSONDir, filename + "_log.txt"));
-        sw.WriteLine($"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}");
+        string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
+        Writer.WriteLine(logLine);
+        Writer.Flush();
     }
 
     private string GetAssetType(string file, UE4Version version)
