@@ -37,20 +37,23 @@ public class System
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList();
-        foreach (var file in files)
+        foreach (var dir in files)
         {
-            var type = GetAssetTypeAR(file);
-            if (type == "null") type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+            foreach (var file in dir)
+            {
+                var type = GetAssetTypeAR(file);
+                if (type == "null") type = GetAssetType(file, JSONSettings.GlobalUEVersion);
 
-            var path = "/" + Path.GetRelativePath(JSONSettings.ContentDir, file).Replace("\\", "/");
+                var path = "/" + Path.GetRelativePath(JSONSettings.ContentDir, file).Replace("\\", "/");
 
-            PrintOutput(path, "Scan");
-            AssetCount++;
+                PrintOutput(path, "Scan");
+                AssetCount++;
 
-            if (types.ContainsKey(type)) types[type].Add(path);
-            else types[type] = new List<string> { path };
+                if (types.ContainsKey(type)) types[type].Add(path);
+                else types[type] = new List<string> { path };
 
-            if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
+                if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
+            }
         }
         PrintOutput("Find all files " + files.Count, "Scan");
         var jTypes = new JObject();
@@ -109,50 +112,56 @@ public class System
     public void GetCookedAssets(bool copy = true)
     {
         var files = MakeFileList();
-        foreach (var file in files)
+        foreach (var dir in files)
         {
-            var uexpFile = Path.ChangeExtension(file, "uexp");
-            var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetTypeAR(file);
-            if (type == "null") {
-                Debug.WriteLine(file);
-                type = GetAssetType(file, JSONSettings.GlobalUEVersion);
-            }
-
-            AssetCount++;
-            if (!JSONSettings.TypesToCopy.Contains(type))
+            foreach (var file in dir)
             {
-                PrintOutput("Skipped operation on " + file, "GetCookedAssets");
-                continue;
+                var uexpFile = Path.ChangeExtension(file, "uexp");
+                var ubulkFile = Path.ChangeExtension(file, "ubulk");
+                var type = GetAssetTypeAR(file);
+                if (type == "null") {
+                    Debug.WriteLine(file);
+                    type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+                }
+    
+                AssetCount++;
+                if (!JSONSettings.TypesToCopy.Contains(type))
+                {
+                    PrintOutput("Skipped operation on " + file, "GetCookedAssets");
+                    continue;
+                }
+    
+                var relativePath = Path.GetRelativePath(JSONSettings.ContentDir, file);
+                var newPath = Path.Combine(JSONSettings.CookedDir, relativePath);
+    
+                PrintOutput(newPath, "GetCookedAssets");
+    
+                Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
+    
+                if (File.Exists(uexpFile))
+                {
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                }
+    
+                if (!File.Exists(ubulkFile)) continue;
+                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             }
-
-            var relativePath = Path.GetRelativePath(JSONSettings.ContentDir, file);
-            var newPath = Path.Combine(JSONSettings.CookedDir, relativePath);
-
-            PrintOutput(newPath, "GetCookedAssets");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
-            if (copy) File.Copy(file, newPath, true);
-            else File.Move(file, newPath, true);
-
-            if (File.Exists(uexpFile))
-            {
-                if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-            }
-
-            if (!File.Exists(ubulkFile)) continue;
-            if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-            else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+            
         }
     }
     
     public void SerializeAssets()
     {
         var files = MakeFileList();
-        foreach (var file in files)
+        foreach (var dir in files)
         {
-            UAsset asset = new UAsset(file, JSONSettings.GlobalUEVersion, true);
+            foreach (var file in dir)
+            {
+                UAsset asset = new UAsset(file, JSONSettings.GlobalUEVersion, true);
             AssetCount++;
 
             if (JSONSettings.SkipSerialization.Contains(asset.assetType))
@@ -265,21 +274,23 @@ public class System
             
             if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
             else PrintOutput(file, "SerializeAssets");
+            }
         }
     }
 
-    private List<string> MakeFileList()
+    private List<string[]> MakeFileList()
     {
-        var files = new List<string>();
+        List<string[]> ret = new List<string[]>();
         AssetTotal = 0;
         AssetCount = 1;
-        for (var dir = 0; dir < JSONSettings.ParseDir.Length; dir++)
+        foreach (var dir in JSONSettings.ParseDir)
         {
-            files.Append<>(Directory.GetFiles(JSONSettings.ParseDir[dir], "*.uasset", SearchOption.TopDirectoryOnly));
-            AssetTotal += files[dir].Length;
+            var files = Directory.GetFiles(dir, "*.uasset", SearchOption.TopDirectoryOnly);
+            ret.Add(files);
+            AssetTotal += files.Length;
         }
 
-        return files;
+        return ret;
     }
 
     private bool CheckDeleteAsset(UAsset asset, bool isSkipped)
@@ -345,7 +356,8 @@ public class System
         if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
         var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
 
-        if (AssetList.ContainsKey(AssetPath)) {
+        if (AssetList.ContainsKey(AssetPath)) 
+        {
             var artype = AssetList[AssetPath].AssetClass;
             return artype;
         }
