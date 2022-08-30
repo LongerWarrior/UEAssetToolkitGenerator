@@ -1,5 +1,8 @@
 ﻿using System.Text;
 
+using System.Diagnostics;
+using Serilog;
+
 namespace CookedAssetSerializer;
 
 public class System
@@ -8,12 +11,12 @@ public class System
 
     private int AssetTotal;
     private int AssetCount;
-    StreamWriter Writer;
+    //StreamWriter Writer;
 
     public System(JSONSettings jsonsettings)
     {
         JSONSettings = jsonsettings;
-        Writer = File.AppendText(Path.Combine(JSONSettings.InfoDir, "output_log.txt"));
+        //Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -41,10 +44,13 @@ public class System
         var files = Directory.GetFiles(JSONSettings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
-        AssetCount = 1;
+        AssetCount = 0;
         foreach (var file in files)
         {
-            var type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+            var type = GetAssetTypeAR(file);
+            if (type == "null")
+                type = GetAssetType(file, JSONSettings.GlobalUEVersion, true);
+
             var path = "/" + Path.GetRelativePath(JSONSettings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
@@ -55,7 +61,6 @@ public class System
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
         }
-
         PrintOutput("Find all files " + files.Length, "Scan");
         var jTypes = new JObject();
         foreach (var entry in types)
@@ -67,7 +72,7 @@ public class System
 
         File.WriteAllText(JSONSettings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(JSONSettings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
-        Writer.Close();
+        //Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
@@ -80,7 +85,11 @@ public class System
         {
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+            var type = GetAssetTypeAR(file);
+            if (type == "null") {
+                Debug.WriteLine(file);
+                type = GetAssetType(file, JSONSettings.GlobalUEVersion, true);
+            }
 
             AssetCount++;
             if (!JSONSettings.TypesToCopy.Contains(type))
@@ -108,7 +117,7 @@ public class System
             if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
         }
-        Writer.Close();
+        //Writer.Close();
     }
     
     public void SerializeAssets()
@@ -233,7 +242,7 @@ public class System
             if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
             else PrintOutput(file, "SerializeAssets");
         }
-        Writer.Close();
+        //Writer.Close();
     }
 
     public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
@@ -249,18 +258,19 @@ public class System
 
     private void PrintOutput(string output, string type = "debug")
     {
-        string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
-        Writer.WriteLine(logLine);
-        Writer.Flush();
+        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
+        Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
+        //Writer.WriteLine(logLine);
+        //Writer.Flush();
     }
 
-    private string GetAssetType(string file, UE4Version version)
+    private string GetAssetType(string file, UE4Version version, bool shortname = true)
     {
         var name = Path.GetFileNameWithoutExtension(file).ToLower();
         UAsset asset = new UAsset(file, version, true);
         if (asset.Exports.Count == 1)
         {
-            return GetFullName(asset.Exports[0].ClassIndex.Index, asset);
+            return shortname ? GetName(asset.Exports[0].ClassIndex.Index, asset) : GetFullName(asset.Exports[0].ClassIndex.Index, asset);
         }
 
         List<Export> exportnames = new();
@@ -281,15 +291,32 @@ public class System
 
         if (exportnames.Count == 1)
         {
-            return GetFullName(exportnames[0].ClassIndex.Index, asset);
+            return shortname ? GetName(exportnames[0].ClassIndex.Index, asset): GetFullName(exportnames[0].ClassIndex.Index, asset);
         }
 
         if (isasset.Count == 1)
         {
-            return GetFullName(isasset[0].ClassIndex.Index, asset);
+            return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
         }
+        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
+        //Console.WriteLine("Couldn't identify asset type : " + file);
+        return "null";
+    }
 
-        Console.WriteLine("Couldn't identify asset type : " + file);
+    private string GetAssetTypeAR(string fullAssetPath) {
+        if (AssetList.Count == 0) return "null";
+
+        var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
+        var directory = Path.GetDirectoryName(fullAssetPath);
+        var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
+        if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
+        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
+
+        if (AssetList.ContainsKey(AssetPath)) {
+            var artype = AssetList[AssetPath].AssetClass;
+            return artype;
+        }
+        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type with AR: " + fullAssetPath);
         return "null";
     }
 }

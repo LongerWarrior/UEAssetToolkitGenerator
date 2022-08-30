@@ -60,8 +60,7 @@ public class SkeletonExport : NormalExport {
         byte ClassStripFlags = reader.ReadByte();
 
         if (!((GlobalStripFlags & 1) != 0)) {
-            //ExistingMarkerNames = Ar.ReadArray(Ar.ReadFName);
-            throw new NotImplementedException("ExistingMarkerNames not implemented");
+            ExistingMarkerNames = reader.ReadArray(reader.ReadFName);
         }
 
     }

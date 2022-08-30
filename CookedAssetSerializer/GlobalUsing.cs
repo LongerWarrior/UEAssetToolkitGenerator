@@ -9,4 +9,5 @@ global using UAssetAPI.PropertyTypes;
 global using UAssetAPI.StructTypes;
 global using CookedAssetSerializer.AssetTypes;
 global using static CookedAssetSerializer.SerializationUtils;
+global using static UAssetAPI.AssetRegistry.ARData;
 
