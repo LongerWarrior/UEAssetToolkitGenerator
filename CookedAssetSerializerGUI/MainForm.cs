@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using CookedAssetSerializer;
+using CookedAssetSerializer.NativizedAssets;
 using CookedAssetSerializerGUI.Properties;
-using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
 using static System.Windows.Forms.Design.AxImporter;
@@ -134,11 +134,11 @@ public partial class MainForm : Form
         "Exclusive"
     };
 
-    private readonly EBlueprintNativizationMethod[] nativMethodValues =
+    private readonly ENativizationMethod[] nativMethodValues =
     {
-        EBlueprintNativizationMethod.Disabled,
-        EBlueprintNativizationMethod.Inclusive,
-        EBlueprintNativizationMethod.Exclusive
+        ENativizationMethod.Disabled,
+        ENativizationMethod.Inclusive,
+        ENativizationMethod.Exclusive
     };
 
     #endregion
@@ -415,7 +415,7 @@ public partial class MainForm : Form
         jsonsettings = new JSONSettings
         {
             ContentDir = rtxtContentDir.Text,
-            ParseDir = rtxtParseDir.Text,
+            //ParseDir = rtxtParseDir.Text,
             JSONDir = rtxtJSONDir.Text,
             CookedDir = rtxtCookedDir.Text,
             InfoDir = rtxtInfoDir.Text,
@@ -441,7 +441,7 @@ public partial class MainForm : Form
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
             rtxtContentDir.Text = jsonsettings.ContentDir;
-            rtxtParseDir.Text = jsonsettings.ParseDir;
+            //rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
             rtxtCookedDir.Text = jsonsettings.CookedDir;
             rtxtInfoDir.Text = jsonsettings.InfoDir;

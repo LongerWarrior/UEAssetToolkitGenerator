@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
 
-namespace NativizedAssets;
+namespace CookedAssetSerializer.NativizedAssets;
 
-public enum EBlueprintNativizationMethod
+public enum ENativizationMethod
 {
-
     [Description("Disable Blueprint nativization (default).")]
     Disabled,
 
