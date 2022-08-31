@@ -602,11 +602,16 @@ public partial class MainForm : Form
     {
         ValidateContentDir();
     }
+    
     private void ValidateContentDir()
     {
-        if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text))
+        if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && !string.IsNullOrEmpty(lastValidContentDir))
         {
             rtxtContentDir.Text = lastValidContentDir;
+        }
+        else if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && string.IsNullOrEmpty(lastValidContentDir))
+        {
+            return;
         }
         lastValidContentDir = rtxtContentDir.Text;
         treeParseDir.Nodes.Clear();
