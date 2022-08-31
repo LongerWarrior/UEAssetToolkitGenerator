@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CookedAssetSerializer;
+using CookedAssetSerializer.NativizedAssets;
 using CookedAssetSerializerGUI.Properties;
 using ExtendedTreeView;
 using NativizedAssets;
@@ -21,7 +22,8 @@ public partial class MainForm : Form
         InitializeComponent();
         SetupForm();
         SetupGlobals();
-               
+
+        
 
         //new GenerateBPY();
 
@@ -121,11 +123,11 @@ public partial class MainForm : Form
         "Exclusive"
     };
 
-    private readonly EBlueprintNativizationMethod[] nativMethodValues =
+    private readonly ENativizationMethod[] nativMethodValues =
     {
-        EBlueprintNativizationMethod.Disabled,
-        EBlueprintNativizationMethod.Inclusive,
-        EBlueprintNativizationMethod.Exclusive
+        ENativizationMethod.Disabled,
+        ENativizationMethod.Inclusive,
+        ENativizationMethod.Exclusive
     };
 
     #endregion
@@ -402,7 +404,7 @@ public partial class MainForm : Form
         jsonsettings = new JSONSettings
         {
             ContentDir = rtxtContentDir.Text,
-            ParseDir = rtxtParseDir.Text,
+            //ParseDir = rtxtParseDir.Text,
             JSONDir = rtxtJSONDir.Text,
             CookedDir = rtxtCookedDir.Text,
             InfoDir = rtxtInfoDir.Text,
@@ -428,7 +430,7 @@ public partial class MainForm : Form
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
             rtxtContentDir.Text = jsonsettings.ContentDir;
-            rtxtParseDir.Text = jsonsettings.ParseDir;
+            //rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
             rtxtCookedDir.Text = jsonsettings.CookedDir;
             rtxtInfoDir.Text = jsonsettings.InfoDir;
@@ -616,7 +618,6 @@ public partial class MainForm : Form
         if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
         rtxtParseDir.Text = rtxtContentDir.Text;
     }
-
 
     private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
     {
@@ -868,7 +869,6 @@ public partial class MainForm : Form
     {
         // Get all subdirectories  
         string[] subdirectoryEntries = Directory.GetDirectories(dir);
-
         // Loop through them to see if they have any other subdirectories  
         foreach (string subdirectory in subdirectoryEntries)
         {
