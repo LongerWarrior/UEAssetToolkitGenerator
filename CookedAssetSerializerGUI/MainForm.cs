@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using CookedAssetSerializer;
 using CookedAssetSerializer.NativizedAssets;
@@ -7,7 +6,6 @@ using CookedAssetSerializerGUI.Properties;
 using ExtendedTreeView;
 using Newtonsoft.Json;
 using UAssetAPI;
-using UAssetAPI.Kismet.Bytecode.Expressions;
 
 namespace CookedAssetSerializerGUI;
 
@@ -406,9 +404,9 @@ public partial class MainForm : Form
 
     private List<string> GetRelativeMinFileList()
     {
-        if (treeParseDir.Nodes.Count == 0) return new();
+        if (treeParseDir.ContentNode is null) return new();
         var res = new List<string>();
-        foreach(var path in treeParseDir.Nodes[0].GatherMinFileList())
+        foreach(var path in treeParseDir.ContentNode.GatherMinFileList())
         {
             res.Add(Path.GetRelativePath(rtxtContentDir.Text, path));
         }
@@ -807,21 +805,21 @@ public partial class MainForm : Form
     }
     private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
     {
-           // Get the node at the current mouse pointer location.  
-           TreeNode theNode = this.treeParseDir.GetNodeAt(e.X, e.Y);  
+           //// Get the node at the current mouse pointer location.  
+           //TreeNode theNode = this.treeParseDir.GetNodeAt(e.X, e.Y);  
   
-           // Set a ToolTip only if the mouse pointer is actually paused on a node.  
-           if (theNode != null && theNode.Tag != null)  
-           {  
-               // Change the ToolTip only if the pointer moved to a new node.  
-               if (theNode.Tag.ToString() != this.tTipTree.GetToolTip(this.treeParseDir))  
-                   this.tTipTree.SetToolTip(this.treeParseDir, theNode.Tag.ToString());
+           //// Set a ToolTip only if the mouse pointer is actually paused on a node.  
+           //if (theNode != null && theNode.Name != null)  
+           //{  
+           //    // Change the ToolTip only if the pointer moved to a new node.  
+           //    if (theNode.Name != this.tTipTree.GetToolTip(this.treeParseDir))  
+           //        this.tTipTree.SetToolTip(this.treeParseDir, theNode.Name);
 
-           }  
-           else     // Pointer is not over a node so clear the ToolTip.  
-           {  
-               this.tTipTree.SetToolTip(this.treeParseDir, "");
-           }   
+           //}  
+           //else     // Pointer is not over a node so clear the ToolTip.  
+           //{  
+           //    this.tTipTree.SetToolTip(this.treeParseDir, "");
+           //}   
     }
 
     private void LoadFiles(string dir, TreeNode td)
@@ -834,13 +832,14 @@ public partial class MainForm : Form
             foreach (string file in Files)
             {
                 TreeNode tds = td.Nodes.Add(Path.GetFileName(file));
-                tds.Tag = file;
+                tds.Name = file;
                 tds.StateImageIndex = 1;
                 tds.Checked = td.Checked;
             }
         }
         catch (Exception e)
         {
+            // TODO : Add output message and Log
             //Debug.WriteLine(e);
         }
     }
@@ -857,12 +856,13 @@ public partial class MainForm : Form
             {
                 TreeNode tds = td.Nodes.Add(Path.GetFileName(subdirectory));
                 tds.StateImageIndex = 0;
-                tds.Tag = subdirectory;
+                tds.Name = subdirectory;
                 tds.Checked = td.Checked;
             }
         }
         catch (Exception e)
         {
+            // TODO : Add output message and Log
             //Debug.WriteLine(e);
         }
     }
@@ -871,7 +871,7 @@ public partial class MainForm : Form
     {
         treeParseDir.BeginUpdate();
         TreeNode tds = treeParseDir.Nodes.Add(Path.GetFileName(Dir));
-        tds.Tag = Dir;
+        tds.Name = Dir;
         tds.Checked = check;
         tds.StateImageIndex = 0;
         LoadSubDirectories(Dir, tds);
@@ -882,9 +882,7 @@ public partial class MainForm : Form
 
     private void SetupTreeView(List<string> parseDir, string contentDir)
     {
-
         treeParseDir.Nodes.Clear();
-        
 
         //Only Content dir
         if (parseDir.Count == 1 && parseDir[0] == ".")
@@ -894,9 +892,7 @@ public partial class MainForm : Form
         }
 
         LoadDirectory(contentDir, false);
-        treeParseDir.Nodes[0].Checked = false;
         if (parseDir.Count == 0) return;
-
 
         var _fullpaths = new string[parseDir.Count];
         for (int i = 0; i < parseDir.Count; i++)
@@ -904,8 +900,7 @@ public partial class MainForm : Form
         var fullpaths = _fullpaths.ToList();
         treeParseDir.BeginUpdate();
 
-        var topnode = treeParseDir.Nodes[0];
-        LoadChildrenNodes(fullpaths, topnode);
+        LoadChildrenNodes(fullpaths, treeParseDir.ContentNode!);
         treeParseDir.EndUpdate();
     }
 
@@ -913,15 +908,15 @@ public partial class MainForm : Form
     {
         foreach (var node in topnode.Children(false))
         {
-            var nodepath = node.Tag.ToString();
+            var nodepath = node.Name;
             if (fullpaths.Contains(nodepath))
             {
                 fullpaths.Remove(nodepath);
                 node.Checked = true;
-                if (!node.Tag.ToString().EndsWith("uasset"))
+                if (!node.Name.EndsWith("uasset"))
                 {
-                    LoadSubDirectories((string)node.Tag, node);
-                    LoadFiles((string)node.Tag, node);
+                    LoadSubDirectories(node.Name, node);
+                    LoadFiles(node.Name, node);
                 }
 
                 foreach (var p in node.Parents())
@@ -931,10 +926,10 @@ public partial class MainForm : Form
             {
                 var subfullpaths = fullpaths.Where(s => IsSubPathOf(s, nodepath)).ToList();
                 fullpaths = fullpaths.Except(subfullpaths).ToList();
-                if (!node.Tag.ToString().EndsWith("uasset"))
+                if (!node.Name.EndsWith("uasset"))
                 {
-                    LoadSubDirectories((string)node.Tag, node);
-                    LoadFiles((string)node.Tag, node);
+                    LoadSubDirectories(node.Name, node);
+                    LoadFiles(node.Name, node);
                 }
                 LoadChildrenNodes(subfullpaths, node);
             }
@@ -950,7 +945,7 @@ public partial class MainForm : Form
         {
             foreach (var path in fullpaths)
             {
-                Debug.WriteLine("Node: "+topnode.Tag.ToString());
+                Debug.WriteLine("Node: "+topnode.Name);
                 Debug.WriteLine(path);
             }
         }
@@ -1066,19 +1061,13 @@ public partial class MainForm : Form
         {
             if (node.Nodes.Count == 0)
             {
-                if (!((string)node.Tag).EndsWith("uasset"))
+                if (!node.Name.EndsWith("uasset"))
                 {
-                    LoadSubDirectories((string)node.Tag, node);
-                    LoadFiles((string)node.Tag, node);
+                    LoadSubDirectories(node.Name, node);
+                    LoadFiles(node.Name, node);
                 }
             }
         }         
-    }
-
-    public void GatherCheckedFiles(object sender, EventArgs e)
-    {
-        //system.Files = treeParseDir.Nodes.Count !=0 ? treeParseDir.Nodes[0]?.GatherAllFiles() ?? new() : new();
-        //system.Files = treeParseDir.Nodes.Count !=0 ? treeParseDir.Nodes[0]?.GatherMinFileList() ?? new() : new();
     }
 
     private void treeParseDir_MouseDown(object sender, MouseEventArgs e)
@@ -1088,15 +1077,13 @@ public partial class MainForm : Form
             // Get the node at the current mouse pointer location.  
             TreeNode theNode = treeParseDir.GetNodeAt(e.X, e.Y);
 
-            // Set a ToolTip only if the mouse pointer is actually paused on a node.  
-            if (theNode != null)
+            if (theNode is not null)
             {
                 theNode.TreeView.SelectedNode = theNode;
             }
             else
             {
-                if(treeParseDir.Nodes.Count != 0)
-                    treeParseDir.SelectedNode =  treeParseDir.Nodes[0];
+                treeParseDir.SelectedNode =  treeParseDir.ContentNode;
             }
 
         }
@@ -1113,22 +1100,6 @@ public partial class MainForm : Form
             p.Checked = p.Nodes.OfType<TreeNode>().Any(n => n.Checked);
     }
 
-    //private void cntxtTreeParse_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-    //{
-    //    if (treeParseDir.Nodes.Count!=0 && treeParseDir.SelectedNode == treeParseDir.Nodes[0])
-    //    {
-    //        if (cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
-    //        foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
-    //            menuitem.Text += " All";
-    //    }
-    //    else
-    //    {
-    //        if (!cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
-    //        foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
-    //            menuitem.Text = menuitem.Text.Replace(" All","");
-    //    }
-    //}
-
     private void cntxtMainStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
 
@@ -1136,7 +1107,7 @@ public partial class MainForm : Form
 
     private void copyPathToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Clipboard.SetText(treeParseDir.SelectedNode?.Tag.ToString());
+        Clipboard.SetText(treeParseDir.SelectedNode?.Name);
     }
 
     private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1146,7 +1117,7 @@ public partial class MainForm : Form
 
     private void openSelectedTreeNode()
     {
-        var path = treeParseDir.SelectedNode?.Tag.ToString();
+        var path = treeParseDir.SelectedNode?.Name;
         if (path is not null && path.EndsWith("uasset")) path = Path.GetDirectoryName(path);
         if (!Directory.Exists(path)) return;
 
@@ -1158,12 +1129,6 @@ public partial class MainForm : Form
         Process.Start(startInfo);
     }
 
-
-    private void treeParseDir_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-    {
-
-    }
-
     private void treeParseDir_KeyDown(object sender, KeyEventArgs e)
     {
         var snode = treeParseDir.SelectedNode;
@@ -1171,7 +1136,7 @@ public partial class MainForm : Form
 
         switch (e.KeyCode)
         {
-            case Keys.C: Clipboard.SetText(treeParseDir.SelectedNode?.Tag.ToString()); break;
+            case Keys.C: Clipboard.SetText(treeParseDir.SelectedNode?.Name); break;
             case Keys.O: openSelectedTreeNode(); break;
             case Keys.S: colllapseSelectedTreeNode(); break;
             case Keys.E: expandSelectedTreeNode(); break;

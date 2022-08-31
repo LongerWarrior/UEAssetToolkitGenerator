@@ -1,7 +1,10 @@
-﻿namespace CookedAssetSerializerGUI;
+﻿using System.Xml.Linq;
+
+namespace CookedAssetSerializerGUI;
 
 static class TreeViewExtensions
 {
+    private static TreeNode? ContentNode(this TreeView tree) => tree.Nodes.Count != 0 ? tree.Nodes[0] : null; 
     public static IEnumerable<TreeNode> Children(this TreeNode node, bool fulltree = true)
     {
         foreach (TreeNode n in node.Nodes)
@@ -36,7 +39,7 @@ static class TreeViewExtensions
         {
             if (node.Checked && node.Nodes.Count == 0)
             {
-                var path = node.Tag.ToString() ?? ""; //just to be safe
+                var path = node.Name ?? ""; //just to be safe
                 if (path.EndsWith("uasset"))
                 {
                     files.Add(path);
@@ -69,7 +72,7 @@ static class TreeViewExtensions
 
         if (savedir)
         {
-            files.Add(topnode.Tag.ToString());
+            files.Add(topnode.Name);
             return files;
         }
 

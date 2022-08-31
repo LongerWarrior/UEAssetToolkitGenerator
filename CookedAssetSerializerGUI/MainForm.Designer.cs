@@ -200,6 +200,7 @@ partial class MainForm {
             this.treeParseDir.Location = new System.Drawing.Point(0, 7);
             this.treeParseDir.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.treeParseDir.Name = "treeParseDir";
+            this.treeParseDir.ShowNodeToolTips = true;
             this.treeParseDir.Size = new System.Drawing.Size(247, 704);
             this.treeParseDir.TabIndex = 2;
             this.treeParseDir.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeParseDir_AfterCheck);
@@ -207,7 +208,6 @@ partial class MainForm {
             this.treeParseDir.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeParseDir_KeyDown);
             this.treeParseDir.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseDown);
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
-            this.treeParseDir.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.treeParseDir_PreviewKeyDown);
             // 
             // cntxtTreeParse
             // 
