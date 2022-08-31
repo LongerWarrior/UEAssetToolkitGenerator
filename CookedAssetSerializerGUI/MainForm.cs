@@ -32,7 +32,7 @@ public partial class MainForm : Form
 
         InitializeComponent();
         SetupForm();
-        /*SetupGlobals();*/
+        SetupGlobals();
 
         
 
