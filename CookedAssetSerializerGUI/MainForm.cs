@@ -4,7 +4,6 @@ using CookedAssetSerializer;
 using CookedAssetSerializer.NativizedAssets;
 using CookedAssetSerializerGUI.Properties;
 using ExtendedTreeView;
-using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
 
@@ -22,8 +21,6 @@ public partial class MainForm : Form
         InitializeComponent();
         SetupForm();
         SetupGlobals();
-
-        
 
         //new GenerateBPY();
 
