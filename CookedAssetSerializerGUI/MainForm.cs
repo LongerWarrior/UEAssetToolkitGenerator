@@ -605,11 +605,11 @@ public partial class MainForm : Form
     
     private void ValidateContentDir()
     {
-        if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && !string.IsNullOrEmpty(lastValidContentDir))
+        if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && Directory.Exists(lastValidContentDir))
         {
             rtxtContentDir.Text = lastValidContentDir;
         }
-        else if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && string.IsNullOrEmpty(lastValidContentDir))
+        else if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && !Directory.Exists(lastValidContentDir))
         {
             return;
         }
