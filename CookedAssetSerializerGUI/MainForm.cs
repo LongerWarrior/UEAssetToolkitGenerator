@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using CookedAssetSerializer;
 using CookedAssetSerializer.NativizedAssets;
@@ -6,6 +7,7 @@ using CookedAssetSerializerGUI.Properties;
 using ExtendedTreeView;
 using Newtonsoft.Json;
 using UAssetAPI;
+using UAssetAPI.Kismet.Bytecode.Expressions;
 
 namespace CookedAssetSerializerGUI;
 
@@ -227,12 +229,12 @@ public partial class MainForm : Form
 
     private void SetupForm()
     {
-        /*rtxtContentDir.Text = Environment.CurrentDirectory;
+        rtxtContentDir.Text = Environment.CurrentDirectory;
+        LoadDirectory(Environment.CurrentDirectory);
         lastValidContentDir = Environment.CurrentDirectory;
-        rtxtParseDir.Text = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
         rtxtCookedDir.Text = Environment.CurrentDirectory;
-        rtxtInfoDir.Text = Environment.CurrentDirectory;*/
+        rtxtInfoDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
@@ -256,6 +258,7 @@ public partial class MainForm : Form
         };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
+
     }
 
     private void SetDialogDirectories()
@@ -336,25 +339,6 @@ public partial class MainForm : Form
         }
     }
 
-
-    private void rtxtParseDir_Leave(object sender, EventArgs e)
-    {
-        if (rtxtParseDir.Text.Length == 0)
-        {
-            rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
-            rtxtParseDir.ForeColor = SystemColors.GrayText;
-        }
-    }
-
-    private void rtxtParseDir_Enter(object sender, EventArgs e)
-    {
-        if (rtxtParseDir.Text == "C:\\ExamplePath\\Content\\Data")
-        {
-            rtxtParseDir.Text = "";
-            rtxtParseDir.ForeColor = SystemColors.WindowText;
-        }
-    }
-
     private string[] SanitiseInputs(string[] lines)
     {
         for (var i = 0; i < lines.Length; i++)
@@ -401,7 +385,7 @@ public partial class MainForm : Form
         jsonsettings = new JSONSettings
         {
             ContentDir = rtxtContentDir.Text,
-            //ParseDir = rtxtParseDir.Text,
+            ParseDir = GetRelativeMinFileList(),
             JSONDir = rtxtJSONDir.Text,
             CookedDir = rtxtCookedDir.Text,
             InfoDir = rtxtInfoDir.Text,
@@ -420,6 +404,17 @@ public partial class MainForm : Form
         system = new CookedAssetSerializer.System(jsonsettings);
     }
 
+    private List<string> GetRelativeMinFileList()
+    {
+        if (treeParseDir.Nodes.Count == 0) return new();
+        var res = new List<string>();
+        foreach(var path in treeParseDir.Nodes[0].GatherMinFileList())
+        {
+            res.Add(Path.GetRelativePath(rtxtContentDir.Text, path));
+        }
+        return res;
+    }
+
     private void LoadJSONSettings()
     {
         
@@ -427,12 +422,13 @@ public partial class MainForm : Form
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
             rtxtContentDir.Text = jsonsettings.ContentDir;
+            SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
             //rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
             rtxtCookedDir.Text = jsonsettings.CookedDir;
             rtxtInfoDir.Text = jsonsettings.InfoDir;
         }
-
+        
         cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
         chkRefreshAssets.Checked = jsonsettings.RefreshAssets;
         chkDummyWithProps.Checked = jsonsettings.DummyWithProps;
@@ -579,21 +575,9 @@ public partial class MainForm : Form
         }
     }
 
-    private void ValidateParseDir(object sender, System.ComponentModel.CancelEventArgs e)
-    {
-        if (string.IsNullOrEmpty(rtxtParseDir.Text))
-        {
-            rtxtParseDir.Text = rtxtContentDir.Text;
-            return;
-        }
-
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
-    }
-
     private static bool IsSubPathOf(string subPath, string basePath)
     {
-        if (!Directory.Exists(subPath)) return false;
+        //if (!Directory.Exists(subPath)) return false;
         var rel = Path.GetRelativePath(basePath, subPath);
         return !rel.StartsWith('.') && !Path.IsPathRooted(rel);
     }
@@ -611,9 +595,6 @@ public partial class MainForm : Form
         lastValidContentDir = rtxtContentDir.Text;
         treeParseDir.Nodes.Clear();
         LoadDirectory(rtxtContentDir.Text);
-        
-        if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
-        rtxtParseDir.Text = rtxtContentDir.Text;
     }
 
     private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
@@ -803,11 +784,6 @@ public partial class MainForm : Form
         SaveJSONSettings();
     }
 
-    private void btnSelectParseDir_Click(object sender, EventArgs e) 
-    {
-        rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
-    }
-
     private void btnInfoDir_Click(object sender, EventArgs e)
     {
         rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
@@ -850,43 +826,139 @@ public partial class MainForm : Form
 
     private void LoadFiles(string dir, TreeNode td)
     {
-        string[] Files = Directory.GetFiles(dir, "*.uasset");
-
-        // Loop through them to see files  
-        foreach (string file in Files)
+        string[] Files = Array.Empty<string>();
+        try
         {
-            TreeNode tds = td.Nodes.Add(Path.GetFileName(file));
-            tds.Tag = file;
-            tds.StateImageIndex = 1;
-            tds.Checked = td.Checked;
+           Files = Directory.GetFiles(dir, "*.uasset");
+            // Loop through them to see files  
+            foreach (string file in Files)
+            {
+                TreeNode tds = td.Nodes.Add(Path.GetFileName(file));
+                tds.Tag = file;
+                tds.StateImageIndex = 1;
+                tds.Checked = td.Checked;
+            }
+        }
+        catch (Exception e)
+        {
+            //Debug.WriteLine(e);
         }
     }
 
     private void LoadSubDirectories(string dir, TreeNode td)
     {
         // Get all subdirectories  
-        string[] subdirectoryEntries = Directory.GetDirectories(dir);
-        // Loop through them to see if they have any other subdirectories  
-        foreach (string subdirectory in subdirectoryEntries)
+        string[] subdirectoryEntries = Array.Empty<string>();
+        try
         {
-            TreeNode tds = td.Nodes.Add(Path.GetFileName(subdirectory));
-            tds.StateImageIndex = 0;
-            tds.Tag = subdirectory;
-            tds.Checked = td.Checked; 
+            subdirectoryEntries = Directory.GetDirectories(dir);
+            // Loop through them to see if they have any other subdirectories  
+            foreach (string subdirectory in subdirectoryEntries)
+            {
+                TreeNode tds = td.Nodes.Add(Path.GetFileName(subdirectory));
+                tds.StateImageIndex = 0;
+                tds.Tag = subdirectory;
+                tds.Checked = td.Checked;
+            }
+        }
+        catch (Exception e)
+        {
+            //Debug.WriteLine(e);
         }
     }
 
-    public void LoadDirectory(string Dir)
+    public void LoadDirectory(string Dir, bool check = true)
     {
         treeParseDir.BeginUpdate();
         TreeNode tds = treeParseDir.Nodes.Add(Path.GetFileName(Dir));
         tds.Tag = Dir;
-        tds.Checked = true;
+        tds.Checked = check;
         tds.StateImageIndex = 0;
         LoadSubDirectories(Dir, tds);
         LoadFiles(Dir, tds);
-        treeParseDir.SelectedNode = treeParseDir.TopNode;
+        treeParseDir.SelectedNode = tds;
         treeParseDir.EndUpdate();
+    }
+
+    private void SetupTreeView(List<string> parseDir, string contentDir)
+    {
+
+        treeParseDir.Nodes.Clear();
+        
+
+        //Only Content dir
+        if (parseDir.Count == 1 && parseDir[0] == ".")
+        {
+            LoadDirectory(contentDir);
+            return;
+        }
+
+        LoadDirectory(contentDir, false);
+        treeParseDir.Nodes[0].Checked = false;
+        if (parseDir.Count == 0) return;
+
+
+        var _fullpaths = new string[parseDir.Count];
+        for (int i = 0; i < parseDir.Count; i++)
+            _fullpaths[i] = Path.Combine(contentDir, parseDir[i]);
+        var fullpaths = _fullpaths.ToList();
+        treeParseDir.BeginUpdate();
+
+        var topnode = treeParseDir.Nodes[0];
+        LoadChildrenNodes(fullpaths, topnode);
+        treeParseDir.EndUpdate();
+    }
+
+    private void LoadChildrenNodes(List<string> fullpaths, TreeNode topnode)
+    {
+        foreach (var node in topnode.Children(false))
+        {
+            var nodepath = node.Tag.ToString();
+            if (fullpaths.Contains(nodepath))
+            {
+                fullpaths.Remove(nodepath);
+                node.Checked = true;
+                if (!node.Tag.ToString().EndsWith("uasset"))
+                {
+                    LoadSubDirectories((string)node.Tag, node);
+                    LoadFiles((string)node.Tag, node);
+                }
+
+                foreach (var p in node.Parents())
+                    p.Checked = true;
+            }
+            else if (fullpaths.Any(s => IsSubPathOf(s, nodepath)))
+            {
+                var subfullpaths = fullpaths.Where(s => IsSubPathOf(s, nodepath)).ToList();
+                fullpaths = fullpaths.Except(subfullpaths).ToList();
+                if (!node.Tag.ToString().EndsWith("uasset"))
+                {
+                    LoadSubDirectories((string)node.Tag, node);
+                    LoadFiles((string)node.Tag, node);
+                }
+                LoadChildrenNodes(subfullpaths, node);
+            }
+            else
+            {
+
+            }
+
+        }
+
+        // TODO: Add output message and log
+        if (fullpaths.Count > 0)
+        {
+            foreach (var path in fullpaths)
+            {
+                Debug.WriteLine("Node: "+topnode.Tag.ToString());
+                Debug.WriteLine(path);
+            }
+        }
+    }
+
+    private void UpdateParentsCheck(TreeNode node)
+    {
+
     }
 
     private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
@@ -928,19 +1000,33 @@ public partial class MainForm : Form
 
     private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        expandSelectedTreeNode();
+    }
+
+    private void expandSelectedTreeNode()
+    {
         treeParseDir.BeginUpdate();
+        //treeParseDir.Scrollable = false;
         treeParseDir.SelectedNode?.ExpandAll();
+        //treeParseDir.Scrollable = true;
         treeParseDir.EndUpdate();
     }
 
     private void collapseAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        colllapseSelectedTreeNode();
+    }
+    private void colllapseSelectedTreeNode()
+    {
         treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.Collapse(false);
         treeParseDir.EndUpdate();
     }
-
     private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        refreshSelectedTreeNode();
+    }
+    private void refreshSelectedTreeNode()
     {
         treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.Refresh();
@@ -991,8 +1077,8 @@ public partial class MainForm : Form
 
     public void GatherCheckedFiles(object sender, EventArgs e)
     {
-        system.Files = treeParseDir.TopNode?.GatherCheckedFiles() ?? new();
-        Debug.WriteLine(system.Files.Count);
+        //system.Files = treeParseDir.Nodes.Count !=0 ? treeParseDir.Nodes[0]?.GatherAllFiles() ?? new() : new();
+        //system.Files = treeParseDir.Nodes.Count !=0 ? treeParseDir.Nodes[0]?.GatherMinFileList() ?? new() : new();
     }
 
     private void treeParseDir_MouseDown(object sender, MouseEventArgs e)
@@ -1009,7 +1095,8 @@ public partial class MainForm : Form
             }
             else
             {
-                treeParseDir.SelectedNode = treeParseDir.TopNode;
+                if(treeParseDir.Nodes.Count != 0)
+                    treeParseDir.SelectedNode =  treeParseDir.Nodes[0];
             }
 
         }
@@ -1026,24 +1113,70 @@ public partial class MainForm : Form
             p.Checked = p.Nodes.OfType<TreeNode>().Any(n => n.Checked);
     }
 
-    private void cntxtTreeParse_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-    {
-        if (treeParseDir.SelectedNode == treeParseDir.TopNode)
-        {
-            if (cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
-            foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
-                menuitem.Text += " All";
-        }
-        else
-        {
-            if (!cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
-            foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
-                menuitem.Text = menuitem.Text.Replace(" All","");
-        }
-    }
+    //private void cntxtTreeParse_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+    //{
+    //    if (treeParseDir.Nodes.Count!=0 && treeParseDir.SelectedNode == treeParseDir.Nodes[0])
+    //    {
+    //        if (cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
+    //        foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
+    //            menuitem.Text += " All";
+    //    }
+    //    else
+    //    {
+    //        if (!cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
+    //        foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
+    //            menuitem.Text = menuitem.Text.Replace(" All","");
+    //    }
+    //}
 
     private void cntxtMainStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
 
+    }
+
+    private void copyPathToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Clipboard.SetText(treeParseDir.SelectedNode?.Tag.ToString());
+    }
+
+    private void openToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        openSelectedTreeNode();
+    }
+
+    private void openSelectedTreeNode()
+    {
+        var path = treeParseDir.SelectedNode?.Tag.ToString();
+        if (path is not null && path.EndsWith("uasset")) path = Path.GetDirectoryName(path);
+        if (!Directory.Exists(path)) return;
+
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            Arguments = path,
+            FileName = "explorer.exe"
+        };
+        Process.Start(startInfo);
+    }
+
+
+    private void treeParseDir_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    {
+
+    }
+
+    private void treeParseDir_KeyDown(object sender, KeyEventArgs e)
+    {
+        var snode = treeParseDir.SelectedNode;
+        if (!e.Control || snode is null) return;
+
+        switch (e.KeyCode)
+        {
+            case Keys.C: Clipboard.SetText(treeParseDir.SelectedNode?.Tag.ToString()); break;
+            case Keys.O: openSelectedTreeNode(); break;
+            case Keys.S: colllapseSelectedTreeNode(); break;
+            case Keys.E: expandSelectedTreeNode(); break;
+            case Keys.R: refreshSelectedTreeNode(); break;
+            default: break;
+        };
     }
 }

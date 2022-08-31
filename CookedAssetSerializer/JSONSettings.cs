@@ -3,7 +3,7 @@
 public struct JSONSettings
 {
     [JsonProperty] public string ContentDir;
-    [JsonProperty] public string[] ParseDir;
+    [JsonProperty] public List<string> ParseDir;
     [JsonProperty] public string JSONDir;
     [JsonProperty] public string CookedDir;
     [JsonProperty] public string InfoDir;

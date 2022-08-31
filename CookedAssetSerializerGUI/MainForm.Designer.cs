@@ -46,6 +46,8 @@ partial class MainForm {
             this.panel1 = new System.Windows.Forms.Panel();
             this.treeParseDir = new ExtendedTreeView.ExTreeView();
             this.cntxtTreeParse = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +55,6 @@ partial class MainForm {
             this.lbAuthors = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tbRun = new System.Windows.Forms.TabPage();
-            this.btnPrsTree = new System.Windows.Forms.Button();
             this.chkAutoLoad = new System.Windows.Forms.CheckBox();
             this.chkDumNativ = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -61,7 +62,6 @@ partial class MainForm {
             this.btnSaveConfig = new System.Windows.Forms.Button();
             this.rtxtInfoDir = new System.Windows.Forms.RichTextBox();
             this.rtxtOutput = new System.Windows.Forms.RichTextBox();
-            this.rtxtParseDir = new System.Windows.Forms.RichTextBox();
             this.rtxtContentDir = new System.Windows.Forms.RichTextBox();
             this.rtxtJSONDir = new System.Windows.Forms.RichTextBox();
             this.rtxtCookedDir = new System.Windows.Forms.RichTextBox();
@@ -69,7 +69,6 @@ partial class MainForm {
             this.btnInfoDir = new System.Windows.Forms.Button();
             this.btnOpenAllTypes = new System.Windows.Forms.Button();
             this.btnOpenAssetTypes = new System.Windows.Forms.Button();
-            this.btnSelectParseDir = new System.Windows.Forms.Button();
             this.btnOpenLogs = new System.Windows.Forms.Button();
             this.btnSelectJSONDir = new System.Windows.Forms.Button();
             this.lblProgress = new System.Windows.Forms.Label();
@@ -205,38 +204,55 @@ partial class MainForm {
             this.treeParseDir.TabIndex = 2;
             this.treeParseDir.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeParseDir_AfterCheck);
             this.treeParseDir.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeParseDir_BeforeExpand);
+            this.treeParseDir.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeParseDir_KeyDown);
             this.treeParseDir.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseDown);
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
+            this.treeParseDir.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.treeParseDir_PreviewKeyDown);
             // 
             // cntxtTreeParse
             // 
             this.cntxtTreeParse.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openToolStripMenuItem,
+            this.copyPathToolStripMenuItem,
             this.expandAllToolStripMenuItem,
             this.collapseAllToolStripMenuItem,
             this.refreshAllToolStripMenuItem});
             this.cntxtTreeParse.Name = "cntxtTreeParse";
-            this.cntxtTreeParse.Size = new System.Drawing.Size(137, 70);
-            this.cntxtTreeParse.Opening += new System.ComponentModel.CancelEventHandler(this.cntxtTreeParse_Opening);
+            this.cntxtTreeParse.Size = new System.Drawing.Size(130, 114);
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.openToolStripMenuItem.Text = "&Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // copyPathToolStripMenuItem
+            // 
+            this.copyPathToolStripMenuItem.Name = "copyPathToolStripMenuItem";
+            this.copyPathToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.copyPathToolStripMenuItem.Text = "&Copy path";
+            this.copyPathToolStripMenuItem.Click += new System.EventHandler(this.copyPathToolStripMenuItem_Click);
             // 
             // expandAllToolStripMenuItem
             // 
             this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
-            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.expandAllToolStripMenuItem.Text = "Expand All";
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.expandAllToolStripMenuItem.Text = "&Expand";
             this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
             // 
             // collapseAllToolStripMenuItem
             // 
             this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
-            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.collapseAllToolStripMenuItem.Text = "Collapse All";
+            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.collapseAllToolStripMenuItem.Text = "Collap&se";
             this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
             // 
             // refreshAllToolStripMenuItem
             // 
             this.refreshAllToolStripMenuItem.Name = "refreshAllToolStripMenuItem";
-            this.refreshAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.refreshAllToolStripMenuItem.Text = "Refresh All";
+            this.refreshAllToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.refreshAllToolStripMenuItem.Text = "&Refresh";
             this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // panel2
@@ -277,7 +293,6 @@ partial class MainForm {
             // tbRun
             // 
             this.tbRun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.tbRun.Controls.Add(this.btnPrsTree);
             this.tbRun.Controls.Add(this.chkAutoLoad);
             this.tbRun.Controls.Add(this.chkDumNativ);
             this.tbRun.Controls.Add(this.label2);
@@ -285,7 +300,6 @@ partial class MainForm {
             this.tbRun.Controls.Add(this.btnSaveConfig);
             this.tbRun.Controls.Add(this.rtxtInfoDir);
             this.tbRun.Controls.Add(this.rtxtOutput);
-            this.tbRun.Controls.Add(this.rtxtParseDir);
             this.tbRun.Controls.Add(this.rtxtContentDir);
             this.tbRun.Controls.Add(this.rtxtJSONDir);
             this.tbRun.Controls.Add(this.rtxtCookedDir);
@@ -293,7 +307,6 @@ partial class MainForm {
             this.tbRun.Controls.Add(this.btnInfoDir);
             this.tbRun.Controls.Add(this.btnOpenAllTypes);
             this.tbRun.Controls.Add(this.btnOpenAssetTypes);
-            this.tbRun.Controls.Add(this.btnSelectParseDir);
             this.tbRun.Controls.Add(this.btnOpenLogs);
             this.tbRun.Controls.Add(this.btnSelectJSONDir);
             this.tbRun.Controls.Add(this.lblProgress);
@@ -312,23 +325,6 @@ partial class MainForm {
             this.tbRun.Size = new System.Drawing.Size(956, 681);
             this.tbRun.TabIndex = 0;
             this.tbRun.Text = "Run";
-            // 
-            // btnPrsTree
-            // 
-            this.btnPrsTree.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnPrsTree.FlatAppearance.BorderSize = 2;
-            this.btnPrsTree.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPrsTree.Font = new System.Drawing.Font("Yu Gothic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnPrsTree.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnPrsTree.Location = new System.Drawing.Point(13, 50);
-            this.btnPrsTree.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnPrsTree.Name = "btnPrsTree";
-            this.btnPrsTree.Size = new System.Drawing.Size(35, 30);
-            this.btnPrsTree.TabIndex = 40;
-            this.btnPrsTree.Text = "<<";
-            this.btnPrsTree.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnPrsTree.UseVisualStyleBackColor = true;
-            this.btnPrsTree.Click += new System.EventHandler(this.GatherCheckedFiles);
             // 
             // chkAutoLoad
             // 
@@ -432,23 +428,6 @@ partial class MainForm {
             this.rtxtOutput.TabIndex = 23;
             this.rtxtOutput.Text = "";
             this.rtxtOutput.WordWrap = false;
-            // 
-            // rtxtParseDir
-            // 
-            this.rtxtParseDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.rtxtParseDir.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxtParseDir.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.rtxtParseDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtParseDir.Location = new System.Drawing.Point(150, 50);
-            this.rtxtParseDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.rtxtParseDir.Multiline = false;
-            this.rtxtParseDir.Name = "rtxtParseDir";
-            this.rtxtParseDir.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.rtxtParseDir.Size = new System.Drawing.Size(787, 30);
-            this.rtxtParseDir.TabIndex = 33;
-            this.rtxtParseDir.Text = "C:\\ExamplePath\\Content\\Data";
-            this.rtxtParseDir.Enter += new System.EventHandler(this.rtxtParseDir_Enter);
-            this.rtxtParseDir.Leave += new System.EventHandler(this.rtxtParseDir_Leave);
             // 
             // rtxtContentDir
             // 
@@ -563,22 +542,6 @@ partial class MainForm {
             this.btnOpenAssetTypes.Text = "Open AssetTypes";
             this.btnOpenAssetTypes.UseVisualStyleBackColor = true;
             this.btnOpenAssetTypes.Click += new System.EventHandler(this.btnOpenAssetTypes_Click);
-            // 
-            // btnSelectParseDir
-            // 
-            this.btnSelectParseDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnSelectParseDir.FlatAppearance.BorderSize = 2;
-            this.btnSelectParseDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelectParseDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSelectParseDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSelectParseDir.Location = new System.Drawing.Point(43, 50);
-            this.btnSelectParseDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnSelectParseDir.Name = "btnSelectParseDir";
-            this.btnSelectParseDir.Size = new System.Drawing.Size(92, 30);
-            this.btnSelectParseDir.TabIndex = 32;
-            this.btnSelectParseDir.Text = "Parse Dir";
-            this.btnSelectParseDir.UseVisualStyleBackColor = true;
-            this.btnSelectParseDir.Click += new System.EventHandler(this.btnSelectParseDir_Click);
             // 
             // btnOpenLogs
             // 
@@ -1095,9 +1058,10 @@ partial class MainForm {
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.ClientSize = new System.Drawing.Size(1204, 722);
+            this.ClientSize = new System.Drawing.Size(1237, 724);
             this.Controls.Add(this.flowLayoutPanel1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1132,7 +1096,6 @@ partial class MainForm {
     private Label lbAuthors;
     private TabControl tabControl1;
     private TabPage tbRun;
-    private Button btnPrsTree;
     private CheckBox chkAutoLoad;
     private CheckBox chkDumNativ;
     private Label label2;
@@ -1140,7 +1103,6 @@ partial class MainForm {
     private Button btnSaveConfig;
     private RichTextBox rtxtInfoDir;
     private RichTextBox rtxtOutput;
-    private RichTextBox rtxtParseDir;
     private RichTextBox rtxtContentDir;
     private RichTextBox rtxtJSONDir;
     private RichTextBox rtxtCookedDir;
@@ -1148,7 +1110,6 @@ partial class MainForm {
     private Button btnInfoDir;
     private Button btnOpenAllTypes;
     private Button btnOpenAssetTypes;
-    private Button btnSelectParseDir;
     private Button btnOpenLogs;
     private Button btnSelectJSONDir;
     private Label lblProgress;
@@ -1196,4 +1157,6 @@ partial class MainForm {
     private ToolStripMenuItem cancelSerializationToolStripMenuItem;
     private ToolStripMenuItem restoreAllSettingsToDefaultthisTabToolStripMenuItem;
     private ToolStripMenuItem restoreAllSettingsToDefaultallTabsToolStripMenuItem;
+    private ToolStripMenuItem copyPathToolStripMenuItem;
+    private ToolStripMenuItem openToolStripMenuItem;
 }

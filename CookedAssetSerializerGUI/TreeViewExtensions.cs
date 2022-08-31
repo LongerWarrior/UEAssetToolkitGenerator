@@ -29,7 +29,7 @@ static class TreeViewExtensions
         }
     }
 
-    public static List<string> GatherCheckedFiles(this TreeNode topnode)
+    public static List<string> GatherAllFiles(this TreeNode topnode)
     {
         var files = new List<string>();
         foreach (var node in topnode.Children())
@@ -49,6 +49,36 @@ static class TreeViewExtensions
 
         }
         return files;
+    }
+
+    public static List<string> GatherMinFileList(this TreeNode topnode)
+    {
+        var files = new List<string>();
+
+        if (!topnode.Checked) return files;
+
+        var savedir = true;
+        foreach (var node in topnode.Children())
+        {
+            if (!node.Checked)
+            {
+                savedir = false;
+                break;
+            } 
+        }
+
+        if (savedir)
+        {
+            files.Add(topnode.Tag.ToString());
+            return files;
+        }
+
+        foreach (var node in topnode.Children(false))
+        {
+            files.AddRange(node.GatherMinFileList());
+        }
+        return files;
+
     }
 
     public static void Refresh(this TreeNode node)
