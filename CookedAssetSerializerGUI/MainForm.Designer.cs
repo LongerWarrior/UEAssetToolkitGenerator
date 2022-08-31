@@ -1,5 +1,6 @@
 ﻿using CookedAssetSerializer;
 using CookedAssetSerializerGUI.Properties;
+using ExtendedTreeView;
 
 namespace CookedAssetSerializerGUI;
 
@@ -43,12 +44,11 @@ partial class MainForm {
             this.restoreAllSettingsToDefaultthisTabToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restoreAllSettingsToDefaultallTabsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.prgbarTreeLd = new System.Windows.Forms.ProgressBar();
-            this.treeParseDir = new System.Windows.Forms.TreeView();
+            this.treeParseDir = new ExtendedTreeView.ExTreeView();
             this.cntxtTreeParse = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
             this.lbAuthors = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -126,7 +126,7 @@ partial class MainForm {
             this.flowLayoutPanel1.Controls.Add(this.panel2);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(2, 2);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1200, 717);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1232, 717);
             this.flowLayoutPanel1.TabIndex = 40;
             // 
             // cntxtMainStrip
@@ -139,7 +139,8 @@ partial class MainForm {
             this.restoreAllSettingsToDefaultthisTabToolStripMenuItem,
             this.restoreAllSettingsToDefaultallTabsToolStripMenuItem});
             this.cntxtMainStrip.Name = "cntxtMainStrip";
-            this.cntxtMainStrip.Size = new System.Drawing.Size(277, 158);
+            this.cntxtMainStrip.Size = new System.Drawing.Size(277, 136);
+            this.cntxtMainStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cntxtMainStrip_Opening);
             // 
             // clearAllPathsToolStripMenuItem
             // 
@@ -185,33 +186,26 @@ partial class MainForm {
             // 
             // panel1
             // 
-            this.panel1.AutoSize = true;
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.Controls.Add(this.prgbarTreeLd);
             this.panel1.Controls.Add(this.treeParseDir);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(218, 711);
+            this.panel1.Size = new System.Drawing.Size(250, 711);
             this.panel1.TabIndex = 0;
-            this.panel1.Visible = false;
-            // 
-            // prgbarTreeLd
-            // 
-            this.prgbarTreeLd.Location = new System.Drawing.Point(0, 678);
-            this.prgbarTreeLd.Name = "prgbarTreeLd";
-            this.prgbarTreeLd.Size = new System.Drawing.Size(133, 23);
-            this.prgbarTreeLd.TabIndex = 3;
             // 
             // treeParseDir
             // 
             this.treeParseDir.CheckBoxes = true;
             this.treeParseDir.ContextMenuStrip = this.cntxtTreeParse;
             this.treeParseDir.Location = new System.Drawing.Point(0, 7);
+            this.treeParseDir.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.treeParseDir.Name = "treeParseDir";
-            this.treeParseDir.Size = new System.Drawing.Size(215, 665);
+            this.treeParseDir.Size = new System.Drawing.Size(247, 704);
             this.treeParseDir.TabIndex = 2;
             this.treeParseDir.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeParseDir_AfterCheck);
+            this.treeParseDir.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeParseDir_BeforeExpand);
+            this.treeParseDir.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseDown);
             this.treeParseDir.MouseMove += new System.Windows.Forms.MouseEventHandler(this.treeParseDir_MouseMove);
             // 
             // cntxtTreeParse
@@ -219,30 +213,31 @@ partial class MainForm {
             this.cntxtTreeParse.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.expandAllToolStripMenuItem,
             this.collapseAllToolStripMenuItem,
-            this.refreshToolStripMenuItem});
+            this.refreshAllToolStripMenuItem});
             this.cntxtTreeParse.Name = "cntxtTreeParse";
             this.cntxtTreeParse.Size = new System.Drawing.Size(137, 70);
+            this.cntxtTreeParse.Opening += new System.ComponentModel.CancelEventHandler(this.cntxtTreeParse_Opening);
             // 
             // expandAllToolStripMenuItem
             // 
             this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
-            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.expandAllToolStripMenuItem.Text = "Expand All";
             this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
             // 
             // collapseAllToolStripMenuItem
             // 
             this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
-            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.collapseAllToolStripMenuItem.Text = "Collapse All";
             this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
             // 
-            // refreshToolStripMenuItem
+            // refreshAllToolStripMenuItem
             // 
-            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.refreshToolStripMenuItem.Text = "Refresh";
-            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
+            this.refreshAllToolStripMenuItem.Name = "refreshAllToolStripMenuItem";
+            this.refreshAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.refreshAllToolStripMenuItem.Text = "Refresh All";
+            this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // panel2
             // 
@@ -251,7 +246,7 @@ partial class MainForm {
             this.panel2.Controls.Add(this.lbAuthors);
             this.panel2.Controls.Add(this.tabControl1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panel2.Location = new System.Drawing.Point(227, 3);
+            this.panel2.Location = new System.Drawing.Point(259, 3);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(970, 711);
             this.panel2.TabIndex = 1;
@@ -333,7 +328,7 @@ partial class MainForm {
             this.btnPrsTree.Text = "<<";
             this.btnPrsTree.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.btnPrsTree.UseVisualStyleBackColor = true;
-            this.btnPrsTree.Click += new System.EventHandler(this.btnPrsTree_Click);
+            this.btnPrsTree.Click += new System.EventHandler(this.GatherCheckedFiles);
             // 
             // chkAutoLoad
             // 
@@ -469,8 +464,7 @@ partial class MainForm {
             this.rtxtContentDir.Size = new System.Drawing.Size(787, 30);
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
-            this.rtxtContentDir.Enter += new System.EventHandler(this.rtxtContentDir_Enter);
-            this.rtxtContentDir.Leave += new System.EventHandler(this.rtxtContentDir_Leave);
+            this.rtxtContentDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
             // 
             // rtxtJSONDir
             // 
@@ -1133,8 +1127,7 @@ partial class MainForm {
     private ToolTip tTipTree;
     private FlowLayoutPanel flowLayoutPanel1;
     private Panel panel1;
-    private ProgressBar prgbarTreeLd;
-    private TreeView treeParseDir;
+    private ExTreeView treeParseDir;
     private Panel panel2;
     private Label lbAuthors;
     private TabControl tabControl1;
@@ -1195,7 +1188,7 @@ partial class MainForm {
     private ContextMenuStrip cntxtTreeParse;
     private ToolStripMenuItem expandAllToolStripMenuItem;
     private ToolStripMenuItem collapseAllToolStripMenuItem;
-    private ToolStripMenuItem refreshToolStripMenuItem;
+    private ToolStripMenuItem refreshAllToolStripMenuItem;
     private ContextMenuStrip cntxtMainStrip;
     private ToolStripMenuItem clearAllPathsToolStripMenuItem;
     private ToolStripMenuItem restorePathsToDefaultsToolStripMenuItem;

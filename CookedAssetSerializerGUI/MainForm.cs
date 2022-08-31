@@ -1,28 +1,16 @@
-using System;
 using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
 using CookedAssetSerializer;
 using CookedAssetSerializerGUI.Properties;
+using ExtendedTreeView;
 using NativizedAssets;
 using Newtonsoft.Json;
 using UAssetAPI;
-using static System.Windows.Forms.Design.AxImporter;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace CookedAssetSerializerGUI;
 
-
-
-
 public partial class MainForm : Form
 {
-    
-
-
     public MainForm() {
         Singleton.Init(new Dictionary<string, bool> 
         { 
@@ -32,9 +20,8 @@ public partial class MainForm : Form
 
         InitializeComponent();
         SetupForm();
-        /*SetupGlobals();*/
-
-        
+        SetupGlobals();
+               
 
         //new GenerateBPY();
 
@@ -614,14 +601,22 @@ public partial class MainForm : Form
 
     private void ValidateContentDir(object sender, System.ComponentModel.CancelEventArgs e)
     {
+        ValidateContentDir();
+    }
+    private void ValidateContentDir()
+    {
         if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text))
         {
             rtxtContentDir.Text = lastValidContentDir;
         }
         lastValidContentDir = rtxtContentDir.Text;
+        treeParseDir.Nodes.Clear();
+        LoadDirectory(rtxtContentDir.Text);
+        
         if (IsSubPathOf(rtxtParseDir.Text, rtxtContentDir.Text)) return;
         rtxtParseDir.Text = rtxtContentDir.Text;
     }
+
 
     private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
     {
@@ -672,6 +667,7 @@ public partial class MainForm : Form
     private void btnSelectContentDir_Click(object sender, EventArgs e)
     {
         rtxtContentDir.Text = OpenDirectoryDialog(rtxtContentDir.Text);
+        ValidateContentDir();
     }
 
     private void btnSelectJSONDir_Click(object sender, EventArgs e)
@@ -826,7 +822,7 @@ public partial class MainForm : Form
     private void MainForm_Load(object sender, EventArgs e)
     {
 
-        panel1.Visible = false;
+        //panel1.Visible = false;
         if (AppSettings.Default.bAutoUseLastCfg == true)
         {
             AutoLoadConfig();
@@ -835,20 +831,6 @@ public partial class MainForm : Form
         chkSettDNS.Checked = AppSettings.Default.bDNSSave;
 
     }
-
-    private void treeParseDir_AfterCheck(object sender, TreeViewEventArgs e)
-    {
-        if (e.Action == TreeViewAction.Unknown) return;
-
-        foreach (TreeNode n in e.Node.Children())
-            n.Checked = e.Node.Checked;
-
-        // Comment this if you don't need it.
-        foreach (TreeNode p in e.Node.Parents())
-            p.Checked = p.Nodes.OfType<TreeNode>().Any(n => n.Checked);
-    }
-
-
     private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
     {
            // Get the node at the current mouse pointer location.  
@@ -868,30 +850,21 @@ public partial class MainForm : Form
            }   
     }
 
-    private void UpdateProgress()
-    { 
-        if (prgbarTreeLd.Value < prgbarTreeLd.Maximum)  
-            {
-                prgbarTreeLd.Value++;  
-                int percent = (int)(((double)prgbarTreeLd.Value / (double)prgbarTreeLd.Maximum) * 100);
-                prgbarTreeLd.CreateGraphics().DrawString(percent.ToString() + "%", new Font("Arial", (float)8.25, FontStyle.Regular), Brushes.Black, new PointF(prgbarTreeLd.Width / 2 - 10, prgbarTreeLd.Height / 2 - 7));  
-                Application.DoEvents();  
-            }  
-    }
-
     private void LoadFiles(string dir, TreeNode td)
     {
-        string[] Files = Directory.GetFiles(dir, "*.*");
+        string[] Files = Directory.GetFiles(dir, "*.uasset");
 
         // Loop through them to see files  
         foreach (string file in Files)
         {
-            FileInfo fi = new FileInfo(file);
-            TreeNode tds = td.Nodes.Add(fi.Name);
-            tds.Tag = fi.FullName;
+            //FileInfo fi = new FileInfo(file);
+            //Path.GetFileNameWithoutExtension(file);
+            //TreeNode tds = td.Nodes.Add(fi.Name);
+            //tds.Tag = fi.FullName;
+            TreeNode tds = td.Nodes.Add(Path.GetFileName(file));
+            tds.Tag = file;
             tds.StateImageIndex = 1;
-            UpdateProgress();
-
+            tds.Checked = td.Checked;
         }
     }
 
@@ -899,53 +872,29 @@ public partial class MainForm : Form
     {
         // Get all subdirectories  
         string[] subdirectoryEntries = Directory.GetDirectories(dir);
+
         // Loop through them to see if they have any other subdirectories  
         foreach (string subdirectory in subdirectoryEntries)
         {
-
-            DirectoryInfo di = new DirectoryInfo(subdirectory);
-            TreeNode tds = td.Nodes.Add(di.Name);
+            TreeNode tds = td.Nodes.Add(Path.GetFileName(subdirectory));
             tds.StateImageIndex = 0;
-            tds.Tag = di.FullName;
-            /*LoadFiles(subdirectory, tds);*/
-            LoadSubDirectories(subdirectory, tds);
-            UpdateProgress();
-
+            tds.Tag = subdirectory;
+            tds.Checked = td.Checked; 
         }
     }
 
     public void LoadDirectory(string Dir)
     {
-        DirectoryInfo di = new DirectoryInfo(Dir);
-        //Setting ProgressBar Maximum Value  
-        prgbarTreeLd.Maximum = /*Directory.GetFiles(Dir, "*.*", SearchOption.AllDirectories).Length +*/ Directory.GetDirectories(Dir, "**", SearchOption.AllDirectories).Length;
-        TreeNode tds = treeParseDir.Nodes.Add(di.Name);
-        tds.Tag = di.FullName;
+        treeParseDir.BeginUpdate();
+        TreeNode tds = treeParseDir.Nodes.Add(Path.GetFileName(Dir));
+        tds.Tag = Dir;
+        tds.Checked = true;
         tds.StateImageIndex = 0;
-        /*LoadFiles(Dir, tds);*/
         LoadSubDirectories(Dir, tds);
+        LoadFiles(Dir, tds);
+        treeParseDir.SelectedNode = treeParseDir.TopNode;
+        treeParseDir.EndUpdate();
     }
-
-    private void btnPrsTree_Click(object sender, EventArgs e)
-    {
-        if (panel1.Visible == false)
-        {
-            panel1.Visible = true;
-            treeParseDir.Nodes.Clear();
-            if (rtxtParseDir.Text != "" && Directory.Exists(rtxtParseDir.Text))
-                LoadDirectory(rtxtParseDir.Text);
-            else
-                MessageBox.Show("Select Existing Content Directory!!");
-        }
-        else
-        {
-            panel1.Visible = false;
-            treeParseDir.Nodes.Clear();
-        }
-    }
-
-
-
 
     private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
     {
@@ -986,22 +935,17 @@ public partial class MainForm : Form
 
     private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        treeParseDir.ExpandAll();
+        treeParseDir.SelectedNode?.ExpandAll();
     }
 
     private void collapseAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        treeParseDir.CollapseAll();
+        treeParseDir.SelectedNode?.Collapse(false);
     }
 
     private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        prgbarTreeLd.Value = 0;
-        treeParseDir.Nodes.Clear();
-        if (rtxtParseDir.Text != "" && Directory.Exists(rtxtParseDir.Text))
-            LoadDirectory(rtxtParseDir.Text);
-        else
-            MessageBox.Show("Select Existing Content Directory!!");
+        treeParseDir.SelectedNode?.Refresh();
     }
 
     private void clearAllPathsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1028,30 +972,79 @@ public partial class MainForm : Form
     {
 
     }
-}
 
-static class TreeViewExtensions
-{
-    public static IEnumerable<TreeNode> Children(this TreeNode node)
+    private void treeParseDir_BeforeExpand(object sender, TreeViewCancelEventArgs e)
     {
-        foreach (TreeNode n in node.Nodes)
-        {
-            yield return n;
+        if (e.Action == TreeViewAction.Unknown) return;
 
-            foreach (TreeNode child in Children(n))
-                yield return child;
+        foreach (var node in e.Node.Children(false))
+        {
+            if (node.Nodes.Count == 0)
+            {
+                if (!((string)node.Tag).EndsWith("uasset"))
+                {
+                    LoadSubDirectories((string)node.Tag, node);
+                    LoadFiles((string)node.Tag, node);
+                }
+            }
+        }         
+    }
+
+    public void GatherCheckedFiles(object sender, EventArgs e)
+    {
+        system.Files = treeParseDir.TopNode?.GatherCheckedFiles() ?? new();
+        Debug.WriteLine(system.Files.Count);
+    }
+
+    private void treeParseDir_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Right)
+        {
+            // Get the node at the current mouse pointer location.  
+            TreeNode theNode = treeParseDir.GetNodeAt(e.X, e.Y);
+
+            // Set a ToolTip only if the mouse pointer is actually paused on a node.  
+            if (theNode != null)
+            {
+                theNode.TreeView.SelectedNode = theNode;
+            }
+            else
+            {
+                treeParseDir.SelectedNode = treeParseDir.TopNode;
+            }
+
+        }
+    }
+    private void treeParseDir_AfterCheck(object sender, TreeViewEventArgs e)
+    {
+        if (e.Action == TreeViewAction.Unknown) return;
+
+        foreach (TreeNode n in e.Node.Children())
+            n.Checked = e.Node.Checked;
+
+        // Comment this if you don't need it.
+        foreach (TreeNode p in e.Node.Parents())
+            p.Checked = p.Nodes.OfType<TreeNode>().Any(n => n.Checked);
+    }
+
+    private void cntxtTreeParse_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (treeParseDir.SelectedNode == treeParseDir.TopNode)
+        {
+            if (cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
+            foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
+                menuitem.Text += " All";
+        }
+        else
+        {
+            if (!cntxtTreeParse.Items[0].Text.EndsWith("All")) return;
+            foreach (ToolStripItem menuitem in cntxtTreeParse.Items)
+                menuitem.Text = menuitem.Text.Replace(" All","");
         }
     }
 
-    public static IEnumerable<TreeNode> Parents(this TreeNode node)
+    private void cntxtMainStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        var p = node.Parent;
 
-        while (p != null)
-        {
-            yield return p;
-
-            p = p.Parent;
-        }
     }
 }

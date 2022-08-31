@@ -4,6 +4,9 @@
     <Compile Update="ChkBoxDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="ExtendedTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
