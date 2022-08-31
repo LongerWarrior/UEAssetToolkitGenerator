@@ -857,10 +857,6 @@ public partial class MainForm : Form
         // Loop through them to see files  
         foreach (string file in Files)
         {
-            //FileInfo fi = new FileInfo(file);
-            //Path.GetFileNameWithoutExtension(file);
-            //TreeNode tds = td.Nodes.Add(fi.Name);
-            //tds.Tag = fi.FullName;
             TreeNode tds = td.Nodes.Add(Path.GetFileName(file));
             tds.Tag = file;
             tds.StateImageIndex = 1;
@@ -935,17 +931,23 @@ public partial class MainForm : Form
 
     private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.ExpandAll();
+        treeParseDir.EndUpdate();
     }
 
     private void collapseAllToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.Collapse(false);
+        treeParseDir.EndUpdate();
     }
 
     private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.Refresh();
+        treeParseDir.EndUpdate();
     }
 
     private void clearAllPathsToolStripMenuItem_Click(object sender, EventArgs e)
