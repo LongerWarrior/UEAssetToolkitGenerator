@@ -587,13 +587,13 @@ public partial class MainForm : Form
     
     private void ValidateContentDir()
     {
-        if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && Directory.Exists(lastValidContentDir))
-        {
-            rtxtContentDir.Text = lastValidContentDir;
-        }
-        else if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && !Directory.Exists(lastValidContentDir))
+        if ((string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text)) && !Directory.Exists(lastValidContentDir))
         {
             return;
+        }
+        else if (string.IsNullOrEmpty(rtxtContentDir.Text) || !Directory.Exists(rtxtContentDir.Text))
+        {
+            rtxtContentDir.Text = lastValidContentDir;
         }
         lastValidContentDir = rtxtContentDir.Text;
         treeParseDir.Nodes.Clear();
