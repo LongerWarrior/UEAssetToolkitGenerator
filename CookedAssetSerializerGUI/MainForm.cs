@@ -231,8 +231,8 @@ public partial class MainForm : Form
         LoadDirectory(Environment.CurrentDirectory);
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
-        rtxtCookedDir.Text = Environment.CurrentDirectory;
-        rtxtInfoDir.Text = Environment.CurrentDirectory;
+        rtxtMoveTo.Text = Environment.CurrentDirectory;
+        rtxtLogDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
@@ -267,19 +267,19 @@ public partial class MainForm : Form
 
     private void rtxtCookedDir_Leave(object sender, EventArgs e)
     {
-        if (rtxtCookedDir.Text.Length == 0)
+        if (rtxtMoveTo.Text.Length == 0)
         {
-            rtxtCookedDir.Text = "C:\\ExamplePath\\Cooked";
-            rtxtCookedDir.ForeColor = SystemColors.GrayText;
+            rtxtMoveTo.Text = "C:\\ExamplePath\\Cooked";
+            rtxtMoveTo.ForeColor = SystemColors.GrayText;
         }
     }
 
     private void rtxtCookedDir_Enter(object sender, EventArgs e)
     {
-        if (rtxtCookedDir.Text == "C:\\ExamplePath\\Cooked")
+        if (rtxtMoveTo.Text == "C:\\ExamplePath\\Cooked")
         {
-            rtxtCookedDir.Text = "";
-            rtxtCookedDir.ForeColor = SystemColors.WindowText;
+            rtxtMoveTo.Text = "";
+            rtxtMoveTo.ForeColor = SystemColors.WindowText;
         }
     }
 
@@ -321,19 +321,19 @@ public partial class MainForm : Form
 
     private void rtxtInfoDir_Leave(object sender, EventArgs e)
     {
-        if (rtxtInfoDir.Text.Length == 0)
+        if (rtxtLogDir.Text.Length == 0)
         {
-            rtxtInfoDir.Text = "C:\\ExamplePath\\Info";
-            rtxtInfoDir.ForeColor = SystemColors.GrayText;
+            rtxtLogDir.Text = "C:\\ExamplePath\\Info";
+            rtxtLogDir.ForeColor = SystemColors.GrayText;
         }
     }
 
     private void rtxtInfoDir_Enter(object sender, EventArgs e)
     {
-        if (rtxtInfoDir.Text == "C:\\ExamplePath\\Info")
+        if (rtxtLogDir.Text == "C:\\ExamplePath\\Info")
         {
-            rtxtInfoDir.Text = "";
-            rtxtInfoDir.ForeColor = SystemColors.WindowText;
+            rtxtLogDir.Text = "";
+            rtxtLogDir.ForeColor = SystemColors.WindowText;
         }
     }
 
@@ -373,10 +373,10 @@ public partial class MainForm : Form
             Directory.CreateDirectory(rtxtJSONDir.Text);
         }
 
-        if (string.IsNullOrEmpty(rtxtCookedDir.Text)) 
+        if (string.IsNullOrEmpty(rtxtMoveTo.Text)) 
         {
-            rtxtCookedDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
-            Directory.CreateDirectory(rtxtCookedDir.Text);
+            rtxtMoveTo.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            Directory.CreateDirectory(rtxtMoveTo.Text);
         }
 
 
@@ -385,8 +385,8 @@ public partial class MainForm : Form
             ContentDir = rtxtContentDir.Text,
             ParseDir = GetRelativeMinFileList(),
             JSONDir = rtxtJSONDir.Text,
-            CookedDir = rtxtCookedDir.Text,
-            InfoDir = rtxtInfoDir.Text,
+            CookedDir = rtxtMoveTo.Text,
+            InfoDir = rtxtLogDir.Text,
             GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
             RefreshAssets = chkRefreshAssets.Checked,
             DummyWithProps = chkDummyWithProps.Checked,
@@ -423,8 +423,8 @@ public partial class MainForm : Form
             SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
             //rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
-            rtxtCookedDir.Text = jsonsettings.CookedDir;
-            rtxtInfoDir.Text = jsonsettings.InfoDir;
+            rtxtMoveTo.Text = jsonsettings.CookedDir;
+            rtxtLogDir.Text = jsonsettings.InfoDir;
         }
         
         cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
@@ -565,8 +565,8 @@ public partial class MainForm : Form
         foreach (var file in files)
         {
             string path;
-            if (rtxtInfoDir.Text.EndsWith("\\")) path = rtxtInfoDir.Text + file;
-            else path = rtxtInfoDir.Text + "\\" + file;
+            if (rtxtLogDir.Text.EndsWith("\\")) path = rtxtLogDir.Text + file;
+            else path = rtxtLogDir.Text + "\\" + file;
             if (!File.Exists(path)) continue;
             File.Delete(path);
             OutputText("Cleared log file: " + path, rtxtOutput);
@@ -659,7 +659,7 @@ public partial class MainForm : Form
 
     private void btnSelectOutputDir_Click(object sender, EventArgs e)
     {
-        rtxtCookedDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
+        rtxtMoveTo.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
     }
 
     private void btnScanAssets_Click(object sender, EventArgs e)
@@ -737,17 +737,17 @@ public partial class MainForm : Form
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtInfoDir.Text + "\\AllTypes.txt");
+        OpenFile(rtxtLogDir.Text + "\\AllTypes.txt");
     }
 
     private void btnOpenAssetTypes_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtInfoDir.Text + "\\AssetTypes.json");
+        OpenFile(rtxtLogDir.Text + "\\AssetTypes.json");
     }
 
     private void btnOpenLogs_Click(object sender, EventArgs e)
     {
-        OpenFile(rtxtInfoDir.Text + "\\output_log.txt", true);
+        OpenFile(rtxtLogDir.Text + "\\output_log.txt", true);
     }
 
     private void btnClearLogs_Click(object sender, EventArgs e)
@@ -757,7 +757,7 @@ public partial class MainForm : Form
 
     private void btnLoadConfig_Click(object sender, EventArgs e)
     {
-        var configFile = OpenFileDialog(@"JSON files (*.json)|*.json", rtxtInfoDir.Text);
+        var configFile = OpenFileDialog(@"JSON files (*.json)|*.json", rtxtLogDir.Text);
         if (!File.Exists(configFile))
         {
             OutputText("Please select a valid file!", rtxtOutput);
@@ -789,7 +789,7 @@ public partial class MainForm : Form
 
     private void btnInfoDir_Click(object sender, EventArgs e)
     {
-        rtxtInfoDir.Text = OpenDirectoryDialog(rtxtInfoDir.Text);
+        rtxtLogDir.Text = OpenDirectoryDialog(rtxtLogDir.Text);
     }
 
     private void chkDumNativ_CheckedChanged(object sender, EventArgs e)
