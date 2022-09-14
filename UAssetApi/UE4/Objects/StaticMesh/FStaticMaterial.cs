@@ -5,7 +5,7 @@ public class FStaticMaterial
     //public ResolvedObject? MaterialInterface; // UMaterialInterface
     public FPackageIndex MaterialInterface; // UMaterialInterface
     public FName MaterialSlotName;
-    public FName ImportedMaterialSlotName;
+    //public FName ImportedMaterialSlotName;
     public FMeshUVChannelInfo? UVChannelData;
 
     public FStaticMaterial(AssetBinaryReader reader)

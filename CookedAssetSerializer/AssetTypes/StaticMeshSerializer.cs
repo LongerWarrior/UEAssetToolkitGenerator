@@ -40,27 +40,42 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("AssetObjectData", properties);
         
         var materialsData = new JArray();
-        if (FindPropertyData(ClassExport, "StaticMaterials", out PropertyData _materials)) 
+        //if (FindPropertyData(ClassExport, "StaticMaterials", out PropertyData _materials))
+        //{
+        //    var materials = (ArrayPropertyData)_materials;
+        //    foreach (var propertyData in materials.Value)
+        //    {
+        //        var material = (StructPropertyData)propertyData;
+        //        var materialData = new JObject();
+        //        if (FindPropertyData(material.Value, "MaterialSlotName", out PropertyData _name))
+        //        {
+        //            var slotName = (NamePropertyData)_name;
+        //            materialData.Add("MaterialSlotName", slotName.Value.ToName());
+        //        }
+        //        if (FindPropertyData(material.Value, "MaterialInterface", out PropertyData _interface))
+        //        {
+        //            var materialInterface = (ObjectPropertyData)_interface;
+        //            materialData.Add("MaterialInterface", Index(materialInterface.Value.Index, Dict));
+        //        }
+        //        materialsData.Add(materialData);
+        //    }
+        //}
+        List<int> materialindexes = new();
+        materialindexes.AddRange((ClassExport.RenderData?.LODs[0].Sections).Select(section => section.MaterialIndex));
+
+        var mats = ClassExport.StaticMaterials;
+
+        foreach (var index in materialindexes)
         {
-            var materials = (ArrayPropertyData)_materials;
-            foreach (var propertyData in materials.Value) 
+            if (index < ClassExport.StaticMaterials.Length)
             {
-                var material = (StructPropertyData)propertyData;
                 var materialData = new JObject();
-                if (FindPropertyData(material.Value, "MaterialSlotName", out PropertyData _name)) 
-                {
-                    var slotName = (NamePropertyData)_name;
-                    materialData.Add("MaterialSlotName", slotName.Value.ToName());
-                }
-                if (FindPropertyData(material.Value, "MaterialInterface", out PropertyData _interface)) 
-                {
-                    var materialInterface = (ObjectPropertyData)_interface;
-                    materialData.Add("MaterialInterface", Index(materialInterface.Value.Index, Dict));
-                }
+                materialData.Add("MaterialSlotName", mats[index].MaterialSlotName.ToName());
+                materialData.Add("MaterialInterface", Index(mats[index].MaterialInterface.Index, Dict));
                 materialsData.Add(materialData);
             }
         }
-        
+
         AssetData.Add("Materials", materialsData);
         AssetData.Add("NavCollision", Index(ClassExport.NavCollision.Index, Dict));
         AssetData.Add("BodySetup", Index(ClassExport.BodySetup.Index, Dict));
