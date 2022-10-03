@@ -9,7 +9,7 @@ public class GenerateBPY
 
     private void GenerateSM()
     {
-        var InputPath = @"F:\DRG Modding\DRGPacker\JSON\SMs\";
+        var InputPath = @"F:\DRG Modding\DRGPacker\JSON\Blender\SMs\";
         var outputPath = @"F:\DRG Modding\DRGPacker\JSON\Assets\Game\";
         var allfiles = Directory.GetFiles(InputPath, "*.gltf", SearchOption.AllDirectories);
 
@@ -32,7 +32,7 @@ public class GenerateBPY
             command += "bpy.ops.object.delete(use_global=False, confirm=False)\n\n";
         }
 
-        File.WriteAllText(@"F:\DRG Modding\DRGPacker\JSON\BlenderCommands\commands.py", command);
+        File.WriteAllText(@"F:\DRG Modding\DRGPacker\JSON\Blender\BlenderCommands\commands.py", command);
     }
 
     private void GenerateAnims()
