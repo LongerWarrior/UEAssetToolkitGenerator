@@ -30,6 +30,7 @@ public class FPositionVertexBuffer {
     public readonly FVector[] Verts;
     public readonly int Stride;
     public readonly int NumVertices;
+    // TODO: We need to get "Data" from the reader as it is required to get VertexPosition
 
     public FPositionVertexBuffer(AssetBinaryReader reader) {
         Stride = reader.ReadInt32();

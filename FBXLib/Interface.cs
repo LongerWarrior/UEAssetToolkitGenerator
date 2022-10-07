@@ -4,8 +4,10 @@ namespace FBXLib;
 
 public class Interface
 {
-    [DllImport("FBX_Wrapper.dll", CallingConvention=CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
-    public static extern void CreateFBXManager();
-    [DllImport("FBX_Wrapper.dll", CallingConvention=CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
-    public static extern void CreateFBXImporter();
+    [DllImport("FBX_Wrapper.dll", EntryPoint = "CreateFBXManager")]
+    public static extern IntPtr CreateFBXManager();
+    [DllImport("FBX_Wrapper.dll", EntryPoint = "CreateFBXImporter")]
+    public static extern IntPtr CreateFBXImporter(IntPtr manager, string fileName);
+    
+    
 }
