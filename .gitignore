@@ -14,3 +14,6 @@ UEAssetToolkitGenerator.sln.DotSettings.user
 CookedAssetSerializerGUI/bin/
 
 CookedAssetSerializerGUI/obj/
+/FBX-Wrapper/
+FBXLib/bin
+FBXLib/obj
