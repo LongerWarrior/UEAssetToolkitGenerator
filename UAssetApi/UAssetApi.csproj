@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="UE4\Objects\Animation" />
   </ItemGroup>
 
 </Project>

@@ -83,6 +83,9 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("LodNumber", 1);
         AssetData.Add("ScreenSize", JArray.FromObject(new List<int> {1, 0, 0, 0, 0, 0, 0, 0}));
 
+        // Export raw mesh data into seperate FBX file that can be imported back into UE
+        
+        
         using (var md5 = MD5.Create()) 
         {
             using var stream1 = File.OpenRead(path2);

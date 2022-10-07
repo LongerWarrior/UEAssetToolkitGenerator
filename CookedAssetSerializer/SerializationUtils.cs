@@ -509,7 +509,6 @@ public static class SerializationUtils
                 res.Add(jprop);
                 break;
             }
-
             case EnumPropertyData prop:
             {
                 jprop.Value = prop.Value.ToName();
