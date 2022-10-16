@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using UAssetApi.ExportTypes;
 using UAssetAPI.Kismet.Bytecode;
 
 namespace UAssetAPI;

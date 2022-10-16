@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using UAssetApi.ExportTypes;
 
 namespace CookedAssetSerializer;
 

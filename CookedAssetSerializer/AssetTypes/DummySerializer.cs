@@ -1,4 +1,6 @@
-﻿namespace CookedAssetSerializer.AssetTypes;
+﻿using UAssetApi.ExportTypes;
+
+namespace CookedAssetSerializer.AssetTypes;
 
 public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {

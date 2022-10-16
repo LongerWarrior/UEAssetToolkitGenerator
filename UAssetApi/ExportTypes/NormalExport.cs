@@ -1,4 +1,6 @@
-namespace UAssetAPI;
+using UAssetAPI;
+
+namespace UAssetApi.ExportTypes;
 
 /// <summary>
 /// A regular export, with no special serialization. Serialized as a None-terminated property list.

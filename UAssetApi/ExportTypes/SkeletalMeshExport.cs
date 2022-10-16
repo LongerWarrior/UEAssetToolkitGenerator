@@ -1,4 +1,5 @@
 using UAssetAPI.StructTypes.SkeletalMesh;
+using UAssetApi.UE4.Objects.SkeletalMesh;
 
 namespace UAssetAPI;
 

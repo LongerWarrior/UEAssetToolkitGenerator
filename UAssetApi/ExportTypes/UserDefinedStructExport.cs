@@ -1,3 +1,5 @@
+using UAssetApi.ExportTypes;
+
 namespace UAssetAPI;
 
 public class UserDefinedStructExport : StructExport

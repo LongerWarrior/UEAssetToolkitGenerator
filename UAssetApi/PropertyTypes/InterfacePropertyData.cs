@@ -1,4 +1,6 @@
-﻿namespace UAssetAPI.PropertyTypes;
+﻿using UAssetApi.ExportTypes;
+
+namespace UAssetAPI.PropertyTypes;
 
 /// <summary>
 /// Describes a reference variable to another object (import/export) which may be null (<see cref="FPackageIndex"/>).

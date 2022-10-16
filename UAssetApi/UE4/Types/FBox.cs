@@ -1,4 +1,6 @@
-﻿namespace UAssetAPI;
+﻿using UAssetApi.UE4.Objects.Engine;
+
+namespace UAssetAPI;
 public struct FBox : IUStruct {
     /// <summary>
     /// Holds the box's minimum point.

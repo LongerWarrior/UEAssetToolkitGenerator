@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using System.Text;
+using UAssetAPI;
 
-namespace UAssetAPI;
+namespace UAssetApi.ExportTypes;
 
 [AttributeUsage(AttributeTargets.Field)]
 internal class DisplayIndexOrderAttribute : Attribute

@@ -1,6 +1,8 @@
+using UAssetAPI;
+using UAssetAPI.StructTypes.SkeletalMesh;
 using UAssetAPI.StructTypes.StaticMesh;
 
-namespace UAssetAPI.StructTypes.SkeletalMesh;
+namespace UAssetApi.UE4.Objects.SkeletalMesh;
 
 public enum EClassDataStripFlag : byte
 {
