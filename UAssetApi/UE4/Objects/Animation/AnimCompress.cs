@@ -1,6 +1,4 @@
-﻿using UAssetAPI;
-
-namespace UAssetApi.UE4.Objects.Animation;
+﻿namespace UAssetAPI;
 
 public class UAnimCompress : UAnimBoneCompressionCodec
 {

@@ -1,5 +1,3 @@
-using UAssetApi.ExportTypes;
-
 namespace CookedAssetSerializer.AssetTypes;
 
 public class BlueprintSerializer : Serializer<ClassExport>

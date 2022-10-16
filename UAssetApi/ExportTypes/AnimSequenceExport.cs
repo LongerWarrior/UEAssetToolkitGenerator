@@ -1,5 +1,3 @@
-using UAssetApi.ExportTypes;
-
 namespace UAssetAPI;
 
 public class AnimSequenceExport : AnimSequenceBaseExport
@@ -28,7 +26,7 @@ public class AnimSequenceExport : AnimSequenceBaseExport
     public FTransform[]? RetargetSourceAssetReferencePose;
 
     public bool bUseRawDataOnly;
-    */
+
     public AnimSequenceExport(Export super) : base(super) { }
     
     public AnimSequenceExport() { }
@@ -37,12 +35,5 @@ public class AnimSequenceExport : AnimSequenceBaseExport
     {
         base.Read(reader, nextStarting);
 
-    }
-
-    public override void Write(AssetBinaryWriter writer)
-    {
-        base.Write(writer);
-
-        writer.Write(0);
-    }
+    }*/
 }

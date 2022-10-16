@@ -1,6 +1,4 @@
-﻿using UAssetApi.UE4.Objects.Animation;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 /// Base class for all curve compression codecs.
 public abstract class UAnimCurveCompressionCodec : UObject

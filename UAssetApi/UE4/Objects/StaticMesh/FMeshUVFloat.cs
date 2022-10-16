@@ -1,5 +1,4 @@
-﻿using UAssetApi.UE4.Objects.Engine;
-using static System.BitConverter;
+﻿using static System.BitConverter;
 
 namespace UAssetAPI.StructTypes.StaticMesh;
 

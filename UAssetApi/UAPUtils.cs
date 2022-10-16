@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using UAssetApi.ExportTypes;
 
 namespace UAssetAPI;
 
@@ -106,26 +104,5 @@ public static class UAPUtils
         BitConverter.GetBytes(value3).CopyTo(bytes, sizeof(uint) * 2);
         BitConverter.GetBytes(value4).CopyTo(bytes, sizeof(uint) * 3);
         return new Guid(bytes);
-    }
-}
-
-public static class AlignUtils
-{
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long Align(this long ptr, int alignment)
-    {
-        return ptr + alignment - 1 & ~(alignment - 1);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Align(this int ptr, int alignment)
-    {
-        return ptr + alignment - 1 & ~(alignment - 1);
-    }
-        
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long Align(this uint ptr, int alignment)
-    {
-        return ptr + alignment - 1 & ~(alignment - 1);
     }
 }

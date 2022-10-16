@@ -1,6 +1,4 @@
-﻿using UAssetApi.ExportTypes;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 /// <summary>
 /// Wrapper for index into an ImportMap or ExportMap.

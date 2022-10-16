@@ -1,6 +1,4 @@
-﻿using UAssetApi.ExportTypes;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 /// <summary>
 /// Base class for UObject resource types. FObjectResources are used to store UObjects on disk

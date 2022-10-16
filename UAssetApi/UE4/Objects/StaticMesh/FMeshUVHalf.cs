@@ -1,6 +1,4 @@
-﻿using UAssetApi.UE4.Objects.Engine;
-
-namespace UAssetAPI.StructTypes.StaticMesh;
+﻿namespace UAssetAPI.StructTypes.StaticMesh;
 
 public struct FMeshUVHalf : IUStruct {
     public readonly ushort U;

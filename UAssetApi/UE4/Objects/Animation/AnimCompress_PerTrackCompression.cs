@@ -1,5 +1,3 @@
-﻿using UAssetApi.UE4.Objects.Animation;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 public class UAnimCompress_PerTrackCompression : UAnimCompress { }

@@ -1,6 +1,3 @@
-using UAssetApi.ExportTypes;
-using UAssetApi.UE4.Objects.Engine;
-
 namespace UAssetAPI;
 
 public readonly struct FVert : IUStruct

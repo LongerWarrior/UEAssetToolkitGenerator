@@ -1,5 +1,4 @@
 using System.Drawing;
-using UAssetApi.UE4.Objects.Engine;
 
 namespace UAssetAPI.StructTypes.StaticMesh;
 

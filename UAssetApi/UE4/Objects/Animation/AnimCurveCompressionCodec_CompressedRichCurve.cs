@@ -1,8 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using UAssetApi.UE4.Objects.Animation;
-using UAssetApi.UE4.Types;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 [JsonConverter(typeof(FCurveDescConverter))]
 public /*private*/ struct FCurveDesc
@@ -114,16 +110,16 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             (preInfinityExtrap, postInfinityExtrap, numKeys, compressedKeys) =>
             {
                 var keyTimesOffset = 0;
-                var keyTimeAdapter = new FRichCurve.Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.UniformKeyDataAdapter(RCCF_Linear, compressedKeys, keyTimeAdapter);
+                var keyTimeAdapter = new Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new UniformKeyDataAdapter(RCCF_Linear, compressedKeys, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             },
             // RCKTCF_float32
             (preInfinityExtrap, postInfinityExtrap, numKeys, compressedKeys) =>
             {
                 var keyTimesOffset = 0;
-                var keyTimeAdapter = new FRichCurve.Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.UniformKeyDataAdapter(RCCF_Linear, compressedKeys, keyTimeAdapter);
+                var keyTimeAdapter = new Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new UniformKeyDataAdapter(RCCF_Linear, compressedKeys, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             }
         },
@@ -134,16 +130,16 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             (preInfinityExtrap, postInfinityExtrap, numKeys, compressedKeys) =>
             {
                 var keyTimesOffset = 0;
-                var keyTimeAdapter = new FRichCurve.Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.UniformKeyDataAdapter(RCCF_Cubic, compressedKeys, keyTimeAdapter);
+                var keyTimeAdapter = new Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new UniformKeyDataAdapter(RCCF_Cubic, compressedKeys, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             },
             // RCKTCF_float32
             (preInfinityExtrap, postInfinityExtrap, numKeys, compressedKeys) =>
             {
                 var keyTimesOffset = 0;
-                var keyTimeAdapter = new FRichCurve.Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.UniformKeyDataAdapter(RCCF_Cubic, compressedKeys, keyTimeAdapter);
+                var keyTimeAdapter = new Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new UniformKeyDataAdapter(RCCF_Cubic, compressedKeys, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             }
         },
@@ -155,8 +151,8 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             {
                 var interpModesOffset = 0;
                 var keyTimesOffset = interpModesOffset + (numKeys * sizeof(byte)).Align(sizeof(ushort));
-                var keyTimeAdapter = new FRichCurve.Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.MixedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
+                var keyTimeAdapter = new Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new MixedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             },
             // RCKTCF_float32
@@ -164,8 +160,8 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             {
                 var interpModesOffset = 0;
                 var keyTimesOffset = interpModesOffset + (numKeys * sizeof(byte)).Align(sizeof(float));
-                var keyTimeAdapter = new FRichCurve.Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.MixedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
+                var keyTimeAdapter = new Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new MixedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             }
         },
@@ -177,8 +173,8 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             {
                 var interpModesOffset = 0;
                 var keyTimesOffset = interpModesOffset + (2 * numKeys * sizeof(byte)).Align(sizeof(ushort));
-                var keyTimeAdapter = new FRichCurve.Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.WeightedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
+                var keyTimeAdapter = new Quantized16BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new WeightedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             },
             // RCKTCF_float32
@@ -186,14 +182,14 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             {
                 var interpModesOffset = 0;
                 var keyTimesOffset = interpModesOffset + (2 * numKeys * sizeof(byte)).Align(sizeof(float));
-                var keyTimeAdapter = new FRichCurve.Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
-                var keyDataAdapter = new FRichCurve.WeightedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
+                var keyTimeAdapter = new Float32BitKeyTimeAdapter(compressedKeys, keyTimesOffset, numKeys);
+                var keyDataAdapter = new WeightedKeyDataAdapter(compressedKeys, interpModesOffset, keyTimeAdapter);
                 return ConvertToRaw(keyTimeAdapter, keyDataAdapter, numKeys, preInfinityExtrap, postInfinityExtrap);
             }
         },
     };
 
-    private static FRichCurve ConvertToRaw(FRichCurve.IKeyTimeAdapter keyTimeAdapter, FRichCurve.IKeyDataAdapter keyDataAdapter, int numKeys, ERichCurveExtrapolation preInfinityExtrap, ERichCurveExtrapolation postInfinityExtrap)
+    private static FRichCurve ConvertToRaw(IKeyTimeAdapter keyTimeAdapter, IKeyDataAdapter keyDataAdapter, int numKeys, ERichCurveExtrapolation preInfinityExtrap, ERichCurveExtrapolation postInfinityExtrap)
     {
         var curve = new FRichCurve();
         curve.DefaultValue = 3.402823466e+38f;
@@ -244,8 +240,7 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
                 var curveName = compressedCurveNames[curveIndex];
                 var curve = curveDescriptions[curveIndex];
                 var compressedKeys = buffer + curve.KeyDataOffset;
-                var rawCurve = ConverterMap[(int) curve.CompressionFormat][(int) curve.KeyTimeCompressionFormat]
-                    (curve.PreInfinityExtrap, curve.PostInfinityExtrap, curve.NumKeys, compressedKeys);
+                var rawCurve = ConverterMap[(int) curve.CompressionFormat][(int) curve.KeyTimeCompressionFormat](curve.PreInfinityExtrap, curve.PostInfinityExtrap, curve.NumKeys, compressedKeys);
                 floatCurves[curveIndex] = new FFloatCurve
                 {
                     Name = curveName,

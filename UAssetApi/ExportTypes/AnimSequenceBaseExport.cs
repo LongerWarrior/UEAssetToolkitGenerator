@@ -1,11 +1,9 @@
-using UAssetAPI;
+namespace UAssetAPI;
 
-namespace UAssetApi.ExportTypes;
-
-public class AnimSequenceBaseExport : AnimExport
+public class AnimSequenceBaseExport : NormalExport
 {
     public float SequenceLength;
-    public float RateScale;
+    public float RateScale = 1.0f;
 
     public AnimSequenceBaseExport(Export super) : base(super) { }
     
@@ -15,14 +13,7 @@ public class AnimSequenceBaseExport : AnimExport
     {
         base.Read(reader, nextStarting);
 
-        SequenceLength = this["SequenceLength"] is FloatPropertyData slength ? slength.Value : default;
-        RateScale = this["RateScale"] is FloatPropertyData srate ? srate.Value : 1.0f;
-    }
-
-    public override void Write(AssetBinaryWriter writer)
-    {
-        base.Write(writer);
-
-        writer.Write(0);
+        SequenceLength = reader.ReadSingle();
+        RateScale = reader.ReadSingle();
     }
 }

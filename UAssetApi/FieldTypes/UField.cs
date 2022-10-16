@@ -1,6 +1,4 @@
-﻿using UAssetApi.ExportTypes;
-
-namespace UAssetAPI.FieldTypes;
+﻿namespace UAssetAPI.FieldTypes;
 
 /// <summary>
 /// Base class of reflection data objects.

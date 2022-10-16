@@ -1,6 +1,4 @@
-﻿using UAssetApi.UE4.Objects.Animation;
-
-namespace UAssetAPI;
+﻿namespace UAssetAPI;
 
 public class UAnimCurveCompressionCodec_UniformIndexable : UAnimCurveCompressionCodec
 {
