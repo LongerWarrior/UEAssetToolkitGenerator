@@ -9,8 +9,8 @@ public class Serializer<T> where T: Export
     public bool IsSkipped;
     
     protected UAsset Asset;
-    private string AssetName;
-    private string AssetPath;
+    protected string AssetName;
+    protected string AssetPath;
     protected string OutPath;
 
     private readonly JObject JsonOut = new JObject();

@@ -1,6 +1,6 @@
 ﻿namespace UAssetAPI;
 
-public class UAnimBoneCompressionCodec_ACL : UAnimBoneCompressionCodec_ACLBase
+/*public class UAnimBoneCompressionCodec_ACL : UAnimBoneCompressionCodec_ACLBase
 {
     public FPackageIndex SafetyFallbackCodec; // UAnimBoneCompressionCodec
 
@@ -22,4 +22,4 @@ public class UAnimBoneCompressionCodec_ACL : UAnimBoneCompressionCodec_ACLBase
 
         return codecMatch;
     }
-}
+}*/

@@ -10,7 +10,7 @@ public static class AnimationCompressionUtils
     public const int Quant11BitOffs = 1023;
 
     /** normalized quaternion with 3 16-bit fixed point fields */
-    public static FQuat ReadQuatFixed48NoW(this FArchive Ar, int componentMask = 7)
+    /*public static FQuat ReadQuatFixed48NoW(this FArchive Ar, int componentMask = 7)
     {
         // 32767 corresponds to 0
         var x = (componentMask & 1) != 0 ? Ar.Read<ushort>() : Quant16BitOffs;
@@ -25,7 +25,7 @@ public static class AnimationCompressionUtils
         return new FQuat(fX, fY, fZ, wSquared > 0.0f ? MathF.Sqrt(wSquared) : 0.0f);
     }
 
-    /** normalized quaternion with 11/11/10-bit fixed point fields */
+    /** normalized quaternion with 11/11/10-bit fixed point fields #1#
     public static FQuat ReadQuatFixed32NoW(this FArchive Ar)
     {
         const int XShift = 21;
@@ -130,7 +130,7 @@ public static class AnimationCompressionUtils
         var wSquared = 1.0f - x*x - y*y - z*z;
 
         return new FQuat(x, y, z, wSquared > 0.0f ? MathF.Sqrt(wSquared) : 0.0f);
-    }
+    }*/
 
     public static float DecodeFixed48_PerTrackComponent(ushort value, int log2)
     {

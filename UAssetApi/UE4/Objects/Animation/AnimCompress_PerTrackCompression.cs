@@ -1,3 +1,3 @@
 ﻿namespace UAssetAPI;
 
-public class UAnimCompress_PerTrackCompression : UAnimCompress { }
+//public class UAnimCompress_PerTrackCompression : UAnimCompress { }

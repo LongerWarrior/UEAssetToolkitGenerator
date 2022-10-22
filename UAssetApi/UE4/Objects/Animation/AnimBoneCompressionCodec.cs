@@ -4,7 +4,7 @@ namespace UAssetAPI;
 /**
  * Base class for all bone compression codecs.
  */
-public abstract class UAnimBoneCompressionCodec : UObject
+/*public abstract class UAnimBoneCompressionCodec : UObject
 {
     public virtual UAnimBoneCompressionCodec? GetCodec(string ddcHandle)
     {
@@ -29,4 +29,4 @@ public abstract class UAnimBoneCompressionCodec : UObject
     }
 
     public abstract ICompressedAnimData AllocateAnimData();
-}
+}*/

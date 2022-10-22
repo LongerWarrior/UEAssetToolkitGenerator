@@ -35,7 +35,7 @@ public class FFloatCurve : FAnimCurveBase
     }
 }
 
-public struct FRawCurveTracks
+/*public struct FRawCurveTracks
 {
     public FFloatCurve[] FloatCurves;
 
@@ -44,4 +44,4 @@ public struct FRawCurveTracks
         FloatCurves = this["FloatCurves"] is ArrayPropertyData curves ? 
             curves.Value.Select(x => new FFloatCurve()).ToArray() : Array.Empty<FFloatCurve>();
     }
-}
+}*/

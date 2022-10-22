@@ -1,6 +1,6 @@
 ﻿namespace UAssetAPI;
 
-public class FCompressedOffsetDataBase<T> where T : struct
+/*public class FCompressedOffsetDataBase<T> where T : struct
 {
     public T[] OffsetData = Array.Empty<T>();
     public int StripSize;
@@ -40,7 +40,7 @@ public class FCompressedAnimDataBase
      *   [3] Rot0.NumKeys
      *   [4] Trans1.Offset
      *   . . .
-     */
+     #1#
     public int[] CompressedTrackOffsets;
 
     /**
@@ -51,7 +51,7 @@ public class FCompressedAnimDataBase
      *   [1] Scale1.Offset or NumKeys
      * @TODO NOTE: first implementation is offset is [0], numkeys [1]
      *   . . .
-     */
+     #1#
     public FCompressedOffsetData CompressedScaleOffsets = new();
 
     public byte[] CompressedByteStream;
@@ -66,7 +66,7 @@ public class FCompressedAnimDataBase
 
 public interface ICompressedAnimData
 {
-    /* Common data */
+    /* Common data #1#
     public int CompressedNumberOfFrames { get; set; } // CompressedNumberOfKeys in UE5
     //public FAnimationErrorStats BoneCompressionErrorStats; //editor
 
@@ -81,7 +81,7 @@ public interface ICompressedAnimData
         /*if (!Ar.Owner.HasFlags(EPackageFlags.PKG_FilterEditorOnly))
         {
             BoneCompressionErrorStats = new FAnimationErrorStats(Ar);
-        }*/
+        }#1#
     }
 
     public void Bind(byte[] bulkData);
@@ -178,7 +178,7 @@ public class FUECompressedAnimDataConverter : JsonConverter<FUECompressedAnimDat
             writer.WritePropertyName("StripSize");
             writer.WriteValue(value.CompressedScaleOffsets.StripSize);
         }
-        writer.WriteEndObject();*/
+        writer.WriteEndObject();#1#
 
         writer.WriteEndObject();
     }
@@ -188,4 +188,4 @@ public class FUECompressedAnimDataConverter : JsonConverter<FUECompressedAnimDat
     {
         throw new NotImplementedException();
     }
-}
+}*/

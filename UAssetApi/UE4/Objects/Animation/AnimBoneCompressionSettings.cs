@@ -1,6 +1,6 @@
 ﻿namespace UAssetAPI;
 
-public class UAnimBoneCompressionSettings : UObject
+/*public class UAnimBoneCompressionSettings : UObject
 {
     public FPackageIndex[] Codecs; // UAnimBoneCompressionCodec[]
 
@@ -29,4 +29,4 @@ public class UAnimBoneCompressionSettings : UObject
 
         return codecMatch;
     }
-}
+}*/

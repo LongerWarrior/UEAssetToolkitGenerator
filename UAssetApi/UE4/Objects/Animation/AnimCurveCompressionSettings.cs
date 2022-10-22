@@ -1,6 +1,6 @@
 ﻿namespace UAssetAPI;
 
-public class UAnimCurveCompressionSettings : UObjectProperty
+/*public class UAnimCurveCompressionSettings : UObjectProperty
 {
     public FPackageIndex Codec; // UAnimCurveCompressionCodec
 
@@ -24,4 +24,4 @@ public class UAnimCurveCompressionSettings : UObjectProperty
     }
 
     public UAnimCurveCompressionCodec? GetCodec(string path) => Codec?.Load<UAnimCurveCompressionCodec>()?.GetCodec(path);
-}
+}*/

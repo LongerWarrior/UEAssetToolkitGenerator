@@ -1,7 +1,7 @@
 ﻿namespace UAssetAPI;
 
-[JsonConverter(typeof(FCurveDescConverter))]
-public /*private*/ struct FCurveDesc
+/*[JsonConverter(typeof(FCurveDescConverter))]
+public /*private#1# struct FCurveDesc
 {
     public ERichCurveCompressionFormat CompressionFormat;
     public ERichCurveKeyTimeCompressionFormat KeyTimeCompressionFormat;
@@ -251,4 +251,4 @@ public class UAnimCurveCompressionCodec_CompressedRichCurve : UAnimCurveCompress
             return floatCurves;
         }
     }
-}
+}*/

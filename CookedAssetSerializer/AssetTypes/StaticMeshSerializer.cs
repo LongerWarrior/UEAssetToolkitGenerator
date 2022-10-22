@@ -1,4 +1,6 @@
 ﻿using System.Security.Cryptography;
+using CookedAssetSerializer.FBX;
+using static CookedAssetSerializer.FBX.StaticMeshFBX;
 
 namespace CookedAssetSerializer.AssetTypes;
 
@@ -20,13 +22,6 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         DisableGeneration.Add("ExtendedBounds");
         DisableGeneration.Add("LightmapUVDensity");
         DisableGeneration.Add("StaticMaterials");
-        
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
-        if (!File.Exists(path2)) 
-        {
-            IsSkipped = true;
-            return;
-        }
 
         if (!SetupAssetInfo()) return;
         
@@ -84,8 +79,15 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("ScreenSize", JArray.FromObject(new List<int> {1, 0, 0, 0, 0, 0, 0, 0}));
 
         // Export raw mesh data into seperate FBX file that can be imported back into UE
-        
-        
+        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        string error = "";
+        new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error);
+
+        if (!File.Exists(path2) || error != "") 
+        {
+            IsSkipped = true;
+            return;
+        }
         using (var md5 = MD5.Create()) 
         {
             using var stream1 = File.OpenRead(path2);
@@ -97,4 +99,13 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         
         WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
     }
+
+    FStaticMeshStruct BuildStaticMeshStruct()
+    {
+        FStaticMeshStruct mesh;
+        mesh.Name = AssetName;
+        mesh.RenderData = ClassExport.RenderData;
+        mesh.StaticMaterials = ClassExport.StaticMaterials;
+        return mesh;
+    } 
 }

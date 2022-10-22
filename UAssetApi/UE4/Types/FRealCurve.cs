@@ -12,14 +12,14 @@ namespace UAssetApi.UE4.Types;
         [JsonConverter(typeof(StringEnumConverter))]
         public ERichCurveExtrapolation PostInfinityExtrap;
 
-        public FRealCurve()
+        /*public FRealCurve()
         {
             DefaultValue = this["DefaultValue"] is FloatPropertyData curve ? curve.Value : 3.402823466e+38f; // MAX_flt;
             PreInfinityExtrap = this["PreInfinityExtrap"] is EnumPropertyData pre ? 
                 (ERichCurveExtrapolation)pre.RawValue : ERichCurveExtrapolation.RCCE_Constant;
             PostInfinityExtrap = this["PostInfinityExtrap"] is EnumPropertyData post ? 
                 (ERichCurveExtrapolation)post.RawValue : ERichCurveExtrapolation.RCCE_Constant;
-        }
+        }*/
 
         public abstract void RemapTimeValue(ref float inTime, ref float cycleValueOffset);
         public abstract float Eval(float inTime, float inDefaultTime = 0);

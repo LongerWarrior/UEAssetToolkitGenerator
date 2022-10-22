@@ -1,21 +1,21 @@
 ﻿namespace  UAssetAPI;
 
-[JsonConverter(typeof(FACLDatabaseCompressedAnimDataConverter))]
+/*[JsonConverter(typeof(FACLDatabaseCompressedAnimDataConverter))]
 public class FACLDatabaseCompressedAnimData : ICompressedAnimData
 {
     public int CompressedNumberOfFrames { get; set; }
 
-    /** Maps the compressed_tracks instance. Used in cooked build only. */
+    /** Maps the compressed_tracks instance. Used in cooked build only. #1#
     public byte[] CompressedByteStream;
 
-    /** The codec instance that owns us. */
+    /** The codec instance that owns us. #1#
     public UAnimBoneCompressionCodec_ACLDatabase? Codec;
 
-    /** The sequence name hash that owns this data. */
+    /** The sequence name hash that owns this data. #1#
     public uint SequenceNameHash;
 
-    /*/** Holds the compressed_tracks instance for the anim sequence #1#
-    public byte[] CompressedClip;*/
+    /#1#** Holds the compressed_tracks instance for the anim sequence #2#
+    public byte[] CompressedClip;#1#
 
     public void SerializeCompressedData(FAssetArchive Ar)
     {
@@ -26,7 +26,7 @@ public class FACLDatabaseCompressedAnimData : ICompressedAnimData
         /*if (!Ar.Owner.HasFlags(EPackageFlags.PKG_FilterEditorOnly))
         {
             CompressedClip = Ar.ReadArray<byte>();
-        }*/
+        }#1#
     }
 
     public void Bind(byte[] bulkData)
@@ -61,4 +61,4 @@ public class FACLDatabaseCompressedAnimDataConverter : JsonConverter<FACLDatabas
 public class UAnimBoneCompressionCodec_ACLDatabase : UAnimBoneCompressionCodec_ACLBase
 {
     public override ICompressedAnimData AllocateAnimData() => new FACLDatabaseCompressedAnimData { Codec = this };
-}
+}*/

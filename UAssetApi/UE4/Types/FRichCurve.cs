@@ -11,11 +11,11 @@ public class FRichCurve : FRealCurve
 {
     public RichCurveKeyPropertyData[] Keys;
 
-    public FRichCurve()
+    /*public FRichCurve()
     {
         Keys = Array.Empty<RichCurveKeyPropertyData>();
         Keys = this["Keys"] is ArrayPropertyData keys ? keys.Value : Array.Empty<RichCurveKeyPropertyData>();
-    }
+    }*/
 
     public override void RemapTimeValue(ref float inTime, ref float cycleValueOffset)
     {
