@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using CookedAssetSerializer.FBX;
 using static CookedAssetSerializer.FBX.StaticMeshFBX;
 
@@ -13,6 +14,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         SerializeAsset();
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.String; size: 128MB")]
     private void SerializeAsset()
     {
         if (!SetupSerialization()) return;
