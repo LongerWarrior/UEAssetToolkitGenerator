@@ -75,15 +75,14 @@ public class SkeletonSerializer : Serializer<SkeletonExport>
         // Export raw mesh data into seperate FBX file that can be imported back into UE
         var path2 = Path.ChangeExtension(OutPath, "fbx");
         string error = "";
-        bool tooLarge = false;
-        new SkeletonFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
+        new SkeletonFBX(BuildSkeletonStruct(), path2, false, ref error);
 
         if (!File.Exists(path2)) 
         {
             IsSkipped = true;
             if (error != "")
             {
-                if (tooLarge) SkippedCode = error;
+                SkippedCode = error;
             }
             else
             {
