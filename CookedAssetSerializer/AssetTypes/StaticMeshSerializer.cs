@@ -83,11 +83,20 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         // Export raw mesh data into seperate FBX file that can be imported back into UE
         var path2 = Path.ChangeExtension(OutPath, "fbx");
         string error = "";
-        new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error);
+        bool tooLarge = false;
+        new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
 
-        if (!File.Exists(path2) || error != "") 
+        if (!File.Exists(path2)) 
         {
             IsSkipped = true;
+            if (error != "")
+            {
+                if (tooLarge) SkippedCode = error;
+            }
+            else
+            {
+                SkippedCode = "No FBX file supplied!";
+            }
             return;
         }
         using (var md5 = MD5.Create()) 
@@ -104,6 +113,17 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
 
     FStaticMeshStruct BuildStaticMeshStruct()
     {
+        foreach (var lod in ClassExport.RenderData.LODs)
+        {
+            if (lod.VertexBuffer != null)
+            {
+                foreach (var uvItem in lod.VertexBuffer.UV)
+                {
+                    uvItem.Normal[2].Data &= 0xFFFFFFu;
+                }
+            }
+        }
+        
         FStaticMeshStruct mesh;
         mesh.Name = AssetName;
         mesh.RenderData = ClassExport.RenderData;

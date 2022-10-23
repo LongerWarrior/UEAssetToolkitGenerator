@@ -1,4 +1,7 @@
-﻿namespace CookedAssetSerializer.AssetTypes;
+﻿using CookedAssetSerializer.FBX;
+using static CookedAssetSerializer.FBX.SkeletonFBX;
+
+namespace CookedAssetSerializer.AssetTypes;
 
 public class SkeletonSerializer : Serializer<SkeletonExport>
 {
@@ -69,10 +72,37 @@ public class SkeletonSerializer : Serializer<SkeletonExport>
         assetObjData.Value = properties;
         AssetData.Add(assetObjData);
         
+        // Export raw mesh data into seperate FBX file that can be imported back into UE
+        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        string error = "";
+        bool tooLarge = false;
+        new SkeletonFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
+
+        if (!File.Exists(path2)) 
+        {
+            IsSkipped = true;
+            if (error != "")
+            {
+                if (tooLarge) SkippedCode = error;
+            }
+            else
+            {
+                SkippedCode = "No FBX file supplied!";
+            }
+            return;
+        }
+        
         AssignAssetSerializedData();
         
         WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
     }
+    
+    FSkeletonStruct BuildSkeletonStruct()
+    {
+        FSkeletonStruct sk;
+        sk.Skeleton = ClassExport.ReferenceSkeleton;
+        return sk;
+    } 
     
     //public static JProperty SerializeSkeletonData(List<PropertyData> Data) {
     //	JProperty jdata;

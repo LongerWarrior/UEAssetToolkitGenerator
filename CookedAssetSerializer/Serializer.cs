@@ -7,6 +7,7 @@ public class Serializer<T> where T: Export
     protected Settings Settings;
 
     public bool IsSkipped;
+    public string SkippedCode = "";
     
     protected UAsset Asset;
     protected string AssetName;

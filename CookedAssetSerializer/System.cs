@@ -8,12 +8,12 @@ public class System
 
     private int AssetTotal;
     private int AssetCount;
-    //StreamWriter Writer;
+    StreamWriter Writer;
 
     public System(Settings settings)
     {
         Settings = settings;
-        //Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
+        Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -67,7 +67,7 @@ public class System
 
         File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
-        //Writer.Close();
+        Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
@@ -108,7 +108,7 @@ public class System
             if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
         }
-        //Writer.Close();
+        Writer.Close();
     }
     
     public void SerializeAssets()
@@ -127,8 +127,11 @@ public class System
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                 continue;
             }
+            
+            PrintOutput("Serializing " + file, "SerializeAssets");
 
             bool skip = false;
+            string skipReason = "";
             if (asset.assetType != EAssetType.Uncategorized)
             {
                 if (Settings.DummyAssets.Contains(asset.assetType))
@@ -218,7 +221,9 @@ public class System
                             skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.StaticMesh:
-                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(Settings, asset).IsSkipped);
+                            var sm = new StaticMeshSerializer(Settings, asset);
+                            if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
+                            skip = CheckDeleteAsset(asset, sm.IsSkipped);
                             break;
                     }
                 }
@@ -229,11 +234,15 @@ public class System
                 if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
                 skip = CheckDeleteAsset(asset, new UncategorizedSerializer(Settings, asset).IsSkipped);
             }
-            
-            if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+
+            if (skip)
+            {
+                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "SerializeAssets");
+            }
             else PrintOutput(file, "SerializeAssets");
         }
-        //Writer.Close();
+        Writer.Close();
     }
 
     public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
@@ -249,9 +258,9 @@ public class System
 
     private void PrintOutput(string output, string type = "debug")
     {
-        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
-        //Writer.WriteLine(logLine);
-        //Writer.Flush();
+        string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
+        Writer.WriteLine(logLine);
+        Writer.Flush();
     }
 
     private string GetAssetType(string file, UE4Version version)
