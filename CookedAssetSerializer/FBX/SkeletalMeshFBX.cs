@@ -28,8 +28,8 @@ public class SkeletalMeshFBX
         }
         
         // output json as file at path
-        File.WriteAllText(Path.ChangeExtension(path, "json"), json);
-        //ExportSkeletalMeshIntoFbxFile(json, path, bExportAsText, ref error);
+        //File.WriteAllText(Path.ChangeExtension(path, "json"), json);
+        ExportSkeletalMeshIntoFbxFile(json, path, bExportAsText, ref error);
     }
     
     public float ConvertLengthToTime(int length)
