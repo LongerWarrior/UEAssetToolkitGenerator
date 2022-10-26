@@ -1,4 +1,5 @@
-﻿using CookedAssetSerializer.FBX;
+﻿using System.Security.Cryptography;
+using CookedAssetSerializer.FBX;
 using static CookedAssetSerializer.FBX.SkeletalMeshFBX;
 
 namespace CookedAssetSerializer.AssetTypes;
@@ -19,8 +20,26 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         if (!SetupAssetInfo()) return;
         
         SerializeHeaders();
+        
+        var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+        AssetData.Add("AssetObjectData", properties);
 
-        AssetData.Add(new JProperty("AssetClass", GetFullName(ClassExport.ClassIndex.Index, Asset)));
+        var materials = new JArray();
+        List<short> materialindexes = new();
+        materialindexes.AddRange((ClassExport.LODModels[0].Sections).Select(section => section.MaterialIndex));
+        var mats = ClassExport.Materials;
+        foreach (var index in materialindexes)
+        {
+            if (index < mats.Length)
+            {
+                var materialData = new JObject();
+                materialData.Add("MaterialSlotName", mats[index].MaterialSlotName.ToName());
+                var fPackageIndex = mats[index].Material;
+                if (fPackageIndex != null) materialData.Add("MaterialInterface", Index(fPackageIndex.Index, Dict));
+                materials.Add(materialData);
+            }
+        }
+        AssetData.Add("Materials", materials);
         
         // Export raw mesh data into seperate FBX file that can be imported back into UE
         var path2 = Path.ChangeExtension(OutPath, "fbx");
@@ -40,6 +59,12 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
                 SkippedCode = "No FBX file supplied!";
             }
             return;
+        }
+        using (var md5 = MD5.Create()) 
+        {
+            using var stream1 = File.OpenRead(path2);
+            var hash = md5.ComputeHash(stream1).Select(x => x.ToString("x2")).Aggregate((a, b) => a + b);
+            AssetData.Add("ModelFileHash", hash);
         }
         
         AssignAssetSerializedData();

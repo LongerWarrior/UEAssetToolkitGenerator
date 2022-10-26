@@ -13,8 +13,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         Asset = asset;
         SerializeAsset();
     }
-
-    [SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.String; size: 128MB")]
+    
     private void SerializeAsset()
     {
         if (!SetupSerialization()) return;
@@ -29,34 +28,12 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         
         SerializeHeaders();
         
-        //AssignAssetSerializedData();
-        
         var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
         RefObjects = new List<int>();
         AssetData.Add("AssetObjectData", properties);
         
         var materialsData = new JArray();
-        //if (FindPropertyData(ClassExport, "StaticMaterials", out PropertyData _materials))
-        //{
-        //    var materials = (ArrayPropertyData)_materials;
-        //    foreach (var propertyData in materials.Value)
-        //    {
-        //        var material = (StructPropertyData)propertyData;
-        //        var materialData = new JObject();
-        //        if (FindPropertyData(material.Value, "MaterialSlotName", out PropertyData _name))
-        //        {
-        //            var slotName = (NamePropertyData)_name;
-        //            materialData.Add("MaterialSlotName", slotName.Value.ToName());
-        //        }
-        //        if (FindPropertyData(material.Value, "MaterialInterface", out PropertyData _interface))
-        //        {
-        //            var materialInterface = (ObjectPropertyData)_interface;
-        //            materialData.Add("MaterialInterface", Index(materialInterface.Value.Index, Dict));
-        //        }
-        //        materialsData.Add(materialData);
-        //    }
-        //}
         List<int> materialindexes = new();
         materialindexes.AddRange((ClassExport.RenderData?.LODs[0].Sections).Select(section => section.MaterialIndex));
 
