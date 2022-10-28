@@ -4,6 +4,7 @@ namespace UAssetAPI.StructTypes.SkeletalMesh;
 
 public class FSkeletalMeshVertexColorBuffer
 {
+    [JsonConverter(typeof(ColorJsonConverter))]
     public readonly Color[] Data;
 
     public FSkeletalMeshVertexColorBuffer()
