@@ -15,7 +15,7 @@ public class StaticMeshFBX
 
     public StaticMeshFBX(FStaticMeshStruct meshStruct, string path, bool bExportAsText, ref string error, ref bool tooLarge)
     {
-        string json = JsonConvert.SerializeObject(meshStruct, Formatting.Indented);
+        string json = JsonConvert.SerializeObject(meshStruct);
         // if json string is longer than 20 million characters (roughly 3.5mins completetion time), skip it
         if (json.Length > 20000000) // TODO: Make this a setting
         {

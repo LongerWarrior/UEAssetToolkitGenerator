@@ -45,7 +45,7 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         var path2 = Path.ChangeExtension(OutPath, "fbx");
         string error = "";
         bool tooLarge = false;
-        new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
+        //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
 
         if (!File.Exists(path2)) 
         {

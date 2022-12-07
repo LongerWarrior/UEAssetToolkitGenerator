@@ -44,12 +44,15 @@ public class System
         AssetCount = 1;
         foreach (var file in files)
         {
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
+
             var type = GetAssetType(file, Settings.GlobalUEVersion);
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
-            AssetCount++;
-
+            
             if (types.ContainsKey(type)) types[type].Add(path);
             else types[type] = new List<string> { path };
 
@@ -64,6 +67,7 @@ public class System
             jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
             allTypes.Add("\"" + entry.Key + "\",");
         }
+        allTypes.Sort();
 
         File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
@@ -78,11 +82,14 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
+            
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
             var type = GetAssetType(file, Settings.GlobalUEVersion);
-
-            AssetCount++;
+            
             if (!Settings.TypesToCopy.Contains(type))
             {
                 PrintOutput("Skipped operation on " + file, "GetCookedAssets");
@@ -119,9 +126,12 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
             AssetCount++;
-
+            
+            if (CheckPNGAsset(file)) continue;
+            
+            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
+            
             if (Settings.SkipSerialization.Contains(asset.assetType))
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
@@ -161,10 +171,10 @@ public class System
                             skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.CameraAnim:
                             skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
@@ -261,6 +271,13 @@ public class System
         string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
         Writer.WriteLine(logLine);
         Writer.Flush();
+    }
+
+    private bool CheckPNGAsset(string file)
+    {
+        // If there is another file with the same name but has the .png extension, skip it
+        // TODO: Make JSON for the PNG just existing for Asset Gen (currently UAGUI does not support this uasset type)
+        return File.Exists(file.Replace(".uasset", ".png"));
     }
 
     private string GetAssetType(string file, UE4Version version)

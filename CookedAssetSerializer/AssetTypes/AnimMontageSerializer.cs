@@ -16,8 +16,6 @@ public class AnimMontageSerializer : Serializer<BlendSpaceBaseExport>
         if (!SetupAssetInfo()) return;
 
         SerializeHeaders();
-
-        
         
         AssignAssetSerializedData();
 

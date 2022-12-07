@@ -1163,9 +1163,9 @@ public static class SerializationUtils
                     if (Data[i].DuplicationIndex != Data[i - 1].DuplicationIndex + 1 &&
                         Data[i].Name.ToName() == Data[i - 1].Name.ToName())
                     {
-                        Console.WriteLine("Missing property with lower duplication index  Name : " +
+                        /*Console.WriteLine("Missing property with lower duplication index  Name : " +
                                           Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() +
-                                          " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
+                                          " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());*/
 
                         return false;
                     }
@@ -1175,9 +1175,9 @@ public static class SerializationUtils
             {
                 if (Data[i].DuplicationIndex > 0)
                 {
-                    Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " +
+                    /*Console.WriteLine(" i=0  Missing property with lower duplication index  Name : " +
                                       Data[i].Name.ToName() + " Type : " + Data[i].PropertyType.ToName() +
-                                      " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());
+                                      " StructType : " + (Data[i] as StructPropertyData).StructType.ToName());*/
                     return false;
                 }
             }
