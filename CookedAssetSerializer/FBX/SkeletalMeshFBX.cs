@@ -39,7 +39,7 @@ public class SkeletalMeshFBX
         return (float)(length / 1000000 * 10.5) / 60;
     }
     
-    [DllImport(@"F:\Github Projects\Other\UEAssetToolkitGenerator\FBX-Wrapper\cmake-build-release\FBX_Wrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(@"FBX_Wrapper", CallingConvention = CallingConvention.Cdecl)]
     static extern void ExportSkeletalMeshIntoFbxFile(string JSONSkeletonalMeshData, string OutFileName,
         bool bExportAsText, ref string OutErrorMessage);
 }
