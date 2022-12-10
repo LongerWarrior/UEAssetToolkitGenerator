@@ -37,12 +37,32 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
         // Case for AnimSequence
         if (checkBoneTreeIndex)
         {
-            var mapTable = properties["TrackToSkeletonMapTable"];
+            // TODO: Fix edge case where anim sequence has missing bone tree indexes in track to skeleton map table
+            /*var mapTable = properties["TrackToSkeletonMapTable"];
             if (mapTable != null)
             {
+                // Sometimes, the bone tree index misses some numbers, so we need to make sure that it never misses any numbers
+                // Make a temporary sorted array. Then loop through the array, and if the current index is not equal to the current value, then we need to add a new value
                 var sortedArray = mapTable.OrderBy(x => x["BoneTreeIndex"].Value<int>());
-                mapTable.Replace(new JArray(sortedArray));
-            }
+                var newValues = new List<JObject>();
+                var currentIndex = 0;
+                foreach (var value in sortedArray)
+                {
+                    if (value["BoneTreeIndex"].Value<int>() != currentIndex)
+                    {
+                        var newValue = new JObject();
+                        newValue.Add("BoneTreeIndex", currentIndex);
+                        newValues.Add(newValue);
+                    }
+                    currentIndex++;
+                }
+
+                // Add the new values to the map table
+                foreach (var value in newValues)
+                {
+                    mapTable = (JToken)mapTable.Append(value);
+                }
+            }*/
         }
 
         PaperSpriteSerializer(ref properties);
