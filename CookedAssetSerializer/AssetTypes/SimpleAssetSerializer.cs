@@ -26,12 +26,24 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
     }
 
     public void SerializeAsset(JProperty assetClass = null, JProperty extraAssetData = null, 
-        JProperty extraAssetObjectData = null, JProperty extraProperties = null, bool skipRefs = false, bool skipAOD = false)
+        JProperty extraAssetObjectData = null, JProperty extraProperties = null, bool skipRefs = false, 
+        bool skipAOD = false, bool checkBoneTreeIndex = false)
     {
         // Case for CurveBase, SKM, SoundCue
         if (assetClass != null) AssetData.Add(assetClass);
 
         var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
+
+        // Case for AnimSequence
+        if (checkBoneTreeIndex)
+        {
+            var mapTable = properties["TrackToSkeletonMapTable"];
+            if (mapTable != null)
+            {
+                var sortedArray = mapTable.OrderBy(x => x["BoneTreeIndex"].Value<int>());
+                mapTable.Replace(new JArray(sortedArray));
+            }
+        }
 
         PaperSpriteSerializer(ref properties);
         
