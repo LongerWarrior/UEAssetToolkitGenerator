@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Text;
 using CookedAssetSerializer;
 using Newtonsoft.Json;
+using Serilog;
 using UAssetAPI;
 
 namespace CookedAssetSerializerGUI;
@@ -17,6 +19,12 @@ public partial class Form1 : Form
         });
         
         InitializeComponent();
+
+        Log.Logger = new LoggerConfiguration().Enrich.FromLogContext()
+            .WriteTo.File(
+            Path.Combine(Environment.CurrentDirectory, "Logs", $"CAS-Log-{DateTime.Now:yyyy-MM-dd}.txt"),
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}").CreateLogger();
+
         SetupForm();
         SetupGlobals();
 
@@ -615,7 +623,8 @@ public partial class Form1 : Form
         SaveSettings();
     }
 
-    private void btnSelectParseDir_Click(object sender, EventArgs e) {
+    private void btnSelectParseDir_Click(object sender, EventArgs e)
+    {
         rtxtParseDir.Text = OpenDirectoryDialog(rtxtParseDir.Text);
     }
 
