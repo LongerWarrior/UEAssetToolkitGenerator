@@ -11,12 +11,10 @@ public class System
 
     private int AssetTotal;
     private int AssetCount;
-    //StreamWriter Writer;
 
     public System(Settings settings)
     {
         Settings = settings;
-        //Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -74,7 +72,6 @@ public class System
 
         File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
-        //Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
@@ -118,7 +115,6 @@ public class System
             if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
         }
-        //Writer.Close();
     }
     
     public void SerializeAssets()
@@ -255,7 +251,6 @@ public class System
             }
             else PrintOutput(file, "SerializeAssets");
         }
-        //Writer.Close();
     }
 
     public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
@@ -273,8 +268,6 @@ public class System
     {
         //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
         Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
-        //Writer.WriteLine(logLine);
-        //Writer.Flush();
     }
 
     private bool CheckPNGAsset(string file)
@@ -319,7 +312,6 @@ public class System
             return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
-        //Console.WriteLine("Couldn't identify asset type : " + file);
         return "null";
     }
 }

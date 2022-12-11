@@ -330,7 +330,6 @@ public partial class Form1 : Form
         }
         else
         {
-            btnScanAR.Enabled = !isRunning;
             btnScanAssets.Enabled = !isRunning;
             btnMoveCookedAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
