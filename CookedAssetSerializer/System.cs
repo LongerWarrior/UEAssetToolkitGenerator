@@ -1,5 +1,8 @@
 ﻿using System.Text;
 
+using System.Diagnostics;
+using Serilog;
+
 namespace CookedAssetSerializer;
 
 public class System
@@ -41,7 +44,7 @@ public class System
         var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
         AssetTotal = files.Length;
-        AssetCount = 1;
+        AssetCount = 0;
         foreach (var file in files)
         {
             AssetCount++;
@@ -268,9 +271,10 @@ public class System
 
     private void PrintOutput(string output, string type = "debug")
     {
-        string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
-        /*Writer.WriteLine(logLine);
-        Writer.Flush();*/
+        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
+        Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
+        //Writer.WriteLine(logLine);
+        //Writer.Flush();
     }
 
     private bool CheckPNGAsset(string file)
@@ -314,8 +318,8 @@ public class System
         {
             return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
-
-        Console.WriteLine("Couldn't identify asset type : " + file);
+        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
+        //Console.WriteLine("Couldn't identify asset type : " + file);
         return "null";
     }
 }
