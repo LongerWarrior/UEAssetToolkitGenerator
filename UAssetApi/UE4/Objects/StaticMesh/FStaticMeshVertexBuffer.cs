@@ -7,7 +7,7 @@ public class FStaticMeshVertexBuffer
     public readonly int NumVertices;
     public readonly bool UseFullPrecisionUVs;
     public readonly bool UseHighPrecisionTangentBasis;
-    public readonly FStaticMeshUVItem[] UV;  // TangentsData ?
+    public readonly FStaticMeshUVItem[] UV;  // StaticMeshVertexBuffer 
 
     public FStaticMeshVertexBuffer(AssetBinaryReader reader)
     {

@@ -25,7 +25,7 @@ public class StringTableSerializer : Serializer<StringTableExport>
         foreach (var key in ClassExport.Table.Keys) 
         {
             ClassExport.Table.TryGetValue(key, out var value);
-            strings.Add(key.ToString(), value.ToString());
+            strings.Add(key?.ToString() ?? "", value?.ToString() ?? "");
         }
         AssetData.Add("SourceStrings", strings);
         AssetData.Add("MetaData", new JObject());

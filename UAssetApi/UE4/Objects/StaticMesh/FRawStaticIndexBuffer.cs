@@ -35,13 +35,13 @@ public class FRawStaticIndexBuffer
             else
             {
                 var count = (int)len / 2;
-                Indices32 = new uint[count];
+                Indices16 = new ushort[count];
                 for (int i = 0; i < count; i++) {
-                    Indices32[i] = reader.ReadUInt16();
+                    Indices16[i] = reader.ReadUInt16();
                 }
             }
 
-            if (reader.Ver >= UE4Version.VER_UE4_25) {
+            if (reader["RawIndexBuffer.HasShouldExpandTo32Bit"]) {
                 var bShouldExpandTo32Bit = reader.ReadIntBoolean();
             }
 
