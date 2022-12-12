@@ -1,9 +1,6 @@
 ﻿using System.Diagnostics;
 using Serilog;
 
-using System.Diagnostics;
-using Serilog;
-
 namespace CookedAssetSerializer;
 
 public class System
@@ -166,7 +163,7 @@ public class System
             UAsset asset = new UAsset(file, JSONSettings.GlobalUEVersion, true);
             AssetCount++;
 
-            if (JSONSettings.SkipSerialization.Contains(asset.assetType))
+            if (JSONSettings.SkipSerialization.Contains(asset.assetType)) continue;
             if (CheckPNGAsset(file))
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
