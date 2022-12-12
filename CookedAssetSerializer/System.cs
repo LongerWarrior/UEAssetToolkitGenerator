@@ -282,7 +282,7 @@ public class System
         UAsset asset = new UAsset(file, version, true);
         if (asset.Exports.Count == 1)
         {
-            return shortname ? GetName(asset.Exports[0].ClassIndex.Index, asset) : GetFullName(asset.Exports[0].ClassIndex.Index, asset);
+            return GetFullName(asset.Exports[0].ClassIndex.Index, asset);
         }
 
         List<Export> exportnames = new();
@@ -303,12 +303,12 @@ public class System
 
         if (exportnames.Count == 1)
         {
-            return shortname ? GetName(exportnames[0].ClassIndex.Index, asset): GetFullName(exportnames[0].ClassIndex.Index, asset);
+            return GetFullName(exportnames[0].ClassIndex.Index, asset);
         }
 
         if (isasset.Count == 1)
         {
-            return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
+            return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
         return "null";
