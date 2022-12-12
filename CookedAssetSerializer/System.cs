@@ -41,7 +41,7 @@ public class System
         List<string> allTypes = new();
         var files = MakeFileList();
         AssetCount = 0;
-        AssetTotal = files.Length;
+        AssetTotal = files.Count;
         foreach (var file in files)
         {
             var type = GetAssetTypeAR(file);
@@ -167,7 +167,7 @@ public class System
             AssetCount++;
 
             if (JSONSettings.SkipSerialization.Contains(asset.assetType))
-            if (CheckPNGAsset(file)) continue;
+            if (CheckPNGAsset(file))
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                 continue;
@@ -206,10 +206,10 @@ public class System
                             skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.CameraAnim:
                             skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
@@ -266,7 +266,7 @@ public class System
                             skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.StaticMesh:
-                            var sm = new StaticMeshSerializer(Settings, asset);
+                            var sm = new StaticMeshSerializer(JSONSettings, asset);
                             if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
                             skip = CheckDeleteAsset(asset, sm.IsSkipped);
                             break;

@@ -304,7 +304,7 @@ public class AssetBinaryReader : BinaryReader
 
     private bool GetOption(string optionKey)
     {
-        if (Singleton.GetOption(optionKey, out var value)) return value;
+        if (Singleton.GetOption(optionKey, out var val)) return val;
 
         if (Singleton.GetOption(optionKey, out bool value)) {
             return value;
