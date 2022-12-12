@@ -11,12 +11,10 @@ public class System
 
     private int AssetTotal;
     private int AssetCount;
-    //StreamWriter Writer;
 
     public System(Settings settings)
     {
         Settings = settings;
-        //Writer = File.AppendText(Path.Combine(Settings.InfoDir, "output_log.txt"));
     }
 
     public int GetAssetTotal()
@@ -47,15 +45,15 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            var type = GetAssetTypeAR(file);
-            if (type == "null")
-                type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
 
+            var type = GetAssetType(file, Settings.GlobalUEVersion);
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
-            AssetCount++;
-
+            
             if (types.ContainsKey(type)) types[type].Add(path);
             else types[type] = new List<string> { path };
 
@@ -69,10 +67,10 @@ public class System
             jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
             allTypes.Add("\"" + entry.Key + "\",");
         }
+        allTypes.Sort();
 
         File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
-        //Writer.Close();
     }
     
     public void GetCookedAssets(bool copy = true)
@@ -83,15 +81,14 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
+            
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetTypeAR(file);
-            if (type == "null") {
-                Debug.WriteLine(file);
-                type = GetAssetType(file, Settings.GlobalUEVersion, true);
-            }
-
-            AssetCount++;
+            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            
             if (!Settings.TypesToCopy.Contains(type))
             {
                 PrintOutput("Skipped operation on " + file, "GetCookedAssets");
@@ -117,7 +114,6 @@ public class System
             if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
         }
-        //Writer.Close();
     }
     
     public void SerializeAssets()
@@ -128,16 +124,22 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
             AssetCount++;
-
+            
+            if (CheckPNGAsset(file)) continue;
+            
+            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
+            
             if (Settings.SkipSerialization.Contains(asset.assetType))
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                 continue;
             }
+            
+            PrintOutput("Serializing " + file, "SerializeAssets");
 
             bool skip = false;
+            string skipReason = "";
             if (asset.assetType != EAssetType.Uncategorized)
             {
                 if (Settings.DummyAssets.Contains(asset.assetType))
@@ -167,10 +169,10 @@ public class System
                             skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.CameraAnim:
                             skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
@@ -227,7 +229,9 @@ public class System
                             skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.StaticMesh:
-                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(Settings, asset).IsSkipped);
+                            var sm = new StaticMeshSerializer(Settings, asset);
+                            if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
+                            skip = CheckDeleteAsset(asset, sm.IsSkipped);
                             break;
                     }
                 }
@@ -238,11 +242,14 @@ public class System
                 if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
                 skip = CheckDeleteAsset(asset, new UncategorizedSerializer(Settings, asset).IsSkipped);
             }
-            
-            if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+
+            if (skip)
+            {
+                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "SerializeAssets");
+            }
             else PrintOutput(file, "SerializeAssets");
         }
-        //Writer.Close();
     }
 
     public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
@@ -260,11 +267,16 @@ public class System
     {
         //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
         Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
-        //Writer.WriteLine(logLine);
-        //Writer.Flush();
     }
 
-    private string GetAssetType(string file, UE4Version version, bool shortname = true)
+    private bool CheckPNGAsset(string file)
+    {
+        // If there is another file with the same name but has the .png extension, skip it
+        // TODO: Make JSON for the PNG just existing for Asset Gen (currently UAGUI does not support this uasset type)
+        return File.Exists(file.Replace(".uasset", ".png"));
+    }
+
+    private string GetAssetType(string file, UE4Version version)
     {
         var name = Path.GetFileNameWithoutExtension(file).ToLower();
         UAsset asset = new UAsset(file, version, true);
@@ -299,24 +311,6 @@ public class System
             return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
-        //Console.WriteLine("Couldn't identify asset type : " + file);
-        return "null";
-    }
-
-    private string GetAssetTypeAR(string fullAssetPath) {
-        if (AssetList.Count == 0) return "null";
-
-        var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
-        var directory = Path.GetDirectoryName(fullAssetPath);
-        var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
-        if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
-        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
-
-        if (AssetList.ContainsKey(AssetPath)) {
-            var artype = AssetList[AssetPath].AssetClass;
-            return artype;
-        }
-        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type with AR: " + fullAssetPath);
         return "null";
     }
 }

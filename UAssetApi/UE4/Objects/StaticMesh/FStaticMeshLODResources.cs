@@ -3,6 +3,7 @@ using System.Drawing;
 namespace UAssetAPI.StructTypes.StaticMesh;
 
 public class FColorVertexBuffer {
+    [JsonConverter(typeof(ColorJsonConverter))]
     public readonly Color[] Data;
     public readonly int Stride;
     public readonly int NumVertices;
