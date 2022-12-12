@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
 using Serilog;
 
+using System.Diagnostics;
+using Serilog;
+
 namespace CookedAssetSerializer;
 
 public class System
@@ -37,16 +40,18 @@ public class System
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList();
+        AssetCount = 0;
+        AssetTotal = files.Length;
         foreach (var file in files)
         {
             var type = GetAssetTypeAR(file);
             if (type == "null") type = GetAssetType(file, JSONSettings.GlobalUEVersion);
+            if (CheckPNGAsset(file)) continue;
 
             var path = "/" + Path.GetRelativePath(JSONSettings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
-            AssetCount++;
-
+            
             if (types.ContainsKey(type)) types[type].Add(path);
             else types[type] = new List<string> { path };
 
@@ -60,6 +65,7 @@ public class System
             jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
             allTypes.Add("\"" + entry.Key + "\",");
         }
+        allTypes.Sort();
 
         File.WriteAllText(JSONSettings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(JSONSettings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
@@ -111,6 +117,10 @@ public class System
         var files = MakeFileList();
         foreach (var file in files)
         {
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
+            
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
             var type = GetAssetTypeAR(file);
@@ -157,12 +167,16 @@ public class System
             AssetCount++;
 
             if (JSONSettings.SkipSerialization.Contains(asset.assetType))
+            if (CheckPNGAsset(file)) continue;
             {
                 PrintOutput("Skipped serialization on " + file, "SerializeAssets");
                 continue;
             }
+            
+            PrintOutput("Serializing " + file, "SerializeAssets");
 
             bool skip = false;
+            string skipReason = "";
             if (asset.assetType != EAssetType.Uncategorized)
             {
                 if (JSONSettings.DummyAssets.Contains(asset.assetType))
@@ -192,10 +206,10 @@ public class System
                             skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
+                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
                             break;
                         case EAssetType.CameraAnim:
                             skip = CheckDeleteAsset(asset, new DummySerializer(JSONSettings, asset).IsSkipped);
@@ -252,7 +266,9 @@ public class System
                             skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(JSONSettings, asset).IsSkipped);
                             break;
                         case EAssetType.StaticMesh:
-                            skip = CheckDeleteAsset(asset, new StaticMeshSerializer(JSONSettings, asset).IsSkipped);
+                            var sm = new StaticMeshSerializer(Settings, asset);
+                            if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
+                            skip = CheckDeleteAsset(asset, sm.IsSkipped);
                             break;
                     }
                 }
@@ -263,11 +279,14 @@ public class System
                 if (!JSONSettings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
                 skip = CheckDeleteAsset(asset, new UncategorizedSerializer(JSONSettings, asset).IsSkipped);
             }
-            
-            if (skip) PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+
+            if (skip)
+            {
+                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "SerializeAssets");
+            }
             else PrintOutput(file, "SerializeAssets");
         }
-        
     }
 
     private List<string> MakeFileList()
@@ -303,7 +322,15 @@ public class System
 
     private void PrintOutput(string output, string type = "debug")
     {
+        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
         Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
+    }
+
+    private bool CheckPNGAsset(string file)
+    {
+        // If there is another file with the same name but has the .png extension, skip it
+        // TODO: Make JSON for the PNG just existing for Asset Gen (currently UAGUI does not support this uasset type)
+        return File.Exists(file.Replace(".uasset", ".png"));
     }
 
     private string GetAssetType(string file, UE4Version version, bool shortname = true)

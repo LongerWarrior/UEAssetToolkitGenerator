@@ -1328,7 +1328,7 @@ public class UAsset {
                             case "PhysicsAsset":
                                 Exports[i] = Exports[i].ConvertToChildExport<PhysicsAssetExport>();
                                 Exports[i].Read(reader, (int)nextStarting);
-                                break;
+                                break;                            
                             default:
                                 if (exportClassType.EndsWith("DataTable")) {
                                     Exports[i] = Exports[i].ConvertToChildExport<DataTableExport>();

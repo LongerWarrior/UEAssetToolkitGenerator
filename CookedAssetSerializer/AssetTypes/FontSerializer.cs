@@ -1,6 +1,8 @@
 ﻿namespace CookedAssetSerializer.AssetTypes;
 
-    public class FontSerializer : Serializer<FontExport>
+public class FontSerializer : Serializer<FontExport>
+{
+    public FontSerializer(Settings assetSettings, UAsset asset)
     {
         public FontSerializer(JSONSettings assetSettings, UAsset asset)
         {
@@ -9,17 +11,17 @@
             SerializeAsset();
         }
 
-        private void SerializeAsset()
+    private void SerializeAsset()
+    {
+	    if (!SetupSerialization()) return;
+	    
+	    if (!SetupAssetInfo()) return;
+	    
+	    SerializeHeaders();
+	    
+        var bOffline = FindPropertyData(ClassExport, "FontCacheType", out var prop);
+        if (bOffline) 
         {
-        if (!SetupSerialization()) return;
-        
-        if (!SetupAssetInfo()) return;
-        
-        SerializeHeaders();
-        
-            var bOffline = FindPropertyData(ClassExport, "FontCacheType", out var prop);
-            if (bOffline) 
-            {
 			var fontCacheType = (EnumPropertyData)prop;
 			if (fontCacheType.Value.ToName() == "EFontCacheType::Runtime") 
 			{
@@ -40,14 +42,14 @@
 					if (fontRef.Value.LocalFontFaceAsset.Index < 0) 
 					{
 						allFontsRef.Add(GetParentName(fontRef.Value.LocalFontFaceAsset.Index, Asset));
-                        }
+					}
 					else Console.WriteLine("exportfontface");
 				} 
 
 				AssetData.Add("ReferencedFontFacePackages", JArray.FromObject(allFontsRef.Distinct()));
 			} else AssetData.Add("IsOfflineFont", true);
-            }/* else {
-			asdata.Add("IsOfflineFont", true);
+        }/* else {
+		asdata.Add("IsOfflineFont", true);
 		}*/
 		
 		AssignAssetSerializedData();
@@ -57,12 +59,12 @@
 		properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
 		
 		WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
-        }
+    }
 
-        private void MakeAllFonts(StructPropertyData cfont, ref List<FontDataPropertyData> allFonts, string propName)
-        {
-        if (FindPropertyData(cfont.Value, propName, out PropertyData _fontFace)) 
-        {
+    private void MakeAllFonts(StructPropertyData cfont, ref List<FontDataPropertyData> allFonts, string propName)
+    {
+	    if (FindPropertyData(cfont.Value, propName, out PropertyData _fontFace)) 
+	    {
 	        var defFontFace = (StructPropertyData)_fontFace;
 	        if (FindPropertyData(defFontFace.Value, "Fonts", out PropertyData _fonts)) 
 	        {
@@ -75,13 +77,13 @@
 			        allFonts.Add((FontDataPropertyData)fontData.Value[0]);
 		        }
 	        }
-        }
-        }
+	    }
+    }
 
-        private void MakeSubTypeFonts(StructPropertyData cfont, ref List<FontDataPropertyData> allFonts)
-        {
-        if (FindPropertyData(cfont.Value, "SubTypefaces", out PropertyData _subTypeFaces)) 
-        {
+    private void MakeSubTypeFonts(StructPropertyData cfont, ref List<FontDataPropertyData> allFonts)
+    {
+	    if (FindPropertyData(cfont.Value, "SubTypefaces", out PropertyData _subTypeFaces)) 
+	    {
 	        var subTypeFaces = (ArrayPropertyData)_subTypeFaces;
 	        foreach (var subTypeFace in subTypeFaces.Value)
 	        {
@@ -104,6 +106,6 @@
 			        }
 		        }
 	        }
-        }
-        }
+	    }
     }
+}

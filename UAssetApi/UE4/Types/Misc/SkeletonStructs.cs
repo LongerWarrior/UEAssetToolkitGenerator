@@ -46,3 +46,8 @@ public struct FMeshBoneInfo {
         ParentIndex = parentIndex;
     }
 }
+
+public struct FTrackToSkeletonMap
+{
+    public int BoneTreeIndex;
+}
