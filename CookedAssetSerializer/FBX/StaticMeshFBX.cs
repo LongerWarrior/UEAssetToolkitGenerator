@@ -17,20 +17,20 @@ public class StaticMeshFBX
     {
         string json = JsonConvert.SerializeObject(meshStruct);
         // if json string is longer than 20 million characters (roughly 3.5mins completetion time), skip it
-        /*if (json.Length > 20000000) // TODO: Make this a setting
+        if (json.Length > 20000000) // TODO: Make this a setting
         {
             error = $"Mesh is too large to export to FBX. " +
                     $"Estimated time to complete using this method: {ConvertLengthToTime(json.Length)} minutes. " +
                     $"Use another method to export this mesh.";
             tooLarge = true;
             return;
-        }*/
+        }
         
         // output json as file at path
         //File.WriteAllText(Path.ChangeExtension(path, "json"), json);
-        //ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
-        TestFBXExport exporter = new TestFBXExport();
-        exporter.ExportStaticMeshIntoFbxFile(meshStruct, bExportAsText, false, path);
+        ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
+        /*TestFBXExport exporter = new TestFBXExport();
+        exporter.ExportStaticMeshIntoFbxFile(meshStruct, bExportAsText, false, path);*/
     }
 
     public float ConvertLengthToTime(int length)
