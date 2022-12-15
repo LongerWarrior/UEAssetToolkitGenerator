@@ -1,8 +1,8 @@
 ﻿namespace UAssetAPI;
 
 public struct FReferenceSkeleton {
-    public FMeshBoneInfo[] FinalRefBoneInfo;
-    public FTransform[] FinalRefBonePose;
+    public FMeshBoneInfo[] FinalRefBoneInfo; // RawRefBoneInfo
+    public FTransform[] FinalRefBonePose; // RawRefBonePose
     public Dictionary<FName, int> FinalNameToIndexMap;
 
     public void Read(AssetBinaryReader reader) {

@@ -5,7 +5,9 @@ public class FSkinWeightInfo
     private const int NUM_INFLUENCES_UE4 = 4;
     private const int MAX_TOTAL_INFLUENCES_UE4 = 8;
 
+    [JsonConverter(typeof(FSkinWeightInfoConverter))]
     public readonly byte[] BoneIndex;
+    [JsonConverter(typeof(FSkinWeightInfoConverter))]
     public readonly byte[] BoneWeight;
 
     public FSkinWeightInfo()

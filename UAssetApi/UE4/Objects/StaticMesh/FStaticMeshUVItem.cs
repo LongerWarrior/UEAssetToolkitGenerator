@@ -2,8 +2,8 @@ namespace UAssetAPI.StructTypes.StaticMesh;
 
 public class FStaticMeshUVItem
 {
-    public readonly FPackedNormal[] Normal;
-    public readonly FMeshUVFloat[] UV;
+    public readonly FPackedNormal[] Normal; // VertexTangent
+    public readonly FMeshUVFloat[] UV; // VertexUV
 
     public FStaticMeshUVItem(AssetBinaryReader reader, bool useHighPrecisionTangents, int numStaticUVSets, bool useStaticFloatUVs)
     {

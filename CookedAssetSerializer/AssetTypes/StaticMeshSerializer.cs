@@ -1,4 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
+using CookedAssetSerializer.FBX;
+using static CookedAssetSerializer.FBX.StaticMeshFBX;
 
 namespace CookedAssetSerializer.AssetTypes;
 
@@ -10,7 +13,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         Asset = asset;
         SerializeAsset();
     }
-
+    
     private void SerializeAsset()
     {
         if (!SetupSerialization()) return;
@@ -20,19 +23,10 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         DisableGeneration.Add("ExtendedBounds");
         DisableGeneration.Add("LightmapUVDensity");
         DisableGeneration.Add("StaticMaterials");
-        
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
-        if (!File.Exists(path2)) 
-        {
-            IsSkipped = true;
-            return;
-        }
 
         if (!SetupAssetInfo()) return;
         
         SerializeHeaders();
-        
-        //AssignAssetSerializedData();
         
         var properties = SerializeListOfProperties(ClassExport.Data, AssetInfo, ref RefObjects);
         properties.Add("$ReferencedObjects", JArray.FromObject(RefObjects.Distinct()));
@@ -40,26 +34,6 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("AssetObjectData", properties);
         
         var materialsData = new JArray();
-        //if (FindPropertyData(ClassExport, "StaticMaterials", out PropertyData _materials))
-        //{
-        //    var materials = (ArrayPropertyData)_materials;
-        //    foreach (var propertyData in materials.Value)
-        //    {
-        //        var material = (StructPropertyData)propertyData;
-        //        var materialData = new JObject();
-        //        if (FindPropertyData(material.Value, "MaterialSlotName", out PropertyData _name))
-        //        {
-        //            var slotName = (NamePropertyData)_name;
-        //            materialData.Add("MaterialSlotName", slotName.Value.ToName());
-        //        }
-        //        if (FindPropertyData(material.Value, "MaterialInterface", out PropertyData _interface))
-        //        {
-        //            var materialInterface = (ObjectPropertyData)_interface;
-        //            materialData.Add("MaterialInterface", Index(materialInterface.Value.Index, Dict));
-        //        }
-        //        materialsData.Add(materialData);
-        //    }
-        //}
         List<int> materialindexes = new();
         materialindexes.AddRange((ClassExport.RenderData?.LODs[0].Sections).Select(section => section.MaterialIndex));
 
@@ -83,6 +57,25 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("LodNumber", 1);
         AssetData.Add("ScreenSize", JArray.FromObject(new List<int> {1, 0, 0, 0, 0, 0, 0, 0}));
 
+        // Export raw mesh data into seperate FBX file that can be imported back into UE
+        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        string error = "";
+        bool tooLarge = false;
+        new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
+
+        if (!File.Exists(path2)) 
+        {
+            IsSkipped = true;
+            if (error != "")
+            {
+                if (tooLarge) SkippedCode = error;
+            }
+            else
+            {
+                SkippedCode = "No FBX file supplied!";
+            }
+            return;
+        }
         using (var md5 = MD5.Create()) 
         {
             using var stream1 = File.OpenRead(path2);
@@ -94,4 +87,24 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         
         WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
     }
+
+    FStaticMeshStruct BuildStaticMeshStruct()
+    {
+        foreach (var lod in ClassExport.RenderData.LODs)
+        {
+            if (lod.VertexBuffer != null)
+            {
+                foreach (var uvItem in lod.VertexBuffer.UV)
+                {
+                    uvItem.Normal[2].Data &= 0xFFFFFFu;
+                }
+            }
+        }
+        
+        FStaticMeshStruct mesh;
+        mesh.Name = AssetName;
+        mesh.RenderData = ClassExport.RenderData;
+        mesh.StaticMaterials = ClassExport.StaticMaterials;
+        return mesh;
+    } 
 }
