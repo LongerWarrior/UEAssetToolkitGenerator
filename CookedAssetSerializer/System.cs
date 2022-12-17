@@ -67,7 +67,7 @@ public class System
             if (CheckPNGAsset(file)) continue;
 
             var type = GetAssetTypeAR(file);
-            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
@@ -297,13 +297,13 @@ public class System
         return File.Exists(file.Replace(".uasset", ".png"));
     }
 
-    private string GetAssetType(string file, UE4Version version, bool shortname = true)
+    private string GetAssetType(string file, UE4Version version)
     {
         var name = Path.GetFileNameWithoutExtension(file).ToLower();
         UAsset asset = new UAsset(file, version, true);
         if (asset.Exports.Count == 1)
         {
-            return shortname ? GetName(asset.Exports[0].ClassIndex.Index, asset) : GetFullName(asset.Exports[0].ClassIndex.Index, asset);
+            return GetFullName(asset.Exports[0].ClassIndex.Index, asset);
         }
 
         List<Export> exportnames = new();
@@ -324,12 +324,12 @@ public class System
 
         if (exportnames.Count == 1)
         {
-            return shortname ? GetName(exportnames[0].ClassIndex.Index, asset): GetFullName(exportnames[0].ClassIndex.Index, asset);
+            return GetFullName(exportnames[0].ClassIndex.Index, asset);
         }
 
         if (isasset.Count == 1)
         {
-            return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
+            return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
         return "null";

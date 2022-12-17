@@ -21,7 +21,7 @@ public class FPackedNormal {
         Data = (uint)((int)(vector.X + 1 * 127.5) + (int)(vector.Y + 1 * 127.5) << 8 + (int)(vector.Z + 1 * 127.5) << 16);
     }
 
-    public FPackedNormal(FVector4 vector)// is this broken?
+    public FPackedNormal(FVector4 vector)// TODO: is this broken?
     {
         Data = (uint)((int)(vector.X + 1 * 127.5) + (int)(vector.Y + 1 * 127.5) << 8 + (int)(vector.Z + 1 * 127.5) << 16 + (int)(vector.W + 1 * 127.5) << 24);
     }
