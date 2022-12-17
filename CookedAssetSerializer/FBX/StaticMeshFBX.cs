@@ -29,6 +29,8 @@ public class StaticMeshFBX
         // output json as file at path
         //File.WriteAllText(Path.ChangeExtension(path, "json"), json);
         ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
+        /*TestFBXExport exporter = new TestFBXExport();
+        exporter.ExportStaticMeshIntoFbxFile(meshStruct, bExportAsText, false, path);*/
     }
 
     public float ConvertLengthToTime(int length)

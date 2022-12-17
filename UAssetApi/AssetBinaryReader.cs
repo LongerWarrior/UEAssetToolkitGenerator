@@ -306,10 +306,6 @@ public class AssetBinaryReader : BinaryReader
     {
         if (Singleton.GetOption(optionKey, out var val)) return val;
 
-        if (Singleton.GetOption(optionKey, out bool value)) {
-            return value;
-        }
-
         switch (optionKey) {
             case "RawIndexBuffer.HasShouldExpandTo32Bit":  return Ver >=  UE4Version.VER_UE4_25;
             //case "ShaderMap.UseNewCookedFormat":  return Asset.EngineVersion >=  UE4Version.VER_UE5_0;
@@ -322,8 +318,7 @@ public class AssetBinaryReader : BinaryReader
             case "StaticMesh.KeepMobileMinLODSettingOnDesktop":  return Ver >=  UE4Version.VER_UE4_27;
             case "StaticMesh.UseNewCookedFormat":  return Ver >=  UE4Version.VER_UE4_23;
             case "VirtualTextures":  return Ver >=  UE4Version.VER_UE4_23;
-            default: 
-                throw new Exception("Not valid Option");
+            default: throw new Exception("Not valid Option");
         }
     }
 

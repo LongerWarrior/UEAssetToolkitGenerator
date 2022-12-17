@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Text;
+using System.Diagnostics;
 using Serilog;
+using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializer;
 
@@ -32,6 +34,23 @@ public class System
         Settings.TypesToCopy.Clear();
     }
 
+    public void ScanAR()
+    {
+        var path = Directory.GetParent(Settings.ContentDir);
+        var AR = new FAssetRegistryState(path.ToString() + "/AssetRegistry.bin", Settings.GlobalUEVersion);
+
+        ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+        foreach (var data in AR.PreallocatedAssetDataBuffers) 
+        {
+            if (data.PackageName.ToName().StartsWith("/Game")) 
+            {
+                ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+            }
+        }
+        AR = null;
+        GC.Collect();
+    }
+
     public void ScanAssetTypes(string typeToFind = "")
     {
         Dictionary<string, List<string>> types = new();
@@ -41,9 +60,12 @@ public class System
         AssetTotal = files.Count;
         foreach (var file in files)
         {
+            AssetCount++;
+            
+            if (CheckPNGAsset(file)) continue;
+
             var type = GetAssetTypeAR(file);
             if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
-            if (CheckPNGAsset(file)) continue;
 
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
@@ -120,13 +142,10 @@ public class System
             
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
+            
             var type = GetAssetTypeAR(file);
-            if (type == "null") {
-                Debug.WriteLine(file);
-                type = GetAssetType(file, Settings.GlobalUEVersion);
-            }
-    
-            AssetCount++;
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
+
             if (!Settings.TypesToCopy.Contains(type))
             {
                 PrintOutput("Skipped operation on " + file, "GetCookedAssets");
@@ -330,13 +349,13 @@ public class System
         return File.Exists(file.Replace(".uasset", ".png"));
     }
 
-    private string GetAssetType(string file, UE4Version version, bool shortname = true)
+    private string GetAssetType(string file, UE4Version version)
     {
         var name = Path.GetFileNameWithoutExtension(file).ToLower();
         UAsset asset = new UAsset(file, version, true);
         if (asset.Exports.Count == 1)
         {
-            return shortname ? GetName(asset.Exports[0].ClassIndex.Index, asset) : GetFullName(asset.Exports[0].ClassIndex.Index, asset);
+            return GetFullName(asset.Exports[0].ClassIndex.Index, asset);
         }
 
         List<Export> exportnames = new();
@@ -357,12 +376,12 @@ public class System
 
         if (exportnames.Count == 1)
         {
-            return shortname ? GetName(exportnames[0].ClassIndex.Index, asset): GetFullName(exportnames[0].ClassIndex.Index, asset);
+            return GetFullName(exportnames[0].ClassIndex.Index, asset);
         }
 
         if (isasset.Count == 1)
         {
-            return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
+            return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
         return "null";
