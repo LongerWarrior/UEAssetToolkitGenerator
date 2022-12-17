@@ -1,7 +1,7 @@
 ﻿using System.Text;
-
 using System.Diagnostics;
 using Serilog;
+using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializer;
 
@@ -34,6 +34,23 @@ public class System
         Settings.TypesToCopy.Clear();
     }
 
+    public void ScanAR()
+    {
+        var path = Directory.GetParent(Settings.ContentDir);
+        var AR = new FAssetRegistryState(path.ToString() + "/AssetRegistry.bin", Settings.GlobalUEVersion);
+
+        ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+        foreach (var data in AR.PreallocatedAssetDataBuffers) 
+        {
+            if (data.PackageName.ToName().StartsWith("/Game")) 
+            {
+                ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+            }
+        }
+        AR = null;
+        GC.Collect();
+    }
+
     public void ScanAssetTypes(string typeToFind = "")
     {
         Dictionary<string, List<string>> types = new();
@@ -49,7 +66,9 @@ public class System
             
             if (CheckPNGAsset(file)) continue;
 
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            var type = GetAssetTypeAR(file);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
+
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
             PrintOutput(path, "Scan");
@@ -87,8 +106,12 @@ public class System
             
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
-            
+            var type = GetAssetTypeAR(file);
+            if (type == "null") {
+                Debug.WriteLine(file);
+                type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            }
+
             if (!Settings.TypesToCopy.Contains(type))
             {
                 PrintOutput("Skipped operation on " + file, "GetCookedAssets");
@@ -311,6 +334,23 @@ public class System
             return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
+        return "null";
+    }
+
+    private string GetAssetTypeAR(string fullAssetPath) {
+        if (AssetList.Count == 0) return "null";
+
+        var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
+        var directory = Path.GetDirectoryName(fullAssetPath);
+        var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
+        if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
+        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
+
+        if (AssetList.ContainsKey(AssetPath)) {
+            var artype = AssetList[AssetPath].AssetClass;
+            return artype;
+        }
+        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type with AR: " + fullAssetPath);
         return "null";
     }
 }

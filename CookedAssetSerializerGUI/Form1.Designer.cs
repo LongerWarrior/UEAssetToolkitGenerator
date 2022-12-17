@@ -713,7 +713,7 @@ partial class Form1 {
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(393, 15);
             this.label8.TabIndex = 38;
-            this.label8.Text = "Written by LongerWarrior, Buckminsterfullerene and atenfyr (UAAPI)";
+            this.label8.Text = "Written by LongerWarrior, Buckminsterfullerene and Narknon. Built on top of UAAPI/CUE4Parse";
             // 
             // Form1
             // 

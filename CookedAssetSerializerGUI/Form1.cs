@@ -643,20 +643,7 @@ public partial class Form1 : Form
             try {
                 lock (boolLock) isRunning = true;
                 ToggleButtons();
-
-                var AR = new FAssetRegistryState(@"D:\FSDTest\FSD\AssetRegistry.bin", settings.GlobalUEVersion);
-
-                ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
-                foreach (var data in AR.PreallocatedAssetDataBuffers) 
-                {
-                    if (data.PackageName.ToName().StartsWith("/Game")) 
-                    {
-                        ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
-                    }
-                }
-                AR = null;
-                GC.Collect();
-
+                system.ScanAR();
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
             }

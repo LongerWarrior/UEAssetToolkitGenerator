@@ -304,31 +304,26 @@ public class AssetBinaryReader : BinaryReader
 
     private bool GetOption(string optionKey)
     {
-        if (Singleton.GetOption(optionKey, out var value)) return value;
+        if (Singleton.GetOption(optionKey, out var val)) return val;
 
-        switch (optionKey)
-        {
-            case "RawIndexBuffer.HasShouldExpandTo32Bit": return Asset.EngineVersion >= UE4Version.VER_UE4_25;
+        switch (optionKey) {
+            case "RawIndexBuffer.HasShouldExpandTo32Bit":  return Ver >=  UE4Version.VER_UE4_25;
             //case "ShaderMap.UseNewCookedFormat":  return Asset.EngineVersion >=  UE4Version.VER_UE5_0;
-            case "SkeletalMesh.KeepMobileMinLODSettingOnDesktop": return Asset.EngineVersion >= UE4Version.VER_UE4_27;
-            case "SkeletalMesh.UseNewCookedFormat": return Asset.EngineVersion >= UE4Version.VER_UE4_24;
-            case "SkeletalMesh.HasRayTracingData": return Asset.EngineVersion >= UE4Version.VER_UE4_27;
-            case "StaticMesh.HasLODsShareStaticLighting":
-                return Asset.EngineVersion < UE4Version.VER_UE4_15 || Asset.EngineVersion >= UE4Version.VER_UE4_24;
-            case "StaticMesh.HasRayTracingGeometry": return Asset.EngineVersion >= UE4Version.VER_UE4_25;
-            case "StaticMesh.HasVisibleInRayTracing": return Asset.EngineVersion >= UE4Version.VER_UE4_26;
-            case "StaticMesh.KeepMobileMinLODSettingOnDesktop": return Asset.EngineVersion >= UE4Version.VER_UE4_27;
-            case "StaticMesh.UseNewCookedFormat": return Asset.EngineVersion >= UE4Version.VER_UE4_23;
-            case "VirtualTextures": return Asset.EngineVersion >= UE4Version.VER_UE4_23;
-            default:
-                throw new Exception("Not valid Option");
+            case "SkeletalMesh.KeepMobileMinLODSettingOnDesktop":  return Ver >=  UE4Version.VER_UE4_27;
+            case "SkeletalMesh.UseNewCookedFormat":  return Ver >=  UE4Version.VER_UE4_24;
+            case "SkeletalMesh.HasRayTracingData":  return Ver >=  UE4Version.VER_UE4_27;
+            case "StaticMesh.HasLODsShareStaticLighting":  return Ver <  UE4Version.VER_UE4_15 || Ver >= UE4Version.VER_UE4_24;
+            case "StaticMesh.HasRayTracingGeometry":  return Ver >=  UE4Version.VER_UE4_25;
+            case "StaticMesh.HasVisibleInRayTracing":  return Ver >=  UE4Version.VER_UE4_26;
+            case "StaticMesh.KeepMobileMinLODSettingOnDesktop":  return Ver >=  UE4Version.VER_UE4_27;
+            case "StaticMesh.UseNewCookedFormat":  return Ver >=  UE4Version.VER_UE4_23;
+            case "VirtualTextures":  return Ver >=  UE4Version.VER_UE4_23;
+            default: throw new Exception("Not valid Option");
         }
     }
 
-    public UE4Version Ver => Asset.EngineVersion;
-
-    public void SkipFixedArray(int size = -1)
-    {
+    public UE4Version Ver => Asset is null ? UEVersion : Asset.EngineVersion;
+    public void SkipFixedArray(int size = -1) {
         var num = ReadInt32();
         BaseStream.Position += num * size;
     }
