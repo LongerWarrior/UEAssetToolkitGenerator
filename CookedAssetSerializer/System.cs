@@ -106,11 +106,9 @@ public class System
             
             var uexpFile = Path.ChangeExtension(file, "uexp");
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
+            
             var type = GetAssetTypeAR(file);
-            if (type == "null") {
-                Debug.WriteLine(file);
-                type = GetAssetType(file, Settings.GlobalUEVersion);
-            }
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
 
             if (!Settings.TypesToCopy.Contains(type))
             {
