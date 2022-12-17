@@ -67,7 +67,7 @@ public class System
             if (CheckPNGAsset(file)) continue;
 
             var type = GetAssetTypeAR(file);
-            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
@@ -109,7 +109,7 @@ public class System
             var type = GetAssetTypeAR(file);
             if (type == "null") {
                 Debug.WriteLine(file);
-                type = GetAssetType(file, Settings.GlobalUEVersion, true);
+                type = GetAssetType(file, Settings.GlobalUEVersion);
             }
 
             if (!Settings.TypesToCopy.Contains(type))
