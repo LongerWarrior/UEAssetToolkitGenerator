@@ -1,7 +1,7 @@
 ﻿using System.Text;
-
 using System.Diagnostics;
 using Serilog;
+using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializer;
 
@@ -34,6 +34,23 @@ public class System
         Settings.TypesToCopy.Clear();
     }
 
+    public void ScanAR()
+    {
+        var path = Directory.GetParent(Settings.ContentDir);
+        var AR = new FAssetRegistryState(path.ToString() + "/AssetRegistry.bin", Settings.GlobalUEVersion);
+
+        ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+        foreach (var data in AR.PreallocatedAssetDataBuffers) 
+        {
+            if (data.PackageName.ToName().StartsWith("/Game")) 
+            {
+                ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+            }
+        }
+        AR = null;
+        GC.Collect();
+    }
+
     public void ScanAssetTypes(string typeToFind = "")
     {
         Dictionary<string, List<string>> types = new();
@@ -50,8 +67,7 @@ public class System
             if (CheckPNGAsset(file)) continue;
 
             var type = GetAssetTypeAR(file);
-            if (type == "null")
-                type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
 
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
@@ -318,7 +334,6 @@ public class System
             return shortname ? GetName(isasset[0].ClassIndex.Index, asset) : GetFullName(isasset[0].ClassIndex.Index, asset);
         }
         Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
-        //Console.WriteLine("Couldn't identify asset type : " + file);
         return "null";
     }
 

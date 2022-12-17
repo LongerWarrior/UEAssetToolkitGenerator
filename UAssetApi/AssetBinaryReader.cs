@@ -304,11 +304,7 @@ public class AssetBinaryReader : BinaryReader
 
     private bool GetOption(string optionKey)
     {
-        if (Singleton.GetOption(optionKey, out var value)) return value;
-
-        if (Singleton.GetOption(optionKey, out bool value)) {
-            return value;
-        }
+        if (Singleton.GetOption(optionKey, out var val)) return val;
 
         switch (optionKey) {
             case "RawIndexBuffer.HasShouldExpandTo32Bit":  return Ver >=  UE4Version.VER_UE4_25;
@@ -322,8 +318,7 @@ public class AssetBinaryReader : BinaryReader
             case "StaticMesh.KeepMobileMinLODSettingOnDesktop":  return Ver >=  UE4Version.VER_UE4_27;
             case "StaticMesh.UseNewCookedFormat":  return Ver >=  UE4Version.VER_UE4_23;
             case "VirtualTextures":  return Ver >=  UE4Version.VER_UE4_23;
-            default: 
-                throw new Exception("Not valid Option");
+            default: throw new Exception("Not valid Option");
         }
     }
 
