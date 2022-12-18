@@ -36,15 +36,20 @@ public class System
 
     public void ScanAR()
     {
-        var path = Directory.GetParent(Settings.ContentDir);
-        var AR = new FAssetRegistryState(path.ToString() + "/AssetRegistry.bin", Settings.GlobalUEVersion);
+        var path = Directory.GetParent(Settings.ContentDir).ToString() + "/AssetRegistry.bin";
+        if (!File.Exists(path))
+        {
+            PrintOutput("Asset registry does not exist at given path!", "AR Scan");
+            return;
+        }
+        var AR = new FAssetRegistryState(path, Settings.GlobalUEVersion);
 
         ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
         foreach (var data in AR.PreallocatedAssetDataBuffers) 
         {
             if (data.PackageName.ToName().StartsWith("/Game")) 
             {
-                ARData.AssetList[data.PackageName.ToName().ToLower()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+                ARData.AssetList[data.PackageName.ToName()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
             }
         }
         AR = null;
@@ -92,13 +97,13 @@ public class System
 
     public void ScanNativeAssets()
     {
-        ENativizationMethod nativizationMethod = ENativizationMethod.Disabled;
+        ENativizationMethod method = ENativizationMethod.Disabled;
         var nativeAssets = new List<string>();
         foreach (var line in File.ReadAllLines(Settings.DfltGamCfgDir))
         {
             if (line.StartsWith("BlueprintNativizationMethod="))
             {
-                nativizationMethod = (ENativizationMethod)Enum.Parse(typeof(ENativizationMethod), line.Split('=')[1]);
+                method = (ENativizationMethod)Enum.Parse(typeof(ENativizationMethod), line.Split('=')[1]);
             }
             
             if (line.StartsWith("+NativizeBlueprintAssets="))
@@ -111,20 +116,25 @@ public class System
 
         if (nativeAssets.Count > 0)
         {
-            // Dummy them based on info in AR asset list
             foreach (var asset in nativeAssets)
             {
-                new RawDummy(Settings, "", "", "");
+                foreach (var ARAsset in AssetList)
+                {
+                    if (ARAsset.Key == asset) new RawDummy(Settings, ARAsset);
+                }
             }
         }
-
-        // If not disabled
-        if (!nativizationMethod.Equals(0))
+        
+        if (!method.Equals(0)) // Inclusive OR exclusive
         {
-            // Scan AR for enums and structs
+            foreach (var ARAsset in AssetList)
+            {
+                if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedEnum)
+                    && ARAsset.Value.AssetClass == "UserDefinedEnum") new RawDummy(Settings, ARAsset);
 
-            // Dummy each asset in this format
-            new RawDummy(Settings, "", "", "");
+                if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedStruct) 
+                    && ARAsset.Value.AssetClass == "UserDefinedStruct") new RawDummy(Settings, ARAsset);
+            }
         }
     }
     

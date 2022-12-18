@@ -1,4 +1,6 @@
-﻿namespace CookedAssetSerializer.AssetTypes;
+﻿using UAssetAPI.AssetRegistry;
+
+namespace CookedAssetSerializer.AssetTypes;
 
 public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {
@@ -52,14 +54,14 @@ public class DummyWithProps : Serializer<NormalExport>
 
 public class RawDummy
 {
-    public RawDummy(JSONSettings settings, string assetClass, string assetPackage, string assetName)
+    public RawDummy(JSONSettings settings, KeyValuePair<string, AssetData> assetInfo)
     {
-        string outPath = Path.Join(settings.JSONDir, assetPackage) + ".json";
+        string outPath = Path.Join(settings.JSONDir, assetInfo.Key) + ".json";
         JObject data = new JObject
         {
-            { "AssetClass", assetClass },
-            { "AssetPackage", assetPackage },
-            { "AssetName", assetName },
+            { "AssetClass", assetInfo.Value.AssetClass },
+            { "AssetPackage", assetInfo.Key },
+            { "AssetName", assetInfo.Value.AssetName },
             { "AssetSerializedData", new JObject("SkipDependecies", false) },
             { "ObjectHierarchy", new JArray() }
         };

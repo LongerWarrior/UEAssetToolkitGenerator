@@ -110,9 +110,7 @@ public partial class MainForm : Form
         UE4Version.VER_UE4_26,
         UE4Version.VER_UE4_27
     };
-
-
-
+    
     private readonly object[] nativeMethodKeys =
     {
         "Disabled",
@@ -150,37 +148,30 @@ public partial class MainForm : Form
     }
 
     #endregion
-
-
-
+    
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (e.CloseReason == CloseReason.WindowsShutDown) return;
 
         if (AppSettings.Default.bDNSSave == false)
         {
-            var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", "Auto Load Last Used Config on Launch?", "Do Not Show Again.");
-            if (AppSettings.Default.bAutoUseLastCfg == true)
-            {
-                dialog.b1Dialog = true;
-            }
+            var dialog = new ChkBoxDialog2Bool("Save?", "Do you want to save before exiting?", 
+                "Auto load last used config on launch?", "Do not show again.");
+            if (AppSettings.Default.bAutoUseLastCfg == true) dialog.b1Dialog = true;
+            
             var result = dialog.ShowDialog();
-
+            
             AppSettings.Default.bAutoUseLastCfg = dialog.b1Dialog;
             AppSettings.Default.bDNSSave = dialog.b2Dialog;
             AppSettings.Default.Save();
-
-
+            
             if (result == DialogResult.Yes)
             {
                 SetupGlobals();
                 SaveJSONSettings();
             }
 
-            if (result == DialogResult.Cancel)
-            {
-                e.Cancel = true;
-            }
+            if (result == DialogResult.Cancel) e.Cancel = true;
         }
     }
 
@@ -205,11 +196,7 @@ public partial class MainForm : Form
             }
         }
     }
-
-
     
-
-
     private void SetupAssetsListBox(List<EAssetType> assets, ListBox assetBox)
     {
         assetBox.DataSource = Enum.GetValues(typeof(EAssetType));
@@ -256,7 +243,6 @@ public partial class MainForm : Form
         };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
-
     }
 
     private void SetDialogDirectories()
@@ -378,8 +364,7 @@ public partial class MainForm : Form
             rtxtMoveTo.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
             Directory.CreateDirectory(rtxtMoveTo.Text);
         }
-
-
+        
         jsonsettings = new JSONSettings
         {
             ContentDir = rtxtContentDir.Text,
@@ -415,7 +400,6 @@ public partial class MainForm : Form
 
     private void LoadJSONSettings()
     {
-        
         if (MessageBox.Show(@"Do you want to load in the file paths?", @"Holup!",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
@@ -457,29 +441,27 @@ public partial class MainForm : Form
 
     private void AutoLoadConfig()
     {
-            var configFile = AppSettings.Default.LastUsedCfg;
-            if (!File.Exists(configFile))
-            {
-                OutputText("Warning! Unable to find last used config!", rtxtOutput);
-                return;
-            }
-
-            // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
-            try
-            {
-                /*system.ClearLists();*/ // I have to do this or else the fucking lists get appended rather than set for some reason
-                jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
-                LoadJSONSettings();
-                OutputText("Loaded settings from: " + configFile, rtxtOutput);
-            }
-            catch (Exception exception)
-            {
-                OutputText("Warning! Last used config is invalid!", rtxtOutput);
-                OutputText(exception.ToString(), rtxtOutput);
-            }        
+        var configFile = AppSettings.Default.LastUsedCfg;
+        if (!File.Exists(configFile))
+        {
+            OutputText("Warning! Unable to find last used config!", rtxtOutput);
+            return;
+        }
+        
+        try
+        {
+            /*system.ClearLists();*/ // I have to do this or else the fucking lists get appended rather than set for some reason
+            jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
+            LoadJSONSettings();
+            OutputText("Loaded settings from: " + configFile, rtxtOutput);
+        }
+        catch (Exception exception)
+        {
+            OutputText("Warning! Last used config is invalid!", rtxtOutput);
+            OutputText(exception.ToString(), rtxtOutput);
+        }        
     }
-
-
+    
     private void ToggleButtons()
     {
         if (InvokeRequired)
@@ -671,6 +653,7 @@ public partial class MainForm : Form
             {
                 lock(boolLock) isRunning = true;
                 ToggleButtons();
+                system.ScanAR();
                 system.ScanAssetTypes();
                 lock(boolLock) isRunning = false;
                 ToggleButtons();
