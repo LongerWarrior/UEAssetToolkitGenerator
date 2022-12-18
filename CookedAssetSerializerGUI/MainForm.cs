@@ -224,9 +224,6 @@ public partial class MainForm : Form
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
 
-        cbNativMethod.Items.AddRange(nativeMethodKeys);
-        cbNativMethod.SelectedIndex = 0;
-
         List<EAssetType> defaultSkipAssets = new()
         {
             EAssetType.SkeletalMesh
@@ -405,7 +402,6 @@ public partial class MainForm : Form
         {
             rtxtContentDir.Text = jsonsettings.ContentDir;
             SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
-            //rtxtParseDir.Text = jsonsettings.ParseDir;
             rtxtJSONDir.Text = jsonsettings.JSONDir;
             rtxtMoveTo.Text = jsonsettings.CookedDir;
             rtxtLogDir.Text = jsonsettings.InfoDir;
