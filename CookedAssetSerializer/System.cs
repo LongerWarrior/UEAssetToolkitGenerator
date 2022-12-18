@@ -108,7 +108,7 @@ public class System
             var ubulkFile = Path.ChangeExtension(file, "ubulk");
             
             var type = GetAssetTypeAR(file);
-            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion, true);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
             if (!Settings.TypesToCopy.Contains(type))
             {
