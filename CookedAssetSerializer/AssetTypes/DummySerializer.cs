@@ -49,3 +49,20 @@ public class DummyWithProps : Serializer<NormalExport>
         else WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
     }
 }
+
+public class RawDummy
+{
+    public RawDummy(JSONSettings settings, string assetClass, string assetPackage, string assetName)
+    {
+        string outPath = Path.Join(settings.JSONDir, assetPackage) + ".json";
+        JObject data = new JObject
+        {
+            { "AssetClass", assetClass },
+            { "AssetPackage", assetPackage },
+            { "AssetName", assetName },
+            { "AssetSerializedData", new JObject("SkipDependecies", false) },
+            { "ObjectHierarchy", new JArray() }
+        };
+        File.WriteAllText(outPath, data.ToString());
+    }
+}

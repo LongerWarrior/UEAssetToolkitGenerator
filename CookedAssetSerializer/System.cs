@@ -111,23 +111,20 @@ public class System
 
         if (nativeAssets.Count > 0)
         {
-            // Check AR scan for assets' parents
+            // Dummy them based on info in AR asset list
+            foreach (var asset in nativeAssets)
+            {
+                new RawDummy(Settings, "", "", "");
+            }
         }
 
+        // If not disabled
         if (!nativizationMethod.Equals(0))
         {
             // Scan AR for enums and structs
 
             // Dummy each asset in this format
-            JObject data = new JObject
-            {
-                { "AssetClass", "Dummy" },
-                { "AssetPackage", "Dummy" },
-                { "AssetName", "Dummy" },
-                { "AssetSerializedData", new JObject("SkipDependecies", false) },
-                { "ObjectHierarchy", new JArray() }
-            };
-            File.WriteAllText("path", data.ToString());
+            new RawDummy(Settings, "", "", "");
         }
     }
     
