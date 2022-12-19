@@ -8,6 +8,7 @@ namespace CookedAssetSerializer;
 public class System
 {
     private readonly JSONSettings Settings;
+    private Dictionary<string, AssetData> AssetList;
 
     private int AssetTotal;
     private int AssetCount;
@@ -34,22 +35,15 @@ public class System
         Settings.TypesToCopy.Clear();
     }
 
-    public void ScanAR()
+    private void ScanAR()
     {
-        var path = Directory.GetParent(Settings.ContentDir).ToString() + "/AssetRegistry.bin";
-        if (!File.Exists(path))
-        {
-            PrintOutput("Asset registry does not exist at given path!", "AR Scan");
-            return;
-        }
-        var AR = new FAssetRegistryState(path, Settings.GlobalUEVersion);
-
-        ARData.AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+        var AR = new FAssetRegistryState(Settings.AssetRegistry, Settings.GlobalUEVersion);
+        AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
         foreach (var data in AR.PreallocatedAssetDataBuffers) 
         {
             if (data.PackageName.ToName().StartsWith("/Game")) 
             {
-                ARData.AssetList[data.PackageName.ToName()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+                AssetList[data.PackageName.ToName()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
             }
         }
         AR = null;
@@ -58,6 +52,8 @@ public class System
 
     public void ScanAssetTypes(string typeToFind = "")
     {
+        ScanAR();
+        
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList();
@@ -99,7 +95,7 @@ public class System
     {
         ENativizationMethod method = ENativizationMethod.Disabled;
         var nativeAssets = new List<string>();
-        foreach (var line in File.ReadAllLines(Settings.DfltGamCfgDir))
+        foreach (var line in File.ReadAllLines(Settings.DefaultGameConfig))
         {
             if (line.StartsWith("BlueprintNativizationMethod="))
             {
@@ -132,8 +128,9 @@ public class System
                 if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedEnum)
                     && ARAsset.Value.AssetClass == "UserDefinedEnum") new RawDummy(Settings, ARAsset);
 
-                if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedStruct) 
-                    && ARAsset.Value.AssetClass == "UserDefinedStruct") new RawDummy(Settings, ARAsset);
+                // Sadly we cannot dummy struct without property data because it will cause issues when being referenced
+                /*if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedStruct) 
+                    && ARAsset.Value.AssetClass == "UserDefinedStruct") new RawDummy(Settings, ARAsset);*/
             }
         }
     }
@@ -316,18 +313,29 @@ public class System
     {
         List<string> ret = new List<string>();
         AssetCount = 1;
-        foreach (var dir in Settings.ParseDir)
+
+        if (Settings.ParseDir.Count == 1)
         {
-            if (dir.EndsWith("uasset"))
+            if (Settings.ParseDir[0].Equals("."))
             {
-                ret.Add(Path.Combine(Settings.ContentDir,dir));
+                ret.AddRange(Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories));    
             }
-            else
-            {
-                ret.AddRange(Directory.GetFiles(Path.Combine(Settings.ContentDir, dir), "*.uasset", SearchOption.AllDirectories));
-            }
-            
         }
+        else
+        {
+            foreach (var dir in Settings.ParseDir)
+            {
+                if (dir.EndsWith("uasset"))
+                {
+                    ret.Add(Path.Combine(Settings.ContentDir,dir));
+                }
+                else
+                {
+                    ret.AddRange(Directory.GetFiles(Path.Combine(Settings.ContentDir, dir), "*.uasset", SearchOption.AllDirectories));
+                }
+            }
+        }
+        
         AssetTotal = ret.Count;
         return ret;
     }
@@ -401,7 +409,7 @@ public class System
         var directory = Path.GetDirectoryName(fullAssetPath);
         var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
         if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
-        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/").ToLower();
+        var AssetPath = Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/");
 
         if (AssetList.ContainsKey(AssetPath)) 
         {

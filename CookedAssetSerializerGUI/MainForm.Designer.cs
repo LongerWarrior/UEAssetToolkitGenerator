@@ -47,12 +47,12 @@ partial class MainForm {
             this.lbAuthors = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tbRun = new System.Windows.Forms.TabPage();
-            this.btnDfltGamCnfg = new System.Windows.Forms.Button();
+            this.btnSelectDfltGamCnfg = new System.Windows.Forms.Button();
             this.rtxtDfltGamCnfg = new System.Windows.Forms.RichTextBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.rtxtAR = new System.Windows.Forms.RichTextBox();
             this.rtxtLogDir = new System.Windows.Forms.RichTextBox();
             this.chkSettDNS = new System.Windows.Forms.CheckBox();
-            this.button5 = new System.Windows.Forms.Button();
+            this.btnSelectAR = new System.Windows.Forms.Button();
             this.btnLogDir = new System.Windows.Forms.Button();
             this.rtxtOutput = new System.Windows.Forms.RichTextBox();
             this.rtxtContentDir = new System.Windows.Forms.RichTextBox();
@@ -224,12 +224,12 @@ partial class MainForm {
             // tbRun
             // 
             this.tbRun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
-            this.tbRun.Controls.Add(this.btnDfltGamCnfg);
+            this.tbRun.Controls.Add(this.btnSelectDfltGamCnfg);
             this.tbRun.Controls.Add(this.rtxtDfltGamCnfg);
-            this.tbRun.Controls.Add(this.richTextBox1);
+            this.tbRun.Controls.Add(this.rtxtAR);
             this.tbRun.Controls.Add(this.rtxtLogDir);
             this.tbRun.Controls.Add(this.chkSettDNS);
-            this.tbRun.Controls.Add(this.button5);
+            this.tbRun.Controls.Add(this.btnSelectAR);
             this.tbRun.Controls.Add(this.btnLogDir);
             this.tbRun.Controls.Add(this.rtxtOutput);
             this.tbRun.Controls.Add(this.rtxtContentDir);
@@ -256,20 +256,20 @@ partial class MainForm {
             this.tbRun.TabIndex = 0;
             this.tbRun.Text = "Run";
             // 
-            // btnDfltGamCnfg
+            // btnSelectDfltGamCnfg
             // 
-            this.btnDfltGamCnfg.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnDfltGamCnfg.FlatAppearance.BorderSize = 2;
-            this.btnDfltGamCnfg.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDfltGamCnfg.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnDfltGamCnfg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnDfltGamCnfg.Location = new System.Drawing.Point(15, 108);
-            this.btnDfltGamCnfg.Name = "btnDfltGamCnfg";
-            this.btnDfltGamCnfg.Size = new System.Drawing.Size(139, 40);
-            this.btnDfltGamCnfg.TabIndex = 23;
-            this.btnDfltGamCnfg.Text = "Game .ini";
-            this.btnDfltGamCnfg.UseVisualStyleBackColor = true;
-            this.btnDfltGamCnfg.Click += new System.EventHandler(this.btnDfltGamCnfg_Click);
+            this.btnSelectDfltGamCnfg.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnSelectDfltGamCnfg.FlatAppearance.BorderSize = 2;
+            this.btnSelectDfltGamCnfg.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelectDfltGamCnfg.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelectDfltGamCnfg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnSelectDfltGamCnfg.Location = new System.Drawing.Point(15, 108);
+            this.btnSelectDfltGamCnfg.Name = "btnSelectDfltGamCnfg";
+            this.btnSelectDfltGamCnfg.Size = new System.Drawing.Size(139, 40);
+            this.btnSelectDfltGamCnfg.TabIndex = 23;
+            this.btnSelectDfltGamCnfg.Text = "Game .ini";
+            this.btnSelectDfltGamCnfg.UseVisualStyleBackColor = true;
+            this.btnSelectDfltGamCnfg.Click += new System.EventHandler(this.btnDfltGamCnfg_Click);
             // 
             // rtxtDfltGamCnfg
             // 
@@ -286,19 +286,19 @@ partial class MainForm {
             this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\DefaultGame.ini";
             this.rtxtDfltGamCnfg.TextChanged += new System.EventHandler(this.rtxtDfltGamCnfg_TextChanged);
             // 
-            // richTextBox1
+            // rtxtAR
             // 
-            this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.richTextBox1.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.richTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.richTextBox1.Location = new System.Drawing.Point(171, 62);
-            this.richTextBox1.Multiline = false;
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.richTextBox1.Size = new System.Drawing.Size(857, 40);
-            this.richTextBox1.TabIndex = 43;
-            this.richTextBox1.Text = "C:\\ExamplePath\\AssetRegistry.bin";
+            this.rtxtAR.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.rtxtAR.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtxtAR.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.rtxtAR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.rtxtAR.Location = new System.Drawing.Point(171, 62);
+            this.rtxtAR.Multiline = false;
+            this.rtxtAR.Name = "rtxtAR";
+            this.rtxtAR.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.rtxtAR.Size = new System.Drawing.Size(857, 40);
+            this.rtxtAR.TabIndex = 43;
+            this.rtxtAR.Text = "C:\\ExamplePath\\AssetRegistry.bin";
             // 
             // rtxtLogDir
             // 
@@ -329,19 +329,20 @@ partial class MainForm {
             this.chkSettDNS.UseVisualStyleBackColor = true;
             this.chkSettDNS.CheckedChanged += new System.EventHandler(this.chkSettDNS_CheckedChanged);
             // 
-            // button5
+            // btnSelectAR
             // 
-            this.button5.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.button5.FlatAppearance.BorderSize = 2;
-            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.button5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.button5.Location = new System.Drawing.Point(15, 62);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(139, 40);
-            this.button5.TabIndex = 42;
-            this.button5.Text = "Asset Reg";
-            this.button5.UseVisualStyleBackColor = true;
+            this.btnSelectAR.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnSelectAR.FlatAppearance.BorderSize = 2;
+            this.btnSelectAR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelectAR.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelectAR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnSelectAR.Location = new System.Drawing.Point(15, 62);
+            this.btnSelectAR.Name = "btnSelectAR";
+            this.btnSelectAR.Size = new System.Drawing.Size(139, 40);
+            this.btnSelectAR.TabIndex = 42;
+            this.btnSelectAR.Text = "Asset Reg";
+            this.btnSelectAR.UseVisualStyleBackColor = true;
+            this.btnSelectAR.Click += new System.EventHandler(this.btnAR_Click);
             // 
             // btnLogDir
             // 
@@ -1107,7 +1108,7 @@ partial class MainForm {
     private RichTextBox rtxtSimpleAssets;
     private RichTextBox rtxtCircularDependancy;
     private Label label6;
-    private Button btnDfltGamCnfg;
+    private Button btnSelectDfltGamCnfg;
     private RichTextBox rtxtDfltGamCnfg;
     private TabPage tabCpyDlt;
     private Label label8;
@@ -1116,6 +1117,6 @@ partial class MainForm {
     private RichTextBox rtxtMoveFrom;
     private Button button1;
     private Button button4;
-    private RichTextBox richTextBox1;
-    private Button button5;
+    private RichTextBox rtxtAR;
+    private Button btnSelectAR;
 }

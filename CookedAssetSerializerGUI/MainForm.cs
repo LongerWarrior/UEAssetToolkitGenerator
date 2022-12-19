@@ -127,7 +127,7 @@ public partial class MainForm : Form
 
     #endregion
 
-    #region CustomFormSetup
+    #region Custom Form Setup
 
     private const int HT_CAPTION = 0x2;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
@@ -148,6 +148,19 @@ public partial class MainForm : Form
     }
 
     #endregion
+    
+    #region Setup/Mainform
+    
+    private void MainForm_Load(object sender, EventArgs e)
+    {
+        //panel1.Visible = false;
+        if (AppSettings.Default.bAutoUseLastCfg == true)
+        {
+            AutoLoadConfig();
+            chkAutoLoad.Checked = true;
+        }
+        chkSettDNS.Checked = AppSettings.Default.bDNSSave;
+    }
     
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -215,7 +228,9 @@ public partial class MainForm : Form
     private void SetupForm()
     {
         rtxtContentDir.Text = Environment.CurrentDirectory;
-        LoadDirectory(Environment.CurrentDirectory);
+        rtxtAR.Text = Environment.CurrentDirectory + "/AssetRegistry.bin";
+        rtxtDfltGamCnfg.Text = Environment.CurrentDirectory + "/DefaultGame.ini";
+        LoadTreeDirectory(Environment.CurrentDirectory);
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
         rtxtMoveTo.Text = Environment.CurrentDirectory;
@@ -241,13 +256,61 @@ public partial class MainForm : Form
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
         SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
     }
-
-    private void SetDialogDirectories()
+    
+    public void SetupGlobals()
     {
+        var typesToCopy = new List<string>();
+        typesToCopy.AddRange(SanitiseInputs(rtxtCookedAssets.Lines));
+        var simpleAssets = new List<string>();
+        simpleAssets.AddRange(SanitiseInputs(rtxtSimpleAssets.Lines));
+        var assetsToSkip = new List<EAssetType>();
+        assetsToSkip.AddRange(lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>());
+        var dummyAssets = new List<EAssetType>();
+        dummyAssets.AddRange(lbDummyAssets.SelectedItems.Cast<EAssetType>());
+        var assetsToDelete = new List<EAssetType>();
+        assetsToDelete.AddRange(lbAssetsToDelete.SelectedItems.Cast<EAssetType>());
+        var circularDependencies = new List<string>();
+        circularDependencies.AddRange(SanitiseInputs(rtxtCircularDependancy.Lines));
 
+        if (string.IsNullOrEmpty(rtxtJSONDir.Text)) 
+        {
+            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
+            Directory.CreateDirectory(rtxtJSONDir.Text);
+        }
+
+        if (string.IsNullOrEmpty(rtxtMoveTo.Text)) 
+        {
+            rtxtMoveTo.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            Directory.CreateDirectory(rtxtMoveTo.Text);
+        }
+        
+        jsonsettings = new JSONSettings
+        {
+            ContentDir = rtxtContentDir.Text,
+            AssetRegistry = rtxtAR.Text,
+            ParseDir = GetRelativeMinFileList(),
+            JSONDir = rtxtJSONDir.Text,
+            CookedDir = rtxtMoveTo.Text,
+            InfoDir = rtxtLogDir.Text,
+            DefaultGameConfig = rtxtDfltGamCnfg.Text,
+            GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
+            RefreshAssets = chkRefreshAssets.Checked,
+            DummyWithProps = chkDummyWithProps.Checked,
+            DummyAssets = dummyAssets,
+            SkipSerialization = assetsToSkip,
+            DeleteAssets = assetsToDelete,
+            CircularDependency = circularDependencies,
+            SimpleAssets = simpleAssets,
+            TypesToCopy = typesToCopy,
+            SelectedIndex = cbUEVersion.SelectedIndex
+        };
+
+        system = new CookedAssetSerializer.System(jsonsettings);
     }
+    
+    #endregion
 
-
+    #region rtxt Leave/Enter
     private void rtxtCookedDir_Leave(object sender, EventArgs e)
     {
         if (rtxtMoveTo.Text.Length == 0)
@@ -319,6 +382,8 @@ public partial class MainForm : Form
             rtxtLogDir.ForeColor = SystemColors.WindowText;
         }
     }
+    
+    #endregion
 
     private string[] SanitiseInputs(string[] lines)
     {
@@ -334,56 +399,7 @@ public partial class MainForm : Form
 
         return lines;
     }
-
-    public void SetupGlobals()
-    {
-        var typesToCopy = new List<string>();
-        typesToCopy.AddRange(SanitiseInputs(rtxtCookedAssets.Lines));
-        var simpleAssets = new List<string>();
-        simpleAssets.AddRange(SanitiseInputs(rtxtSimpleAssets.Lines));
-        var assetsToSkip = new List<EAssetType>();
-        assetsToSkip.AddRange(lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>());
-        var dummyAssets = new List<EAssetType>();
-        dummyAssets.AddRange(lbDummyAssets.SelectedItems.Cast<EAssetType>());
-        var assetsToDelete = new List<EAssetType>();
-        assetsToDelete.AddRange(lbAssetsToDelete.SelectedItems.Cast<EAssetType>());
-        var circularDependencies = new List<string>();
-        circularDependencies.AddRange(SanitiseInputs(rtxtCircularDependancy.Lines));
-
-        if (string.IsNullOrEmpty(rtxtJSONDir.Text)) 
-        {
-            rtxtJSONDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "AssetDump");
-            Directory.CreateDirectory(rtxtJSONDir.Text);
-        }
-
-        if (string.IsNullOrEmpty(rtxtMoveTo.Text)) 
-        {
-            rtxtMoveTo.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
-            Directory.CreateDirectory(rtxtMoveTo.Text);
-        }
-        
-        jsonsettings = new JSONSettings
-        {
-            ContentDir = rtxtContentDir.Text,
-            ParseDir = GetRelativeMinFileList(),
-            JSONDir = rtxtJSONDir.Text,
-            CookedDir = rtxtMoveTo.Text,
-            InfoDir = rtxtLogDir.Text,
-            GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
-            RefreshAssets = chkRefreshAssets.Checked,
-            DummyWithProps = chkDummyWithProps.Checked,
-            DummyAssets = dummyAssets,
-            SkipSerialization = assetsToSkip,
-            DeleteAssets = assetsToDelete,
-            CircularDependency = circularDependencies,
-            SimpleAssets = simpleAssets,
-            TypesToCopy = typesToCopy,
-            SelectedIndex = cbUEVersion.SelectedIndex
-        };
-
-        system = new CookedAssetSerializer.System(jsonsettings);
-    }
-
+    
     private List<string> GetRelativeMinFileList()
     {
         if (treeParseDir.ContentNode is null) return new();
@@ -397,16 +413,13 @@ public partial class MainForm : Form
 
     private void LoadJSONSettings()
     {
-        if (MessageBox.Show(@"Do you want to load in the file paths?", @"Holup!",
-                MessageBoxButtons.YesNo) == DialogResult.Yes)
-        {
-            rtxtContentDir.Text = jsonsettings.ContentDir;
-            SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
-            rtxtJSONDir.Text = jsonsettings.JSONDir;
-            rtxtMoveTo.Text = jsonsettings.CookedDir;
-            rtxtLogDir.Text = jsonsettings.InfoDir;
-        }
-        
+        rtxtContentDir.Text = jsonsettings.ContentDir;
+        rtxtAR.Text = jsonsettings.AssetRegistry;
+        rtxtDfltGamCnfg.Text = jsonsettings.DefaultGameConfig;
+        SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
+        rtxtJSONDir.Text = jsonsettings.JSONDir;
+        rtxtMoveTo.Text = jsonsettings.CookedDir;
+        rtxtLogDir.Text = jsonsettings.InfoDir;
         cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
         chkRefreshAssets.Checked = jsonsettings.RefreshAssets;
         chkDummyWithProps.Checked = jsonsettings.DummyWithProps;
@@ -446,7 +459,6 @@ public partial class MainForm : Form
         
         try
         {
-            /*system.ClearLists();*/ // I have to do this or else the fucking lists get appended rather than set for some reason
             jsonsettings = JsonConvert.DeserializeObject<JSONSettings>(File.ReadAllText(configFile));
             LoadJSONSettings();
             OutputText("Loaded settings from: " + configFile, rtxtOutput);
@@ -575,7 +587,7 @@ public partial class MainForm : Form
         }
         lastValidContentDir = rtxtContentDir.Text;
         treeParseDir.Nodes.Clear();
-        LoadDirectory(rtxtContentDir.Text);
+        LoadTreeDirectory(rtxtContentDir.Text);
     }
 
     private void ValidateDir(object sender, System.ComponentModel.CancelEventArgs e)
@@ -624,10 +636,22 @@ public partial class MainForm : Form
         return false;
     }
 
+    #region Button Click Events
+    
     private void btnSelectContentDir_Click(object sender, EventArgs e)
     {
         rtxtContentDir.Text = OpenDirectoryDialog(rtxtContentDir.Text);
         ValidateContentDir();
+    }
+    
+    private void btnAR_Click(object sender, EventArgs e)
+    {
+        rtxtAR.Text = OpenFileDialog(@"Binary files (*.bin)|*.bin", rtxtContentDir.Text);
+    }
+    
+    private void btnDfltGamCnfg_Click(object sender, EventArgs e)
+    {
+        rtxtDfltGamCnfg.Text = OpenFileDialog(@"ini files (*.ini)|*.ini", rtxtDfltGamCnfg.Text);
     }
 
     private void btnSelectJSONDir_Click(object sender, EventArgs e)
@@ -640,6 +664,8 @@ public partial class MainForm : Form
         rtxtMoveTo.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
     }
 
+    #region Run Buttons
+    
     private void btnScanAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
@@ -649,7 +675,6 @@ public partial class MainForm : Form
             {
                 lock(boolLock) isRunning = true;
                 ToggleButtons();
-                system.ScanAR();
                 system.ScanAssetTypes();
                 lock(boolLock) isRunning = false;
                 ToggleButtons();
@@ -713,6 +738,8 @@ public partial class MainForm : Form
             OutputText("Serialized assets!", rtxtOutput);
         });
     }
+    
+    #endregion
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
     {
@@ -742,8 +769,7 @@ public partial class MainForm : Form
             OutputText("Please select a valid file!", rtxtOutput);
             return;
         }
-
-        // TODO: Reload buggered settings when the catch is run (can't deep clone settings into temp because it can't be serialized)
+        
         try
         {
             system.ClearLists(); // I have to do this or else the fucking lists get appended rather than set for some reason
@@ -771,22 +797,27 @@ public partial class MainForm : Form
         rtxtLogDir.Text = OpenDirectoryDialog(rtxtLogDir.Text);
     }
 
-    private void chkDumNativ_CheckedChanged(object sender, EventArgs e)
+    #endregion
+    
+    private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
     {
+        AppSettings.Default.bDNSSave = chkSettDNS.Checked;
+        AppSettings.Default.Save();
     }
 
-    private void MainForm_Load(object sender, EventArgs e)
+    private void chkAutoLoad_CheckedChanged(object sender, EventArgs e)
+    {
+        AppSettings.Default.bAutoUseLastCfg = chkAutoLoad.Checked;
+        AppSettings.Default.Save();
+    }
+
+    private void rtxtDfltGamCnfg_TextChanged(object sender, EventArgs e)
     {
 
-        //panel1.Visible = false;
-        if (AppSettings.Default.bAutoUseLastCfg == true)
-        {
-            AutoLoadConfig();
-            chkAutoLoad.Checked = true;
-        }
-        chkSettDNS.Checked = AppSettings.Default.bDNSSave;
-
     }
+    
+    #region Tree
+    
     private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
     {
            //// Get the node at the current mouse pointer location.  
@@ -851,7 +882,7 @@ public partial class MainForm : Form
         }
     }
 
-    public void LoadDirectory(string Dir, bool check = true)
+    public void LoadTreeDirectory(string Dir, bool check = true)
     {
         treeParseDir.BeginUpdate();
         TreeNode tds = treeParseDir.Nodes.Add(Path.GetFileName(Dir));
@@ -871,11 +902,11 @@ public partial class MainForm : Form
         //Only Content dir
         if (parseDir.Count == 1 && parseDir[0] == ".")
         {
-            LoadDirectory(contentDir);
+            LoadTreeDirectory(contentDir);
             return;
         }
 
-        LoadDirectory(contentDir, false);
+        LoadTreeDirectory(contentDir, false);
         if (parseDir.Count == 0) return;
 
         var _fullpaths = new string[parseDir.Count];
@@ -903,8 +934,7 @@ public partial class MainForm : Form
                     LoadFiles(node.Name, node);
                 }
 
-                foreach (var p in node.Parents())
-                    p.Checked = true;
+                foreach (var p in node.Parents()) p.Checked = true;
             }
             else if (fullpaths.Any(s => IsSubPathOf(s, nodepath)))
             {
@@ -917,11 +947,6 @@ public partial class MainForm : Form
                 }
                 LoadChildrenNodes(subfullpaths, node);
             }
-            else
-            {
-
-            }
-
         }
 
         // TODO: Add output message and log
@@ -939,39 +964,7 @@ public partial class MainForm : Form
     {
 
     }
-
-    private void chkSettDNS_CheckedChanged(object sender, EventArgs e)
-    {
-        AppSettings.Default.bDNSSave = chkSettDNS.Checked;
-        AppSettings.Default.Save();
-    }
-
-    private void chkAutoLoad_CheckedChanged(object sender, EventArgs e)
-    {
-        AppSettings.Default.bAutoUseLastCfg = chkAutoLoad.Checked;
-        AppSettings.Default.Save();
-    }
-
-    private void btnDfltGamCnfg_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void btnCXXDir_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void rtxtDfltGamCnfg_TextChanged(object sender, EventArgs e)
-    {
-
-    }
-
-    private void rtxtCXXDir_TextChanged(object sender, EventArgs e)
-    {
-
-    }
-
+    
     private void cancelSerializationToolStripMenuItem_Click(object sender, EventArgs e)
     {
 
@@ -995,16 +988,19 @@ public partial class MainForm : Form
     {
         colllapseSelectedTreeNode();
     }
+    
     private void colllapseSelectedTreeNode()
     {
         treeParseDir.BeginUpdate();
         treeParseDir.SelectedNode?.Collapse(false);
         treeParseDir.EndUpdate();
     }
+    
     private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
     {
         refreshSelectedTreeNode();
     }
+    
     private void refreshSelectedTreeNode()
     {
         treeParseDir.BeginUpdate();
@@ -1072,6 +1068,7 @@ public partial class MainForm : Form
 
         }
     }
+    
     private void treeParseDir_AfterCheck(object sender, TreeViewEventArgs e)
     {
         if (e.Action == TreeViewAction.Unknown) return;
@@ -1128,4 +1125,6 @@ public partial class MainForm : Form
             default: break;
         };
     }
+
+    #endregion
 }
