@@ -286,7 +286,6 @@ partial class MainForm {
             this.rtxtDfltGamCnfg.Size = new System.Drawing.Size(857, 40);
             this.rtxtDfltGamCnfg.TabIndex = 24;
             this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\DefaultGame.ini";
-            this.rtxtDfltGamCnfg.TextChanged += new System.EventHandler(this.rtxtDfltGamCnfg_TextChanged);
             // 
             // rtxtAR
             // 

@@ -488,7 +488,8 @@ public partial class MainForm : Form
         }
     }
 
-    private void ProgressText(string text) {
+    private void ProgressText(string text) 
+    {
         if (InvokeRequired)
         {
             var d = new SafeCallDelegateText(ProgressText);
@@ -509,6 +510,7 @@ public partial class MainForm : Form
             if (rtxt.TextLength == 0) rtxt.Text += text;
             else rtxt.Text += Environment.NewLine + text;
         }
+        
     }
 
     private void OpenFile(string path, bool bIsLog = false)
@@ -836,11 +838,6 @@ public partial class MainForm : Form
         AppSettings.Default.Save();
     }
 
-    private void rtxtDfltGamCnfg_TextChanged(object sender, EventArgs e)
-    {
-
-    }
-    
     #region Tree
     
     private void treeParseDir_MouseMove(object sender, MouseEventArgs e)
