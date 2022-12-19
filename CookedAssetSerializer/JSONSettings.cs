@@ -14,7 +14,6 @@ public struct JSONSettings
     [JsonProperty] public bool DummyWithProps;
     [JsonProperty] public List<EAssetType> SkipSerialization;
     [JsonProperty] public List<EAssetType> DummyAssets;
-    [JsonProperty] public List<EAssetType> DeleteAssets;
     [JsonProperty] public List<string> CircularDependency;
     [JsonProperty] public List<string> SimpleAssets;
     [JsonProperty] public List<string> TypesToCopy;

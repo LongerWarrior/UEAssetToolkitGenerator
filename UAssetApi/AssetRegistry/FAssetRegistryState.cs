@@ -29,7 +29,7 @@ public class FAssetRegistryState {
                     break;
                 }
         }
-        ARlog.Information($"Succefully read Asset Registry");
+        ARlog.Information($"[Scan AR]: Succefully read Asset Registry");
         reader.Dispose();
     }
 

@@ -234,7 +234,7 @@ public partial class MainForm : Form
         LoadTreeDirectory(Environment.CurrentDirectory);
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
-        rtxtMoveTo.Text = Environment.CurrentDirectory;
+        rtxtToDir.Text = Environment.CurrentDirectory;
         rtxtLogDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
@@ -255,7 +255,6 @@ public partial class MainForm : Form
             EAssetType.MediaTexture
         };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
-        SetupAssetsListBox(new List<EAssetType>(), lbAssetsToDelete);
     }
     
     public void SetupGlobals()
@@ -268,8 +267,6 @@ public partial class MainForm : Form
         assetsToSkip.AddRange(lbAssetsToSkipSerialization.SelectedItems.Cast<EAssetType>());
         var dummyAssets = new List<EAssetType>();
         dummyAssets.AddRange(lbDummyAssets.SelectedItems.Cast<EAssetType>());
-        var assetsToDelete = new List<EAssetType>();
-        assetsToDelete.AddRange(lbAssetsToDelete.SelectedItems.Cast<EAssetType>());
         var circularDependencies = new List<string>();
         circularDependencies.AddRange(SanitiseInputs(rtxtCircularDependancy.Lines));
 
@@ -279,10 +276,10 @@ public partial class MainForm : Form
             Directory.CreateDirectory(rtxtJSONDir.Text);
         }
 
-        if (string.IsNullOrEmpty(rtxtMoveTo.Text)) 
+        if (string.IsNullOrEmpty(rtxtToDir.Text)) 
         {
-            rtxtMoveTo.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
-            Directory.CreateDirectory(rtxtMoveTo.Text);
+            rtxtToDir.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+            Directory.CreateDirectory(rtxtToDir.Text);
         }
         
         jsonsettings = new JSONSettings
@@ -291,7 +288,7 @@ public partial class MainForm : Form
             AssetRegistry = rtxtAR.Text,
             ParseDir = GetRelativeMinFileList(),
             JSONDir = rtxtJSONDir.Text,
-            CookedDir = rtxtMoveTo.Text,
+            CookedDir = rtxtToDir.Text,
             InfoDir = rtxtLogDir.Text,
             DefaultGameConfig = rtxtDfltGamCnfg.Text,
             GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
@@ -299,7 +296,6 @@ public partial class MainForm : Form
             DummyWithProps = chkDummyWithProps.Checked,
             DummyAssets = dummyAssets,
             SkipSerialization = assetsToSkip,
-            DeleteAssets = assetsToDelete,
             CircularDependency = circularDependencies,
             SimpleAssets = simpleAssets,
             TypesToCopy = typesToCopy,
@@ -314,19 +310,19 @@ public partial class MainForm : Form
     #region rtxt Leave/Enter
     private void rtxtCookedDir_Leave(object sender, EventArgs e)
     {
-        if (rtxtMoveTo.Text.Length == 0)
+        if (rtxtToDir.Text.Length == 0)
         {
-            rtxtMoveTo.Text = "C:\\ExamplePath\\Cooked";
-            rtxtMoveTo.ForeColor = SystemColors.GrayText;
+            rtxtToDir.Text = "C:\\ExamplePath\\Cooked";
+            rtxtToDir.ForeColor = SystemColors.GrayText;
         }
     }
 
     private void rtxtCookedDir_Enter(object sender, EventArgs e)
     {
-        if (rtxtMoveTo.Text == "C:\\ExamplePath\\Cooked")
+        if (rtxtToDir.Text == "C:\\ExamplePath\\Cooked")
         {
-            rtxtMoveTo.Text = "";
-            rtxtMoveTo.ForeColor = SystemColors.WindowText;
+            rtxtToDir.Text = "";
+            rtxtToDir.ForeColor = SystemColors.WindowText;
         }
     }
 
@@ -419,14 +415,13 @@ public partial class MainForm : Form
         rtxtDfltGamCnfg.Text = jsonsettings.DefaultGameConfig;
         SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
         rtxtJSONDir.Text = jsonsettings.JSONDir;
-        rtxtMoveTo.Text = jsonsettings.CookedDir;
+        rtxtToDir.Text = jsonsettings.CookedDir;
         rtxtLogDir.Text = jsonsettings.InfoDir;
         cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
         chkRefreshAssets.Checked = jsonsettings.RefreshAssets;
         chkDummyWithProps.Checked = jsonsettings.DummyWithProps;
         SetupAssetsListBox(jsonsettings.SkipSerialization, lbAssetsToSkipSerialization);
         SetupAssetsListBox(jsonsettings.DummyAssets, lbDummyAssets);
-        SetupAssetsListBox(jsonsettings.DeleteAssets, lbAssetsToDelete);
         rtxtCircularDependancy.Lines = jsonsettings.CircularDependency.ToArray();
         rtxtSimpleAssets.Lines = jsonsettings.SimpleAssets.ToArray();
         rtxtCookedAssets.Lines = jsonsettings.TypesToCopy.ToArray();
@@ -481,7 +476,7 @@ public partial class MainForm : Form
         else
         {
             btnScanAssets.Enabled = !isRunning;
-            btnMoveCookedAssets.Enabled = !isRunning;
+            btnMoveAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
             btnClearLogs.Enabled = !isRunning;
             btnLoadConfig.Enabled = !isRunning;
@@ -641,32 +636,6 @@ public partial class MainForm : Form
 
     #region Button Click Events
     
-    private void btnSelectContentDir_Click(object sender, EventArgs e)
-    {
-        rtxtContentDir.Text = OpenDirectoryDialog(rtxtContentDir.Text);
-        ValidateContentDir();
-    }
-    
-    private void btnAR_Click(object sender, EventArgs e)
-    {
-        rtxtAR.Text = OpenFileDialog(@"Binary files (*.bin)|*.bin", rtxtContentDir.Text);
-    }
-    
-    private void btnDfltGamCnfg_Click(object sender, EventArgs e)
-    {
-        rtxtDfltGamCnfg.Text = OpenFileDialog(@"ini files (*.ini)|*.ini", rtxtDfltGamCnfg.Text);
-    }
-
-    private void btnSelectJSONDir_Click(object sender, EventArgs e)
-    {
-        rtxtJSONDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
-    }
-
-    private void btnSelectOutputDir_Click(object sender, EventArgs e)
-    {
-        rtxtMoveTo.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
-    }
-
     #region Run Buttons
     
     private void btnScanAssets_Click(object sender, EventArgs e)
@@ -693,7 +662,7 @@ public partial class MainForm : Form
         });
     }
 
-    private void btnMoveCookedAssets_Click(object sender, EventArgs e)
+    private void btnMoveAssets_Click(object sender, EventArgs e)
     {
         SetupGlobals();
 
@@ -716,6 +685,11 @@ public partial class MainForm : Form
             }
             OutputText("Moved assets!", rtxtOutput);
         });
+    }
+    
+    private void btnCopyAssets_Click(object sender, EventArgs e)
+    {
+
     }
 
     private void btnSerializeAssets_Click(object sender, EventArgs e)
@@ -767,7 +741,33 @@ public partial class MainForm : Form
     }
     
     #endregion
+    
+    private void btnSelectContentDir_Click(object sender, EventArgs e)
+    {
+        rtxtContentDir.Text = OpenDirectoryDialog(rtxtContentDir.Text);
+        ValidateContentDir();
+    }
+    
+    private void btnAR_Click(object sender, EventArgs e)
+    {
+        rtxtAR.Text = OpenFileDialog(@"Binary files (*.bin)|*.bin", rtxtContentDir.Text);
+    }
+    
+    private void btnDfltGamCnfg_Click(object sender, EventArgs e)
+    {
+        rtxtDfltGamCnfg.Text = OpenFileDialog(@"ini files (*.ini)|*.ini", rtxtDfltGamCnfg.Text);
+    }
 
+    private void btnSelectJSONDir_Click(object sender, EventArgs e)
+    {
+        rtxtJSONDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
+    }
+
+    private void btnSelectOutputDir_Click(object sender, EventArgs e)
+    {
+        rtxtToDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
+    }
+    
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
     {
         OpenFile(rtxtLogDir.Text + "\\AllTypes.txt");
@@ -823,6 +823,13 @@ public partial class MainForm : Form
     {
         rtxtLogDir.Text = OpenDirectoryDialog(rtxtLogDir.Text);
     }
+    
+    private void btnFromDir_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    
 
     #endregion
     
