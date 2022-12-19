@@ -5,6 +5,7 @@ using CookedAssetSerializer.NativizedAssets;
 using CookedAssetSerializerGUI.Properties;
 using ExtendedTreeView;
 using Newtonsoft.Json;
+using Serilog;
 using UAssetAPI;
 
 namespace CookedAssetSerializerGUI;
@@ -739,6 +740,30 @@ public partial class MainForm : Form
         });
     }
     
+    private void btnSerializeNatives_Click(object sender, EventArgs e)
+    {
+        SetupGlobals();
+
+        Task.Run(() =>
+        {
+            try
+            {
+                lock (boolLock) isRunning = true;
+                ToggleButtons();
+                system.SerializeNativeAssets();
+                lock(boolLock) isRunning = false;
+                ToggleButtons();
+            }
+            catch (Exception exception) {
+                OutputText(exception.ToString(), rtxtOutput);
+                lock (boolLock) isRunning = false;
+                ToggleButtons();
+                return;
+            }
+            OutputText("Serialized native assets!", rtxtOutput);
+        });
+    }
+    
     #endregion
 
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
@@ -854,8 +879,7 @@ public partial class MainForm : Form
         }
         catch (Exception e)
         {
-            // TODO : Add output message and Log
-            //Debug.WriteLine(e);
+            OutputText(e.ToString(), rtxtOutput);
         }
     }
 
@@ -877,8 +901,7 @@ public partial class MainForm : Form
         }
         catch (Exception e)
         {
-            // TODO : Add output message and Log
-            //Debug.WriteLine(e);
+            OutputText(e.ToString(), rtxtOutput);
         }
     }
 
@@ -948,9 +971,8 @@ public partial class MainForm : Form
                 LoadChildrenNodes(subfullpaths, node);
             }
         }
-
-        // TODO: Add output message and log
-        if (fullpaths.Count > 0)
+        
+        if (fullpaths.Count > 0) // TODO: Not really sure what the point of this is
         {
             foreach (var path in fullpaths)
             {

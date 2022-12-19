@@ -54,17 +54,21 @@ public class DummyWithProps : Serializer<NormalExport>
 
 public class RawDummy
 {
-    public RawDummy(JSONSettings settings, KeyValuePair<string, AssetData> assetInfo)
+    public RawDummy(JSONSettings settings, KeyValuePair<string, AssetData> assetInfo, string assetName)
     {
         string outPath = Path.Join(settings.JSONDir, assetInfo.Key) + ".json";
+        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+        
+        JObject assetData = new JObject();
         JObject data = new JObject
         {
-            { "AssetClass", assetInfo.Value.AssetClass },
-            { "AssetPackage", assetInfo.Key },
-            { "AssetName", assetInfo.Value.AssetName },
-            { "AssetSerializedData", new JObject("SkipDependecies", false) },
-            { "ObjectHierarchy", new JArray() }
+            new JProperty("AssetClass", assetInfo.Value.AssetClass),
+            new JProperty("AssetPackage", assetInfo.Key),
+            new JProperty("AssetName", assetName)
         };
+        assetData.Add("SkipDependecies", false);
+        data.Add("AssetSerializedData", assetData);
+        data.Add(new JProperty("ObjectHierarchy", new JArray()));
         File.WriteAllText(outPath, data.ToString());
     }
 }

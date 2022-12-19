@@ -91,8 +91,10 @@ public class System
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
     }
 
-    public void ScanNativeAssets()
+    public void SerializeNativeAssets()
     {
+        ScanAR();
+        
         ENativizationMethod method = ENativizationMethod.Disabled;
         var nativeAssets = new List<string>();
         foreach (var line in File.ReadAllLines(Settings.DefaultGameConfig))
@@ -109,14 +111,24 @@ public class System
                 nativeAssets.Add(path);
             }
         }
+        
+        AssetCount = 0;
+        AssetTotal = nativeAssets.Count;
 
         if (nativeAssets.Count > 0)
         {
             foreach (var asset in nativeAssets)
             {
+                AssetCount++;
                 foreach (var ARAsset in AssetList)
                 {
-                    if (ARAsset.Key == asset) new RawDummy(Settings, ARAsset);
+                    if (ARAsset.Key == asset)
+                    {
+                        // Need to use asset's value instead of ARAsset due to ARAsset's value name having the _C
+                        new RawDummy(Settings, ARAsset, asset);
+                        
+                        PrintOutput("Creating dummy blueprint for nativized asset: " + ARAsset.Key, "Native Asset Serializer");
+                    }
                 }
             }
         }
@@ -126,9 +138,15 @@ public class System
             foreach (var ARAsset in AssetList)
             {
                 if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedEnum)
-                    && ARAsset.Value.AssetClass == "UserDefinedEnum") new RawDummy(Settings, ARAsset);
+                    && ARAsset.Value.AssetClass == "UserDefinedEnum")
+                {
+                    AssetTotal++;
+                    AssetCount++;
+                    new RawDummy(Settings, ARAsset, ARAsset.Value.AssetName);
+                    PrintOutput("Creating dummy enum for nativized asset: " + ARAsset.Key, "Native Asset Serializer");
+                }
 
-                // Sadly we cannot dummy struct without property data because it will cause issues when being referenced
+                // Sadly we cannot dummy structs without property data because it will cause issues when being referenced
                 /*if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedStruct) 
                     && ARAsset.Value.AssetClass == "UserDefinedStruct") new RawDummy(Settings, ARAsset);*/
             }
@@ -353,14 +371,12 @@ public class System
 
     private void PrintOutput(string output, string type = "debug")
     {
-        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
         Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
     }
 
     private bool CheckPNGAsset(string file)
     {
         // If there is another file with the same name but has the .png extension, skip it
-        // TODO: Make JSON for the PNG just existing for Asset Gen (currently UAGUI does not support this uasset type)
         return File.Exists(file.Replace(".uasset", ".png"));
     }
 
