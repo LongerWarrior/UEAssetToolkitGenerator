@@ -12,7 +12,7 @@ public class StaticMeshFBX
         public FStaticMeshRenderData RenderData;
         public FStaticMaterial[] StaticMaterials;
     }
-
+    
     public StaticMeshFBX(FStaticMeshStruct meshStruct, string path, bool bExportAsText, ref string error, ref bool tooLarge)
     {
         string json = JsonConvert.SerializeObject(meshStruct);
@@ -28,7 +28,15 @@ public class StaticMeshFBX
         
         // output json as file at path
         //File.WriteAllText(Path.ChangeExtension(path, "json"), json);
-        ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
+        try
+        {
+            ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
+        }
+        catch (Exception e)
+        {
+            Log.Fatal($"[Static Mesh FBX]: Failed to export SM! {e}");
+            return;
+        }
         /*TestFBXExport exporter = new TestFBXExport();
         exporter.ExportStaticMeshIntoFbxFile(meshStruct, bExportAsText, false, path);*/
     }

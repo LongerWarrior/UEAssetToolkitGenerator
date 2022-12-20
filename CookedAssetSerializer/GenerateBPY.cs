@@ -9,8 +9,8 @@ public class GenerateBPY
 
     private void GenerateSM()
     {
-        var InputPath = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Blender\SMs\";
-        var outputPath = @"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Assets\Game\";
+        var InputPath = @"F:\Railgrade Modding\UnrealPacker4.27\JSON\AnimStuff\SMs\";
+        var outputPath = @"F:\Railgrade Modding\UnrealPacker4.27\JSON\Assets\Game\";
         var allfiles = Directory.GetFiles(InputPath, "*.gltf", SearchOption.AllDirectories);
 
         var command = "import bpy\n\n";
@@ -32,16 +32,6 @@ public class GenerateBPY
             command += "bpy.ops.object.delete(use_global=False, confirm=False)\n\n";
         }
 
-        File.WriteAllText(@"F:\CyubeVR Modding\_Tools\UnrealPacker4.27\JSON\Blender\BlenderCommands\commands.py", command);
-    }
-
-    private void GenerateAnims()
-    {
-        var inputPath = @"F:\DRG Modding\DRGPacker\JSON\Anims\";
-        var outputPath = @"F:\DRG Modding\DRGPacker\JSON\Assets\Game\";
-        
-        // We can use the props.txt for each anim to get the names of the skeletons, which are serialized
-        // Then use the serialized skeleton to find its skeletal mesh and map the anim to that mesh
-        // Then export data to JSON ready for import into whatever is using it
+        File.WriteAllText(@"F:\Railgrade Modding\UnrealPacker4.27\JSON\AnimStuff\BlenderCommands\commands.py", command);
     }
 }

@@ -131,7 +131,7 @@
           "Serilog": "2.12.0"
         },
         "runtime": {
-          "UAssetApi.dll": {}
+          "UAssetAPI.dll": {}
         }
       }
     }

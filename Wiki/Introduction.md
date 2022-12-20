@@ -1,7 +1,7 @@
 # Introduction
 
 ## What is this?
-This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://github.com/Archengius/UEAssetToolkit) compatible JSON files. 
+This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://github.com/Buckminsterfullerene02/UEAssetToolkit-Fixes) compatible JSON files. 
 
 **WARNING:** This tool is *NOT* easy to use! Same goes for UEAssetToolkit. Don't expect anything to work first try, and expect plenty of editor crashes. You *must* know what you are doing before you attempt to use this tool! It usually takes ~5-10 hours to generate content for a small game with ~2-5k assets. 
 
@@ -37,14 +37,14 @@ It also has the ability to dummy any Blueprints/UserDefinedEnums (NOT UserDefine
 
 For most other asset types, that currently cannot be serialized (or don't need to be, e.g. sound wave), you will need to use the "Asset Utilities" tab to copy their cooked files into the UE project. More on this in the [asset utilities settings]() section.
 
-## How to use this tool?
+## Using this tool
 
 link to GUI.md
 
 link to GeneratingFBX.md
 
-## How to use the asset generator tool?
+## Using the Asset Generator tool
 
-link to AssetGenerator.md
+[Asset Generator REAME](https://github.com/Buckminsterfullerene02/UEAssetToolkit-Fixes)
 
 link to GameNotes.md

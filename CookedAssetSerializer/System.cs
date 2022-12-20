@@ -363,13 +363,10 @@ public class System
         List<string> ret = new List<string>();
         if (useParseDir)
         {
-            if (Settings.ParseDir.Count == 1)
+            if (Settings.ParseDir.Count == 1 && Settings.ParseDir[0].Equals("."))
             {
-                if (Settings.ParseDir[0].Equals("."))
-                {
-                    ret.AddRange(Directory.GetFiles(fromDir,
-                        "*.uasset", SearchOption.AllDirectories));
-                }
+                ret.AddRange(Directory.GetFiles(fromDir,
+                    "*.uasset", SearchOption.AllDirectories));
             }
             else
             {
