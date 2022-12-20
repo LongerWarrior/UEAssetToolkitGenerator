@@ -53,3 +53,15 @@ These widgets are to do with actually running the program.
 4. A live counter for any of these 3 operations. The first number is the number of assets it has scanned/serialized, and the second is the total number of assets that will be scanned/serialized.
 5. The program's runtime output box. It will print info about what you've done, and also any stack traces if an error occurs. **If any error occurs, and you don't know how to fix it, please submit it as part of an issue using the bug report template**.
 
+## Asset utilities
+Here you can move/copy around assets of specified types, especially cooked assets. This ignores the tree view.
+
+![AssetUtilitySettingsNumbered](..\Wiki\Images\AssetUtilitySettingsNumbered.png)
+
+1. Path to the directory you want to copy/move the files from.
+2. Path to the directory you want to copy/move the files to.
+3. List of asset types you wish to copy/move. Works in the same way as the simple assets box in the serialization settings tab.
+4. Copies the assets.
+5. Moves the assets, retaining directory hierarchy and deleting old left behind directories.
+6. Check this if you want to ignore the asset types box and just copy all files regardless of asset type.
+7. Another live counter for these operations. The first number is the number of assets it has moved/copied, and the second is the total number of assets that will be moved/copied.

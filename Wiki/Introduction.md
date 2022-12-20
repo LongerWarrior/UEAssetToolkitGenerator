@@ -41,7 +41,7 @@ For most other asset types, that currently cannot be serialized (or don't need t
 
 link to GUI.md
 
-link to FBX.md
+link to GeneratingFBX.md
 
 ## How to use the asset generator tool?
 
