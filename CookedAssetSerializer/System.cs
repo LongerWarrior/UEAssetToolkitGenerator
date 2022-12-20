@@ -162,8 +162,17 @@ public class System
     public void GetCookedAssets(bool copy = true)
     {
         ScanAR();
+
+        // Get short version of types so that AR list can be used for efficiency
+        List<string> shortTypes = new List<string>();
+        foreach (var assetType in Settings.TypesToCopy)
+        {
+            shortTypes.Add(assetType.Split(".")[1]);
+        }
         
         var files = MakeFileList();
+        AssetCount = 0;
+        AssetTotal = files.Count;
         foreach (var file in files)
         {
             AssetCount++;
@@ -173,34 +182,36 @@ public class System
             var type = GetAssetTypeAR(file);
             if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
-            if (!Settings.TypesToCopy.Contains(type))
+            if (Settings.TypesToCopy.Contains(type) || shortTypes.Contains(type))
             {
-                PrintOutput("Skipped operation on " + file, "GetCookedAssets");
+                var relativePath = Path.GetRelativePath(Settings.FromDir, file);
+                var newPath = Path.Combine(Settings.CookedDir, relativePath);
+    
+                PrintOutput(newPath, "Get Cooked Assets");
+    
+                Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+            
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
+    
+                var uexpFile = Path.ChangeExtension(file, "uexp");
+                if (File.Exists(uexpFile))
+                {
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                }
+            
+                var ubulkFile = Path.ChangeExtension(file, "ubulk");
+                if (File.Exists(ubulkFile))
+                {
+                    if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                    else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                }
+            }
+            else
+            {
+                PrintOutput("Skipped operation on " + file, "Get Cooked Assets");
                 continue;
-            }
-    
-            var relativePath = Path.GetRelativePath(Settings.FromDir, file);
-            var newPath = Path.Combine(Settings.CookedDir, relativePath);
-    
-            PrintOutput(newPath, "Get Cooked Assets");
-    
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
-            
-            if (copy) File.Copy(file, newPath, true);
-            else File.Move(file, newPath, true);
-    
-            var uexpFile = Path.ChangeExtension(file, "uexp");
-            if (File.Exists(uexpFile))
-            {
-                if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-            }
-            
-            var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            if (File.Exists(ubulkFile))
-            {
-                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             }
         }
     }
@@ -208,6 +219,8 @@ public class System
     public void SerializeAssets()
     {
         var files = MakeFileList();
+        AssetTotal = files.Count;
+        AssetCount = 0;
         foreach (var file in files)
         {
             UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
@@ -216,11 +229,11 @@ public class System
             if (Settings.SkipSerialization.Contains(asset.assetType)) continue;
             if (CheckPNGAsset(file))
             {
-                PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                PrintOutput("Skipped serialization on " + file, "Serialize Assets");
                 continue;
             }
             
-            PrintOutput("Serializing " + file, "SerializeAssets");
+            PrintOutput("Serializing " + file, "Serialize Assets");
 
             bool skip = false;
             string skipReason = "";
@@ -329,17 +342,16 @@ public class System
 
             if (skip)
             {
-                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "SerializeAssets");
-                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "SerializeAssets");
+                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
+                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
             }
-            else PrintOutput(file, "SerializeAssets");
+            else PrintOutput(file, "Serialize Assets");
         }
     }
 
     private List<string> MakeFileList()
     {
         List<string> ret = new List<string>();
-        AssetCount = 1;
 
         if (Settings.ParseDir.Count == 1)
         {
@@ -363,7 +375,6 @@ public class System
             }
         }
         
-        AssetTotal = ret.Count;
         return ret;
     }
 

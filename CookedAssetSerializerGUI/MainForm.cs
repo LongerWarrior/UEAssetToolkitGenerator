@@ -617,12 +617,12 @@ public partial class MainForm : Form
             }
         }
 
-        if (rtxtBox.Name == "rtxtOutputDir")
+        if (rtxtBox.Name == "rtxtToDir")
         {
-            caption = "Cooked Dir doesn't exist";
+            caption = "To Dir doesn't exist";
             if (string.IsNullOrEmpty(rtxtBox.Text))
             {
-                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtContentDir.Text)!.FullName, "Cooked");
+                rtxtBox.Text = Path.Combine(Directory.GetParent(rtxtToDir.Text)!.FullName, "Cooked");
             }
         }
 
