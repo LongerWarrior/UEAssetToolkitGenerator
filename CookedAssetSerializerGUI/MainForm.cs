@@ -386,6 +386,42 @@ public partial class MainForm : Form
         }
     }
     
+    private void rtxtDfltGamCnfg_Leave(object sender, EventArgs e)
+    {
+        if (rtxtDfltGamCnfg.Text.Length == 0)
+        {
+            rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\Unpacked\\Config\\DefaultGame.ini";
+            rtxtDfltGamCnfg.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtDfltGamCnfg_Enter(object sender, EventArgs e)
+    {
+        if (rtxtDfltGamCnfg.Text == "C:\\ExamplePath\\Unpacked\\Config\\DefaultGame.ini")
+        {
+            rtxtDfltGamCnfg.Text = "";
+            rtxtDfltGamCnfg.ForeColor = SystemColors.WindowText;
+        }
+    }
+    
+    private void rtxtAR_Leave(object sender, EventArgs e)
+    {
+        if (rtxtAR.Text.Length == 0)
+        {
+            rtxtAR.Text = "C:\\ExamplePath\\Unpacked\\AssetRegistry.bin";
+            rtxtAR.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtAR_Enter(object sender, EventArgs e)
+    {
+        if (rtxtAR.Text == "C:\\ExamplePath\\Unpacked\\AssetRegistry.bin")
+        {
+            rtxtAR.Text = "";
+            rtxtAR.ForeColor = SystemColors.WindowText;
+        }
+    }
+
     #endregion
 
     private string[] SanitiseInputs(string[] lines)

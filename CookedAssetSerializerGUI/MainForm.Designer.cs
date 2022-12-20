@@ -298,7 +298,9 @@ partial class MainForm {
             this.rtxtDfltGamCnfg.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.rtxtDfltGamCnfg.Size = new System.Drawing.Size(857, 40);
             this.rtxtDfltGamCnfg.TabIndex = 24;
-            this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\DefaultGame.ini";
+            this.rtxtDfltGamCnfg.Text = "C:\\ExamplePath\\Unpacked\\Config\\DefaultGame.ini";
+            this.rtxtDfltGamCnfg.Enter += new System.EventHandler(this.rtxtDfltGamCnfg_Enter);
+            this.rtxtDfltGamCnfg.Leave += new System.EventHandler(this.rtxtDfltGamCnfg_Leave);
             // 
             // rtxtAR
             // 
@@ -312,7 +314,9 @@ partial class MainForm {
             this.rtxtAR.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.rtxtAR.Size = new System.Drawing.Size(857, 40);
             this.rtxtAR.TabIndex = 43;
-            this.rtxtAR.Text = "C:\\ExamplePath\\AssetRegistry.bin";
+            this.rtxtAR.Text = "C:\\ExamplePath\\Unpacked\\AssetRegistry.bin";
+            this.rtxtAR.Enter += new System.EventHandler(this.rtxtAR_Enter);
+            this.rtxtAR.Leave += new System.EventHandler(this.rtxtAR_Leave);
             // 
             // rtxtLogDir
             // 
@@ -401,6 +405,8 @@ partial class MainForm {
             this.rtxtContentDir.TabIndex = 1;
             this.rtxtContentDir.Text = "C:\\ExamplePath\\Content";
             this.rtxtContentDir.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateContentDir);
+            //this.rtxtContentDir.Enter += new System.EventHandler(this.rtxtContentDir_Enter);
+            //this.rtxtContentDir.Leave += new System.EventHandler(this.rtxtContentDir_Leave);
             // 
             // rtxtJSONDir
             // 

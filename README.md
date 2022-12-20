@@ -1,5 +1,5 @@
 # UEAssetToolkitGenerator 
-This is a work-in-progress .NET API to generate [UEAssetToolkit](https://github.com/Archengius/UEAssetToolkit) compatible JSON files. You must have .NET 6 installed to use. Also known as Cooked Asset Serializer (CAS).
+This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://github.com/Archengius/UEAssetToolkit) compatible JSON files. You must have .NET 6 installed to use. Also known as Cooked Asset Serializer (CAS).
 
 ## Usage
 1. Use the Settings table below to configure the generator (or load a config settings file).
