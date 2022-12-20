@@ -84,6 +84,7 @@ partial class MainForm {
             this.rtxtCircularDependancy = new System.Windows.Forms.RichTextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.tabCpyDlt = new System.Windows.Forms.TabPage();
+            this.lblProgress2 = new System.Windows.Forms.Label();
             this.btnCopyAssets = new System.Windows.Forms.Button();
             this.rtxtFromDir = new System.Windows.Forms.RichTextBox();
             this.btnFromDir = new System.Windows.Forms.Button();
@@ -652,7 +653,8 @@ partial class MainForm {
             this.rtxtSimpleAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtSimpleAssets.Location = new System.Drawing.Point(16, 46);
             this.rtxtSimpleAssets.Name = "rtxtSimpleAssets";
-            this.rtxtSimpleAssets.Size = new System.Drawing.Size(514, 392);
+            this.rtxtSimpleAssets.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.rtxtSimpleAssets.Size = new System.Drawing.Size(513, 392);
             this.rtxtSimpleAssets.TabIndex = 15;
             this.rtxtSimpleAssets.Text = resources.GetString("rtxtSimpleAssets.Text");
             this.rtxtSimpleAssets.WordWrap = false;
@@ -688,10 +690,10 @@ partial class MainForm {
             this.lbDummyAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.lbDummyAssets.FormattingEnabled = true;
             this.lbDummyAssets.ItemHeight = 28;
-            this.lbDummyAssets.Location = new System.Drawing.Point(555, 503);
+            this.lbDummyAssets.Location = new System.Drawing.Point(571, 503);
             this.lbDummyAssets.Name = "lbDummyAssets";
             this.lbDummyAssets.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.lbDummyAssets.Size = new System.Drawing.Size(458, 336);
+            this.lbDummyAssets.Size = new System.Drawing.Size(442, 336);
             this.lbDummyAssets.TabIndex = 35;
             // 
             // label3
@@ -699,7 +701,7 @@ partial class MainForm {
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label3.Location = new System.Drawing.Point(573, 3);
+            this.label3.Location = new System.Drawing.Point(587, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(426, 38);
             this.label3.TabIndex = 10;
@@ -713,10 +715,10 @@ partial class MainForm {
             this.lbAssetsToSkipSerialization.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.lbAssetsToSkipSerialization.FormattingEnabled = true;
             this.lbAssetsToSkipSerialization.ItemHeight = 28;
-            this.lbAssetsToSkipSerialization.Location = new System.Drawing.Point(555, 46);
+            this.lbAssetsToSkipSerialization.Location = new System.Drawing.Point(571, 46);
             this.lbAssetsToSkipSerialization.Name = "lbAssetsToSkipSerialization";
             this.lbAssetsToSkipSerialization.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(458, 392);
+            this.lbAssetsToSkipSerialization.Size = new System.Drawing.Size(442, 392);
             this.lbAssetsToSkipSerialization.TabIndex = 11;
             // 
             // label5
@@ -738,7 +740,8 @@ partial class MainForm {
             this.rtxtCircularDependancy.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.rtxtCircularDependancy.Location = new System.Drawing.Point(16, 503);
             this.rtxtCircularDependancy.Name = "rtxtCircularDependancy";
-            this.rtxtCircularDependancy.Size = new System.Drawing.Size(514, 381);
+            this.rtxtCircularDependancy.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.rtxtCircularDependancy.Size = new System.Drawing.Size(513, 381);
             this.rtxtCircularDependancy.TabIndex = 20;
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
@@ -757,6 +760,7 @@ partial class MainForm {
             // tabCpyDlt
             // 
             this.tabCpyDlt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tabCpyDlt.Controls.Add(this.lblProgress2);
             this.tabCpyDlt.Controls.Add(this.btnCopyAssets);
             this.tabCpyDlt.Controls.Add(this.rtxtFromDir);
             this.tabCpyDlt.Controls.Add(this.btnFromDir);
@@ -773,6 +777,17 @@ partial class MainForm {
             this.tabCpyDlt.TabIndex = 4;
             this.tabCpyDlt.Text = "Asset Utilities";
             // 
+            // lblProgress2
+            // 
+            this.lblProgress2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblProgress2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.lblProgress2.Location = new System.Drawing.Point(30, 416);
+            this.lblProgress2.Name = "lblProgress2";
+            this.lblProgress2.Size = new System.Drawing.Size(283, 40);
+            this.lblProgress2.TabIndex = 45;
+            this.lblProgress2.Text = "0/0";
+            this.lblProgress2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // btnCopyAssets
             // 
             this.btnCopyAssets.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
@@ -780,7 +795,7 @@ partial class MainForm {
             this.btnCopyAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCopyAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnCopyAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnCopyAssets.Location = new System.Drawing.Point(286, 788);
+            this.btnCopyAssets.Location = new System.Drawing.Point(59, 266);
             this.btnCopyAssets.Name = "btnCopyAssets";
             this.btnCopyAssets.Size = new System.Drawing.Size(226, 40);
             this.btnCopyAssets.TabIndex = 44;
@@ -835,7 +850,7 @@ partial class MainForm {
             this.btnMoveAssets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMoveAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnMoveAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnMoveAssets.Location = new System.Drawing.Point(557, 788);
+            this.btnMoveAssets.Location = new System.Drawing.Point(59, 341);
             this.btnMoveAssets.Name = "btnMoveAssets";
             this.btnMoveAssets.Size = new System.Drawing.Size(226, 40);
             this.btnMoveAssets.TabIndex = 17;
@@ -879,7 +894,7 @@ partial class MainForm {
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label4.Location = new System.Drawing.Point(455, 221);
+            this.label4.Location = new System.Drawing.Point(566, 221);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(169, 38);
             this.label4.TabIndex = 12;
@@ -891,11 +906,13 @@ partial class MainForm {
             this.rtxtCookedAssets.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxtCookedAssets.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.rtxtCookedAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.rtxtCookedAssets.Location = new System.Drawing.Point(286, 266);
+            this.rtxtCookedAssets.Location = new System.Drawing.Point(343, 262);
             this.rtxtCookedAssets.Name = "rtxtCookedAssets";
-            this.rtxtCookedAssets.Size = new System.Drawing.Size(497, 504);
+            this.rtxtCookedAssets.Size = new System.Drawing.Size(637, 504);
             this.rtxtCookedAssets.TabIndex = 13;
-            this.rtxtCookedAssets.Text = resources.GetString("rtxtCookedAssets.Text");
+            this.rtxtCookedAssets.Text = "\"/Script/Engine.ParticleSystem\",\n\"/Script/Engine.SoundWave\",\n\"/Script/Engine.AimO" +
+    "ffsetBlendSpace\",\n\"/Script/Engine.AimOffsetBlendSpace1D\",\n\"/Script/Engine.BlendS" +
+    "pace\",\n\"/Script/Engine.BlendSpace1D\"";
             // 
             // panel4
             // 
@@ -1073,4 +1090,5 @@ partial class MainForm {
     private RichTextBox rtxtAR;
     private Button btnSelectAR;
     private Button btnSerializeNatives;
+    private Label lblProgress2;
 }

@@ -64,23 +64,23 @@
     <value>244, 17</value>
   </metadata>
   <data name="rtxtSimpleAssets.Text" xml:space="preserve">
-    <value>"/Script/Engine.SoundClass",
+    <value>"/Script/AIModule.BehaviorTree",
+"/Script/AIModule.BlackboardData",
+"/Script/AudioMixer.SubmixEffectDynamicsProcessorPreset",
+"/Script/AudioMixer.SubmixEffectReverbPreset",
+"/Script/AudioMixer.SubmixEffectSubmixEQPreset",
+"/Script/Engine.SoundClass",
 "/Script/Engine.TextureRenderTarget2D",
 "/Script/Engine.MaterialFunction",
 "/Script/Engine.SoundMix",
 "/Script/Engine.SoundConcurrency",
+"/Script/Engine.SoundEffectSourcePresetChain",
+"/Script/Engine.ForceFeedbackAttenuation",
 "/Script/Engine.ForceFeedbackEffect",
 "/Script/Engine.SoundAttenuation",
-"/Script/Foliage.FoliageType_InstancedStaticMesh",</value>
-  </data>
-  <data name="rtxtCookedAssets.Text" xml:space="preserve">
-    <value>"/Script/Engine.ParticleSystem",
-"/Script/Engine.SoundWave",
-"/Script/Engine.SkeletalMesh",
-"/Script/Engine.PhysicsAsset",
-"/Script/Engine.VectorFieldStatic",
-"/Script/Engine.SubUVAnimation",
-"/Script/Engine.AimOffsetBlendSpace",</value>
+"/Script/Engine.SoundSubmix",
+"/Script/Engine.ReverbEffect",
+"/Script/Engine.EndpointSubmix"</value>
   </data>
   <metadata name="cntxtTreeParse.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>113, 17</value>

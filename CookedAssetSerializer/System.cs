@@ -161,6 +161,8 @@ public class System
     
     public void GetCookedAssets(bool copy = true)
     {
+        ScanAR();
+        
         var files = MakeFileList();
         foreach (var file in files)
         {
@@ -168,8 +170,8 @@ public class System
             
             if (CheckPNGAsset(file)) continue;
 
-            var /*type = GetAssetTypeAR(file);
-            if (type == "null")*/ type = GetAssetType(file, Settings.GlobalUEVersion);
+            var type = GetAssetTypeAR(file);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
             if (!Settings.TypesToCopy.Contains(type))
             {

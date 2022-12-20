@@ -243,18 +243,17 @@ public partial class MainForm : Form
 
         List<EAssetType> defaultSkipAssets = new()
         {
-            EAssetType.SkeletalMesh
-        };
-        SetupAssetsListBox(defaultSkipAssets, lbAssetsToSkipSerialization);
-        List<EAssetType> defaultDummyAssets = new()
-        {
             EAssetType.AnimSequence,
-            EAssetType.AnimMontage,
+            EAssetType.SkeletalMesh,
             EAssetType.CameraAnim,
             EAssetType.LandscapeGrassType,
             EAssetType.MediaPlayer,
-            EAssetType.MediaTexture
+            EAssetType.MediaTexture,
+            EAssetType.FileMediaSource,
+            EAssetType.SubsurfaceProfile
         };
+        SetupAssetsListBox(defaultSkipAssets, lbAssetsToSkipSerialization);
+        List<EAssetType> defaultDummyAssets = new() { };
         SetupAssetsListBox(defaultDummyAssets, lbDummyAssets);
     }
     
@@ -495,7 +494,11 @@ public partial class MainForm : Form
             var d = new SafeCallDelegateText(ProgressText);
             Invoke(d, new object[] { text });
         }
-        else lblProgress.Text = text;
+        else
+        {
+            lblProgress.Text = text;
+            lblProgress2.Text = text;
+        }
     }
 
     private void OutputText(string text, RichTextBox rtxt)
