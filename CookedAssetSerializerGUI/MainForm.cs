@@ -380,6 +380,7 @@ public partial class MainForm : Form
             // and not have to muck about deleting them manually
             lines[i] = lines[i].Replace('"'.ToString(), "");
             lines[i] = lines[i].Replace(','.ToString(), "");
+            lines[i] = lines[i].TrimStart();
         }
 
         return lines;
@@ -668,7 +669,7 @@ public partial class MainForm : Form
             {
                 lock(boolLock) isRunning = true;
                 ToggleButtons();
-                system.GetCookedAssets();
+                system.GetCookedAssets(false);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
             }
@@ -693,7 +694,7 @@ public partial class MainForm : Form
             {
                 lock(boolLock) isRunning = true;
                 ToggleButtons();
-                system.GetCookedAssets(false);
+                system.GetCookedAssets(true);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
             }

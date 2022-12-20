@@ -60,7 +60,7 @@ public class System
         
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
-        var files = MakeFileList();
+        var files = MakeFileList(Settings.ContentDir);
         AssetCount = 0;
         AssetTotal = files.Count;
         foreach (var file in files)
@@ -69,7 +69,7 @@ public class System
             
             if (CheckPNGAsset(file)) continue;
 
-            // TOOD: Switch everything to a system that doesn't base off of /Script/<type>.<class>
+            // Cannot use AR types because it (most of the time) does not include the /Script/<type>. data which is required
             var /*type = GetAssetTypeAR(file);
             if (type == "null")*/ type = GetAssetType(file, Settings.GlobalUEVersion);
 
@@ -159,9 +159,11 @@ public class System
         }
     }
     
-    public void GetCookedAssets(bool copy = true)
+    public void GetCookedAssets(bool copy)
     {
         ScanAR();
+
+        var nameType = copy ? "Copy" : "Move"; // For logging
 
         // Get short version of types so that AR list can be used for efficiency
         List<string> shortTypes = new List<string>();
@@ -170,7 +172,7 @@ public class System
             shortTypes.Add(assetType.Split(".")[1]);
         }
         
-        var files = MakeFileList();
+        var files = MakeFileList(Settings.FromDir, false);
         AssetCount = 0;
         AssetTotal = files.Count;
         foreach (var file in files)
@@ -179,7 +181,7 @@ public class System
             
             if (CheckPNGAsset(file)) continue;
 
-            var type = GetAssetTypeAR(file);
+            var type = GetAssetTypeAR(file, Settings.FromDir);
             if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
             if (Settings.TypesToCopy.Contains(type) || shortTypes.Contains(type) || Settings.CopyAllTypes)
@@ -187,7 +189,7 @@ public class System
                 var relativePath = Path.GetRelativePath(Settings.FromDir, file);
                 var newPath = Path.Combine(Settings.CookedDir, relativePath);
     
-                PrintOutput(newPath, "Get Cooked Assets");
+                PrintOutput(newPath, $"{nameType} Assets");
     
                 Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
             
@@ -210,15 +212,22 @@ public class System
             }
             else
             {
-                PrintOutput("Skipped operation on " + file, "Get Cooked Assets");
+                PrintOutput("Skipped operation on " + file, $"{nameType} Assets");
                 continue;
             }
+        }
+
+        // Delete any empty leftover directories
+        if (!copy)
+        {
+            DeleteEmptyDirectories(Settings.FromDir);
+            PrintOutput("Deleted empty directories!", $"{nameType} Assets");
         }
     }
     
     public void SerializeAssets()
     {
-        var files = MakeFileList();
+        var files = MakeFileList(Settings.ContentDir);
         AssetTotal = files.Count;
         AssetCount = 0;
         foreach (var file in files)
@@ -349,38 +358,47 @@ public class System
         }
     }
 
-    private List<string> MakeFileList()
+    private List<string> MakeFileList(string fromDir, bool useParseDir = true)
     {
         List<string> ret = new List<string>();
-
-        if (Settings.ParseDir.Count == 1)
+        if (useParseDir)
         {
-            if (Settings.ParseDir[0].Equals("."))
+            if (Settings.ParseDir.Count == 1)
             {
-                ret.AddRange(Directory.GetFiles(Settings.ContentDir, "*.uasset", SearchOption.AllDirectories));    
+                if (Settings.ParseDir[0].Equals("."))
+                {
+                    ret.AddRange(Directory.GetFiles(fromDir,
+                        "*.uasset", SearchOption.AllDirectories));
+                }
+            }
+            else
+            {
+                foreach (var dir in Settings.ParseDir)
+                {
+                    if (dir.EndsWith("uasset"))
+                    {
+                        ret.Add(Path.Combine(fromDir, dir));
+                    }
+                    else
+                    {
+                        ret.AddRange(Directory.GetFiles(Path.Combine(fromDir, dir),
+                            "*.uasset", SearchOption.AllDirectories));
+                    }
+                }
             }
         }
         else
         {
-            foreach (var dir in Settings.ParseDir)
-            {
-                if (dir.EndsWith("uasset"))
-                {
-                    ret.Add(Path.Combine(Settings.ContentDir,dir));
-                }
-                else
-                {
-                    ret.AddRange(Directory.GetFiles(Path.Combine(Settings.ContentDir, dir), "*.uasset", SearchOption.AllDirectories));
-                }
-            }
+            ret.AddRange(Directory.GetFiles(fromDir, "*.uasset", SearchOption.AllDirectories));
         }
-        
+
         return ret;
     }
 
-    private void PrintOutput(string output, string type = "debug")
+    private void PrintOutput(string output, string type = "debug", bool warning = false)
     {
-        Log.Information($"[{type}]: {AssetCount}/{AssetTotal} {output}");
+        if (warning) Log.Warning($"[{type}]: {AssetCount}/{AssetTotal} {output}");
+        else Log.Information($"[{type}]: {AssetCount}/{AssetTotal} {output}");
     }
 
     private bool CheckPNGAsset(string file)
@@ -423,29 +441,41 @@ public class System
         {
             return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
-        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
+        PrintOutput($"Couldn't identify asset type: {file}", "Get Asset Type", true);
         return "null";
     }
 
-    private string GetAssetTypeAR(string fullAssetPath) {
+    private string GetAssetTypeAR(string fullAssetPath, string relativeToDir) {
         if (AssetList.Count == 0) return "null";
 
-        var AssetPath = GetAssetPackageFromFullPath(fullAssetPath);
+        var AssetPath = GetAssetPackageFromFullPath(fullAssetPath, relativeToDir);
         if (AssetList.ContainsKey(AssetPath)) 
         {
             var artype = AssetList[AssetPath].AssetClass;
             return artype;
         }
-        Log.Warning("[GetAssetType]: Couldn't identify asset type with AR: " + fullAssetPath);
+        PrintOutput($"Couldn't identify asset type with AR: {fullAssetPath}", "Get Asset Type", true);
         return "null";
     }
 
-    private string GetAssetPackageFromFullPath(string fullAssetPath)
+    private string GetAssetPackageFromFullPath(string fullAssetPath, string relativeToDir)
     {
         var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
         var directory = Path.GetDirectoryName(fullAssetPath);
-        var relativeAssetPath = Path.GetRelativePath(Settings.ContentDir, directory);
+        var relativeAssetPath = Path.GetRelativePath(relativeToDir, directory);
         if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
         return Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/");
+    }
+
+    private void DeleteEmptyDirectories(string location)
+    {
+        foreach (var dir in Directory.GetDirectories(location))
+        {
+            DeleteEmptyDirectories(dir);
+            if (Directory.GetFiles(dir).Length == 0 && Directory.GetDirectories(dir).Length == 0)
+            {
+                Directory.Delete(dir, false);
+            }
+        }
     }
 }
