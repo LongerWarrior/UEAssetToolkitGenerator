@@ -1,8 +1,10 @@
-﻿namespace CookedAssetSerializer.AssetTypes;
+﻿using UAssetAPI.AssetRegistry;
+
+namespace CookedAssetSerializer.AssetTypes;
 
 public class DummySerializer : SimpleAssetSerializer<NormalExport>
 {
-    public DummySerializer(Settings settings, UAsset asset) : base(settings, asset)
+    public DummySerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup(false)) return;
         AssignAssetSerializedData();
@@ -12,7 +14,7 @@ public class DummySerializer : SimpleAssetSerializer<NormalExport>
 
 public class DummyWithProps : Serializer<NormalExport>
 {
-    public DummyWithProps(Settings assetSettings, UAsset asset)
+    public DummyWithProps(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;
@@ -47,5 +49,26 @@ public class DummyWithProps : Serializer<NormalExport>
             WriteJsonOut(ObjectHierarchy(AssetInfo, ref RefObjects));
         } 
         else WriteJsonOut(new JProperty("ObjectHierarchy", new JArray()));
+    }
+}
+
+public class RawDummy
+{
+    public RawDummy(JSONSettings settings, KeyValuePair<string, AssetData> assetInfo, string assetName)
+    {
+        string outPath = Path.Join(settings.JSONDir, assetInfo.Key) + ".json";
+        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+        
+        JObject assetData = new JObject();
+        JObject data = new JObject
+        {
+            new JProperty("AssetClass", assetInfo.Value.AssetClass),
+            new JProperty("AssetPackage", assetInfo.Key),
+            new JProperty("AssetName", assetName)
+        };
+        assetData.Add("SkipDependecies", false);
+        data.Add("AssetSerializedData", assetData);
+        data.Add(new JProperty("ObjectHierarchy", new JArray()));
+        File.WriteAllText(outPath, data.ToString());
     }
 }

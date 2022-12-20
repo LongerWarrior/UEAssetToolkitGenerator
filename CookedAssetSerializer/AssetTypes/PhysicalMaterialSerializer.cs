@@ -2,7 +2,7 @@
 
 public class PhysicalMaterialSerializer : SimpleAssetSerializer<NormalExport>
 {
-    public PhysicalMaterialSerializer(Settings settings, UAsset asset) : base(settings, asset)
+    public PhysicalMaterialSerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup()) return;
         SerializeAsset();

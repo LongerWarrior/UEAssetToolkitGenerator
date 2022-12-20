@@ -2,7 +2,7 @@
 
 public class StringTableSerializer : Serializer<StringTableExport>
 {
-    public StringTableSerializer(Settings assetSettings, UAsset asset)
+    public StringTableSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

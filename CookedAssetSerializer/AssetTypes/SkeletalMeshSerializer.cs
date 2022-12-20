@@ -6,7 +6,7 @@ namespace CookedAssetSerializer.AssetTypes;
 
 public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
 {
-    public SkeletalMeshSerializer(Settings assetSettings, UAsset asset)
+    public SkeletalMeshSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

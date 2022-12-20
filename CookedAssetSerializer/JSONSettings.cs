@@ -1,20 +1,23 @@
 ﻿namespace CookedAssetSerializer;
 
-public struct Settings
+public struct JSONSettings
 {
     [JsonProperty] public string ContentDir;
-    [JsonProperty] public string ParseDir;
+    [JsonProperty] public string AssetRegistry;
+    [JsonProperty] public List<string> ParseDir;
     [JsonProperty] public string JSONDir;
-    [JsonProperty] public string CookedDir;
+    [JsonProperty] public string CookedDir; // ToDir
+    [JsonProperty] public string FromDir;
     [JsonProperty] public string InfoDir;
+    [JsonProperty] public string DefaultGameConfig;
     [JsonProperty] public UE4Version GlobalUEVersion;
     [JsonProperty] public bool RefreshAssets;
     [JsonProperty] public bool DummyWithProps;
     [JsonProperty] public List<EAssetType> SkipSerialization;
     [JsonProperty] public List<EAssetType> DummyAssets;
-    [JsonProperty] public List<EAssetType> DeleteAssets;
     [JsonProperty] public List<string> CircularDependency;
     [JsonProperty] public List<string> SimpleAssets;
-    [JsonProperty] public List<string> TypesToCopy;
+    [JsonProperty] public List<string> TypesToCopy; // Copy/move
+    [JsonProperty] public bool CopyAllTypes; // Copy/move
     [JsonProperty] public int SelectedIndex;
 }

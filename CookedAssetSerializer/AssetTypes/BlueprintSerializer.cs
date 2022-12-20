@@ -2,7 +2,7 @@ namespace CookedAssetSerializer.AssetTypes;
 
 public class BlueprintSerializer : Serializer<ClassExport>
 {
-    public BlueprintSerializer(Settings assetSettings, UAsset asset, bool dummy)
+    public BlueprintSerializer(JSONSettings assetSettings, UAsset asset, bool dummy)
     {
         Settings = assetSettings;
         Asset = asset;
