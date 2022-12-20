@@ -84,6 +84,7 @@ partial class MainForm {
             this.rtxtCircularDependancy = new System.Windows.Forms.RichTextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.tabCpyDlt = new System.Windows.Forms.TabPage();
+            this.chkAllTypes = new System.Windows.Forms.CheckBox();
             this.lblProgress2 = new System.Windows.Forms.Label();
             this.btnCopyAssets = new System.Windows.Forms.Button();
             this.rtxtFromDir = new System.Windows.Forms.RichTextBox();
@@ -102,7 +103,6 @@ partial class MainForm {
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chkAllTypes = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.cntxtMainStrip.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -746,6 +746,7 @@ partial class MainForm {
             this.rtxtCircularDependancy.TabIndex = 20;
             this.rtxtCircularDependancy.Text = "/Script/Engine.SoundClass\n/Script/Engine.SoundSubmix\n/Script/Engine.EndpointSubmi" +
     "x";
+            this.rtxtCircularDependancy.WordWrap = false;
             // 
             // label6
             // 
@@ -778,6 +779,18 @@ partial class MainForm {
             this.tabCpyDlt.Size = new System.Drawing.Size(1038, 905);
             this.tabCpyDlt.TabIndex = 4;
             this.tabCpyDlt.Text = "Asset Utilities";
+            // 
+            // chkAllTypes
+            // 
+            this.chkAllTypes.AutoSize = true;
+            this.chkAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkAllTypes.Location = new System.Drawing.Point(113, 413);
+            this.chkAllTypes.Name = "chkAllTypes";
+            this.chkAllTypes.Size = new System.Drawing.Size(120, 32);
+            this.chkAllTypes.TabIndex = 46;
+            this.chkAllTypes.Text = "All Types";
+            this.chkAllTypes.UseVisualStyleBackColor = true;
             // 
             // lblProgress2
             // 
@@ -818,6 +831,8 @@ partial class MainForm {
             this.rtxtFromDir.Size = new System.Drawing.Size(760, 40);
             this.rtxtFromDir.TabIndex = 43;
             this.rtxtFromDir.Text = "C:\\ExamplePath\\OriginalDir";
+            this.rtxtFromDir.Enter += new System.EventHandler(this.rtxtFromDir_Enter);
+            this.rtxtFromDir.Leave += new System.EventHandler(this.rtxtFromDir_Leave);
             // 
             // btnFromDir
             // 
@@ -915,6 +930,7 @@ partial class MainForm {
             this.rtxtCookedAssets.Text = "\"/Script/Engine.ParticleSystem\",\n\"/Script/Engine.SoundWave\",\n\"/Script/Engine.AimO" +
     "ffsetBlendSpace\",\n\"/Script/Engine.AimOffsetBlendSpace1D\",\n\"/Script/Engine.BlendS" +
     "pace\",\n\"/Script/Engine.BlendSpace1D\"";
+            this.rtxtCookedAssets.WordWrap = false;
             // 
             // panel4
             // 
@@ -987,18 +1003,6 @@ partial class MainForm {
             this.refreshAllToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
             this.refreshAllToolStripMenuItem.Text = "&Refresh";
             this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
-            // 
-            // chkAllTypes
-            // 
-            this.chkAllTypes.AutoSize = true;
-            this.chkAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.chkAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkAllTypes.Location = new System.Drawing.Point(113, 413);
-            this.chkAllTypes.Name = "chkAllTypes";
-            this.chkAllTypes.Size = new System.Drawing.Size(120, 32);
-            this.chkAllTypes.TabIndex = 46;
-            this.chkAllTypes.Text = "All Types";
-            this.chkAllTypes.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 

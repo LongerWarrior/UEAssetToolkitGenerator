@@ -313,6 +313,24 @@ public partial class MainForm : Form
             rtxtToDir.ForeColor = SystemColors.WindowText;
         }
     }
+    
+    private void rtxtFromDir_Leave(object sender, EventArgs e)
+    {
+        if (rtxtFromDir.Text.Length == 0)
+        {
+            rtxtFromDir.Text = "C:\\ExamplePath\\OriginalDir";
+            rtxtFromDir.ForeColor = SystemColors.GrayText;
+        }
+    }
+
+    private void rtxtFromDir_Enter(object sender, EventArgs e)
+    {
+        if (rtxtFromDir.Text == "C:\\ExamplePath\\OriginalDir")
+        {
+            rtxtFromDir.Text = "";
+            rtxtFromDir.ForeColor = SystemColors.WindowText;
+        }
+    }
 
     private void rtxtJSONDir_Leave(object sender, EventArgs e)
     {

@@ -80,7 +80,10 @@
 "/Script/Engine.SoundAttenuation",
 "/Script/Engine.SoundSubmix",
 "/Script/Engine.ReverbEffect",
-"/Script/Engine.EndpointSubmix"</value>
+"/Script/Engine.EndpointSubmix",
+"/Script/Synthesis.SourceEffectChorusPreset",
+"/Script/Synthesis.SubmixEffectFilterPreset",
+"/Script/Synthesis.SubmixEffectStereoDelayPreset"</value>
   </data>
   <metadata name="cntxtTreeParse.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>113, 17</value>
