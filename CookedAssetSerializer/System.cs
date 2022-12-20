@@ -182,7 +182,7 @@ public class System
             var type = GetAssetTypeAR(file);
             if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
 
-            if (Settings.TypesToCopy.Contains(type) || shortTypes.Contains(type))
+            if (Settings.TypesToCopy.Contains(type) || shortTypes.Contains(type) || Settings.CopyAllTypes)
             {
                 var relativePath = Path.GetRelativePath(Settings.FromDir, file);
                 var newPath = Path.Combine(Settings.CookedDir, relativePath);

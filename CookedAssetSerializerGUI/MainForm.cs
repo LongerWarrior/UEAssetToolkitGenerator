@@ -111,20 +111,6 @@ public partial class MainForm : Form
         UE4Version.VER_UE4_26,
         UE4Version.VER_UE4_27
     };
-    
-    private readonly object[] nativeMethodKeys =
-    {
-        "Disabled",
-        "Inclusive",
-        "Exclusive"
-    };
-
-    private readonly ENativizationMethod[] nativMethodValues =
-    {
-        ENativizationMethod.Disabled,
-        ENativizationMethod.Inclusive,
-        ENativizationMethod.Exclusive
-    };
 
     #endregion
 
@@ -300,6 +286,7 @@ public partial class MainForm : Form
             CircularDependency = circularDependencies,
             SimpleAssets = simpleAssets,
             TypesToCopy = typesToCopy,
+            CopyAllTypes = chkAllTypes.Checked,
             SelectedIndex = cbUEVersion.SelectedIndex
         };
 
@@ -427,6 +414,7 @@ public partial class MainForm : Form
         rtxtCircularDependancy.Lines = jsonsettings.CircularDependency.ToArray();
         rtxtSimpleAssets.Lines = jsonsettings.SimpleAssets.ToArray();
         rtxtCookedAssets.Lines = jsonsettings.TypesToCopy.ToArray();
+        chkAllTypes.Checked = jsonsettings.CopyAllTypes;
     }
 
     public void SaveJSONSettings()

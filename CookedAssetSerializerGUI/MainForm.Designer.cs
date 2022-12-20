@@ -102,6 +102,7 @@ partial class MainForm {
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkAllTypes = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.cntxtMainStrip.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -760,6 +761,7 @@ partial class MainForm {
             // tabCpyDlt
             // 
             this.tabCpyDlt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tabCpyDlt.Controls.Add(this.chkAllTypes);
             this.tabCpyDlt.Controls.Add(this.lblProgress2);
             this.tabCpyDlt.Controls.Add(this.btnCopyAssets);
             this.tabCpyDlt.Controls.Add(this.rtxtFromDir);
@@ -781,7 +783,7 @@ partial class MainForm {
             // 
             this.lblProgress2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblProgress2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.lblProgress2.Location = new System.Drawing.Point(30, 416);
+            this.lblProgress2.Location = new System.Drawing.Point(30, 464);
             this.lblProgress2.Name = "lblProgress2";
             this.lblProgress2.Size = new System.Drawing.Size(283, 40);
             this.lblProgress2.TabIndex = 45;
@@ -986,6 +988,18 @@ partial class MainForm {
             this.refreshAllToolStripMenuItem.Text = "&Refresh";
             this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
+            // chkAllTypes
+            // 
+            this.chkAllTypes.AutoSize = true;
+            this.chkAllTypes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkAllTypes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkAllTypes.Location = new System.Drawing.Point(113, 413);
+            this.chkAllTypes.Name = "chkAllTypes";
+            this.chkAllTypes.Size = new System.Drawing.Size(120, 32);
+            this.chkAllTypes.TabIndex = 46;
+            this.chkAllTypes.Text = "All Types";
+            this.chkAllTypes.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1091,4 +1105,5 @@ partial class MainForm {
     private Button btnSelectAR;
     private Button btnSerializeNatives;
     private Label lblProgress2;
+    private CheckBox chkAllTypes;
 }

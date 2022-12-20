@@ -17,6 +17,7 @@ public struct JSONSettings
     [JsonProperty] public List<EAssetType> DummyAssets;
     [JsonProperty] public List<string> CircularDependency;
     [JsonProperty] public List<string> SimpleAssets;
-    [JsonProperty] public List<string> TypesToCopy;
+    [JsonProperty] public List<string> TypesToCopy; // Copy/move
+    [JsonProperty] public bool CopyAllTypes; // Copy/move
     [JsonProperty] public int SelectedIndex;
 }
