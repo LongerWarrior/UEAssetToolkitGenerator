@@ -38,3 +38,13 @@ It also has the ability to dummy any Blueprints/UserDefinedEnums (NOT UserDefine
 For most other asset types, that currently cannot be serialized (or don't need to be, e.g. sound wave), you will need to use the "Asset Utilities" tab to copy their cooked files into the UE project. More on this in the [asset utilities settings]() section.
 
 ## How to use this tool?
+
+link to GUI.md
+
+link to FBX.md
+
+## How to use the asset generator tool?
+
+link to AssetGenerator.md
+
+link to GameNotes.md
