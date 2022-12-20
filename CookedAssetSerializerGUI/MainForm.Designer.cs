@@ -90,7 +90,7 @@ partial class MainForm {
             this.label7 = new System.Windows.Forms.Label();
             this.btnMoveAssets = new System.Windows.Forms.Button();
             this.rtxtToDir = new System.Windows.Forms.RichTextBox();
-            this.btnSelectCookedDir = new System.Windows.Forms.Button();
+            this.btnToDir = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.rtxtCookedAssets = new System.Windows.Forms.RichTextBox();
             this.panel4 = new System.Windows.Forms.Panel();
@@ -763,7 +763,7 @@ partial class MainForm {
             this.tabCpyDlt.Controls.Add(this.label7);
             this.tabCpyDlt.Controls.Add(this.btnMoveAssets);
             this.tabCpyDlt.Controls.Add(this.rtxtToDir);
-            this.tabCpyDlt.Controls.Add(this.btnSelectCookedDir);
+            this.tabCpyDlt.Controls.Add(this.btnToDir);
             this.tabCpyDlt.Controls.Add(this.label4);
             this.tabCpyDlt.Controls.Add(this.rtxtCookedAssets);
             this.tabCpyDlt.Location = new System.Drawing.Point(4, 29);
@@ -859,31 +859,31 @@ partial class MainForm {
             this.rtxtToDir.Enter += new System.EventHandler(this.rtxtCookedDir_Enter);
             this.rtxtToDir.Leave += new System.EventHandler(this.rtxtCookedDir_Leave);
             // 
-            // btnSelectCookedDir
+            // btnToDir
             // 
-            this.btnSelectCookedDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
-            this.btnSelectCookedDir.FlatAppearance.BorderSize = 2;
-            this.btnSelectCookedDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelectCookedDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSelectCookedDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.btnSelectCookedDir.Location = new System.Drawing.Point(59, 163);
-            this.btnSelectCookedDir.Name = "btnSelectCookedDir";
-            this.btnSelectCookedDir.Size = new System.Drawing.Size(139, 40);
-            this.btnSelectCookedDir.TabIndex = 4;
-            this.btnSelectCookedDir.Text = "To Dir";
-            this.btnSelectCookedDir.UseVisualStyleBackColor = true;
-            this.btnSelectCookedDir.Click += new System.EventHandler(this.btnSelectOutputDir_Click);
+            this.btnToDir.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(34)))), ((int)(((byte)(43)))));
+            this.btnToDir.FlatAppearance.BorderSize = 2;
+            this.btnToDir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnToDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnToDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.btnToDir.Location = new System.Drawing.Point(59, 163);
+            this.btnToDir.Name = "btnToDir";
+            this.btnToDir.Size = new System.Drawing.Size(139, 40);
+            this.btnToDir.TabIndex = 4;
+            this.btnToDir.Text = "To Dir";
+            this.btnToDir.UseVisualStyleBackColor = true;
+            this.btnToDir.Click += new System.EventHandler(this.btnToDir_Click);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.label4.Location = new System.Drawing.Point(384, 221);
+            this.label4.Location = new System.Drawing.Point(455, 221);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(276, 38);
+            this.label4.Size = new System.Drawing.Size(169, 38);
             this.label4.TabIndex = 12;
-            this.label4.Text = "Cooked Asset Types";
+            this.label4.Text = "Asset Types";
             // 
             // rtxtCookedAssets
             // 
@@ -1044,7 +1044,7 @@ partial class MainForm {
     private Label lblProgress;
     private Button btnClearLogs;
     private Button btnSerializeAssets;
-    private Button btnSelectCookedDir;
+    private Button btnToDir;
     private Button btnMoveAssets;
     private Button btnScanAssets;
     private Label label1;

@@ -6,7 +6,8 @@ public struct JSONSettings
     [JsonProperty] public string AssetRegistry;
     [JsonProperty] public List<string> ParseDir;
     [JsonProperty] public string JSONDir;
-    [JsonProperty] public string CookedDir;
+    [JsonProperty] public string CookedDir; // ToDir
+    [JsonProperty] public string FromDir;
     [JsonProperty] public string InfoDir;
     [JsonProperty] public string DefaultGameConfig;
     [JsonProperty] public UE4Version GlobalUEVersion;

@@ -234,8 +234,9 @@ public partial class MainForm : Form
         LoadTreeDirectory(Environment.CurrentDirectory);
         lastValidContentDir = Environment.CurrentDirectory;
         rtxtJSONDir.Text = Environment.CurrentDirectory;
-        rtxtToDir.Text = Environment.CurrentDirectory;
         rtxtLogDir.Text = Environment.CurrentDirectory;
+        rtxtToDir.Text = Environment.CurrentDirectory;
+        rtxtFromDir.Text = Environment.CurrentDirectory;
 
         cbUEVersion.Items.AddRange(versionOptionsKeys);
         cbUEVersion.SelectedIndex = 28; // This is a dumb thing to do, but oh well
@@ -289,6 +290,7 @@ public partial class MainForm : Form
             ParseDir = GetRelativeMinFileList(),
             JSONDir = rtxtJSONDir.Text,
             CookedDir = rtxtToDir.Text,
+            FromDir = rtxtFromDir.Text,
             InfoDir = rtxtLogDir.Text,
             DefaultGameConfig = rtxtDfltGamCnfg.Text,
             GlobalUEVersion = versionOptionsValues[cbUEVersion.SelectedIndex],
@@ -416,6 +418,7 @@ public partial class MainForm : Form
         SetupTreeView(jsonsettings.ParseDir, jsonsettings.ContentDir);
         rtxtJSONDir.Text = jsonsettings.JSONDir;
         rtxtToDir.Text = jsonsettings.CookedDir;
+        rtxtFromDir.Text = jsonsettings.FromDir;
         rtxtLogDir.Text = jsonsettings.InfoDir;
         cbUEVersion.SelectedIndex = jsonsettings.SelectedIndex;
         chkRefreshAssets.Checked = jsonsettings.RefreshAssets;
@@ -477,9 +480,11 @@ public partial class MainForm : Form
         {
             btnScanAssets.Enabled = !isRunning;
             btnMoveAssets.Enabled = !isRunning;
+            btnCopyAssets.Enabled = !isRunning;
             btnSerializeAssets.Enabled = !isRunning;
             btnClearLogs.Enabled = !isRunning;
             btnLoadConfig.Enabled = !isRunning;
+            btnSerializeNatives.Enabled = !isRunning;
         }
     }
 
@@ -689,7 +694,27 @@ public partial class MainForm : Form
     
     private void btnCopyAssets_Click(object sender, EventArgs e)
     {
+        SetupGlobals();
 
+        Task.Run(() =>
+        {
+            try
+            {
+                lock(boolLock) isRunning = true;
+                ToggleButtons();
+                system.GetCookedAssets(false);
+                lock (boolLock) isRunning = false;
+                ToggleButtons();
+            }
+            catch (Exception exception)
+            {
+                OutputText(exception.ToString(), rtxtOutput);
+                lock (boolLock) isRunning = false;
+                ToggleButtons();
+                return;
+            }
+            OutputText("Copied assets!", rtxtOutput);
+        });
     }
 
     private void btnSerializeAssets_Click(object sender, EventArgs e)
@@ -750,7 +775,7 @@ public partial class MainForm : Form
     
     private void btnAR_Click(object sender, EventArgs e)
     {
-        rtxtAR.Text = OpenFileDialog(@"Binary files (*.bin)|*.bin", rtxtContentDir.Text);
+        rtxtAR.Text = OpenFileDialog(@"Binary files (*.bin)|*.bin", rtxtAR.Text);
     }
     
     private void btnDfltGamCnfg_Click(object sender, EventArgs e)
@@ -763,9 +788,9 @@ public partial class MainForm : Form
         rtxtJSONDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
     }
 
-    private void btnSelectOutputDir_Click(object sender, EventArgs e)
+    private void btnToDir_Click(object sender, EventArgs e)
     {
-        rtxtToDir.Text = OpenDirectoryDialog(rtxtJSONDir.Text);
+        rtxtToDir.Text = OpenDirectoryDialog(rtxtToDir.Text);
     }
     
     private void btnOpenAllTypes_Click(object sender, EventArgs e)
@@ -826,11 +851,9 @@ public partial class MainForm : Form
     
     private void btnFromDir_Click(object sender, EventArgs e)
     {
-
+        rtxtFromDir.Text = OpenDirectoryDialog(rtxtFromDir.Text);
     }
-
     
-
     #endregion
     
     private void chkSettDNS_CheckedChanged(object sender, EventArgs e)

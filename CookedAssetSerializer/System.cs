@@ -167,12 +167,9 @@ public class System
             AssetCount++;
             
             if (CheckPNGAsset(file)) continue;
-            
-            var uexpFile = Path.ChangeExtension(file, "uexp");
-            var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            
-            var type = GetAssetTypeAR(file);
-            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
+
+            var /*type = GetAssetTypeAR(file);
+            if (type == "null")*/ type = GetAssetType(file, Settings.GlobalUEVersion);
 
             if (!Settings.TypesToCopy.Contains(type))
             {
@@ -180,25 +177,29 @@ public class System
                 continue;
             }
     
-            var relativePath = Path.GetRelativePath(Settings.ContentDir, file);
+            var relativePath = Path.GetRelativePath(Settings.FromDir, file);
             var newPath = Path.Combine(Settings.CookedDir, relativePath);
     
-            PrintOutput(newPath, "GetCookedAssets");
+            PrintOutput(newPath, "Get Cooked Assets");
     
             Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+            
             if (copy) File.Copy(file, newPath, true);
             else File.Move(file, newPath, true);
     
+            var uexpFile = Path.ChangeExtension(file, "uexp");
             if (File.Exists(uexpFile))
             {
                 if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
                 else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
             }
-    
-            if (!File.Exists(ubulkFile)) continue;
-            if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-            else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
             
+            var ubulkFile = Path.ChangeExtension(file, "ubulk");
+            if (File.Exists(ubulkFile))
+            {
+                if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+            }
         }
     }
     
