@@ -18,7 +18,7 @@ To obtain skeletal meshes and animation sequences, you will need to follow a mor
 2. Use 3DS Max (*cough* probably has to be obtained in a *cough* non-official way *cough*) to convert `.psk`/`.psa` to `.fbx` - can semi-automate using [this](https://gist.github.com/Buckminsterfullerene02/12947999641c6a290f2cbbaf4e0ee313) batch export script
 3. Copy `.fbx` files into JSON output and serialize skeletal meshes & animation sequences so that they get model hash 
 
-**Warning:** At the time of writing, the animation sequence
+**Warning:** At the time of writing, the animation sequence import into the asset generator is busted (there is an issue about it on the repo), so I have purposefully disabled the model hash include in the JSON, so, you will need to manually import the animation sequence FBX and then fill them with their notifies/track data using the JSON afterwards.
 
 ## Backup method for generating SM FBX
 Sometimes, some static meshes are generated improperly by my FBX Wrapper tool (for varying reasons), so there is a backup method for bulk exporting SMs too.
