@@ -1,0 +1,3 @@
+cmake ./FBX-Wrapper/
+
+pause

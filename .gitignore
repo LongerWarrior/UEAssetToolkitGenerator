@@ -15,6 +15,15 @@ CookedAssetSerializerGUI/bin/
 CookedAssetSerializerGUI/obj/
 Testing
 
+FBX-Wrapper/*.sln
+FBX-Wrapper/CMakeCache.txt
+FBX-Wrapper/cmake_install.cmake
+FBX-Wrapper/*.proj*
+
+_ReSharper.Caches/
+*/cmake-build-debug/
+*/CMakeFiles/
+
 Release/
 
 FBXLib/bin
