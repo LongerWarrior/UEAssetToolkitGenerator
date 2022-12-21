@@ -2,7 +2,7 @@
 
 public class MaterialSerializer : Serializer<NormalExport>
 {
-    public MaterialSerializer(Settings settings, UAsset asset)
+    public MaterialSerializer(JSONSettings settings, UAsset asset)
     {
         Settings = settings;
         Asset = asset;

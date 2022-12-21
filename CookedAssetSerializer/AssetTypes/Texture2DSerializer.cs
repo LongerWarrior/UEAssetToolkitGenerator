@@ -6,7 +6,7 @@ namespace CookedAssetSerializer.AssetTypes;
 
 public class Texture2DSerializer : Serializer<Texture2DExport>
 {
-    public Texture2DSerializer(Settings assetSettings, UAsset asset)
+    public Texture2DSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

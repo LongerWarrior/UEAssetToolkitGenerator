@@ -1,20 +1,25 @@
 ﻿using System.Text;
-
 using System.Diagnostics;
-using Serilog;
+using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializer;
 
 public class System
 {
-    private readonly Settings Settings;
+    private readonly JSONSettings Settings;
+    private Dictionary<string, AssetData> AssetList;
 
     private int AssetTotal;
     private int AssetCount;
 
-    public System(Settings settings)
+    public System(JSONSettings jsonsettings)
     {
-        Settings = settings;
+        Settings = jsonsettings;
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(Settings.InfoDir + "/output_log.txt", 
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Message}{NewLine}{Exception}")
+            .CreateLogger();
     }
 
     public int GetAssetTotal()
@@ -34,37 +39,54 @@ public class System
         Settings.TypesToCopy.Clear();
     }
 
+    private void ScanAR()
+    {
+        var AR = new FAssetRegistryState(Settings.AssetRegistry, Settings.GlobalUEVersion);
+        AssetList = new Dictionary<string, AssetData>(AR.PreallocatedAssetDataBuffers.Length);
+        foreach (var data in AR.PreallocatedAssetDataBuffers) 
+        {
+            if (data.PackageName.ToName().StartsWith("/Game")) 
+            {
+                AssetList[data.PackageName.ToName()] = new AssetData(data.AssetClass, data.AssetName, data.TagsAndValues);
+            }
+        }
+        AR = null;
+        GC.Collect();
+    }
+
     public void ScanAssetTypes(string typeToFind = "")
     {
+        ScanAR();
+        
         Dictionary<string, List<string>> types = new();
         List<string> allTypes = new();
-
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
-
-        AssetTotal = files.Length;
+        var files = MakeFileList(Settings.ContentDir);
         AssetCount = 0;
+        AssetTotal = files.Count;
         foreach (var file in files)
         {
             AssetCount++;
             
             if (CheckPNGAsset(file)) continue;
 
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
+            // Cannot use AR types because it (most of the time) does not include the /Script/<type>. data which is required
+            var /*type = GetAssetTypeAR(file);
+            if (type == "null")*/ type = GetAssetType(file, Settings.GlobalUEVersion);
+
             var path = "/" + Path.GetRelativePath(Settings.ContentDir, file).Replace("\\", "/");
 
-            PrintOutput(path, "Scan");
+            PrintOutput("/Game" + path, "Scan");
             
             if (types.ContainsKey(type)) types[type].Add(path);
             else types[type] = new List<string> { path };
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
         }
-
-        PrintOutput("Find all files " + files.Length, "Scan");
+        Log.Information($"[Scan]: Found {files.Count} files");
         var jTypes = new JObject();
         foreach (var entry in types)
         {
-            PrintOutput(entry.Key + " : " + entry.Value.Count, "Scan");
+            Log.Information($"[Scan]: {entry.Key} : {entry.Value.Count}");
             jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
             allTypes.Add("\"" + entry.Key + "\",");
         }
@@ -73,71 +95,154 @@ public class System
         File.WriteAllText(Settings.InfoDir + "\\AssetTypes.json", jTypes.ToString());
         File.WriteAllText(Settings.InfoDir + "\\AllTypes.txt", string.Join("\n", allTypes));
     }
-    
-    public void GetCookedAssets(bool copy = true)
-    {
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
 
-        AssetTotal = files.Length;
+    public void SerializeNativeAssets()
+    {
+        ScanAR();
+        
+        ENativizationMethod method = ENativizationMethod.Disabled;
+        var nativeAssets = new List<string>();
+        foreach (var line in File.ReadAllLines(Settings.DefaultGameConfig))
+        {
+            if (line.StartsWith("BlueprintNativizationMethod="))
+            {
+                method = (ENativizationMethod)Enum.Parse(typeof(ENativizationMethod), line.Split('=')[1]);
+            }
+            
+            if (line.StartsWith("+NativizeBlueprintAssets="))
+            {
+                var path = line.Split('"')[1];
+                path.Remove(path.Length - 1, 1);
+                nativeAssets.Add(path);
+            }
+        }
+        
         AssetCount = 0;
+        AssetTotal = nativeAssets.Count;
+        if (nativeAssets.Count > 0)
+        {
+            // We cannot only filter by parse dir because the nativized assets don't show up in the tree view,
+            // so they would be skipped regardless
+            foreach (var asset in nativeAssets)
+            {
+                AssetCount++;
+                foreach (var ARAsset in AssetList)
+                {
+                    if (ARAsset.Key == asset)
+                    {
+                        // Need to use asset's value instead of ARAsset due to ARAsset's value name having the _C
+                        new RawDummy(Settings, ARAsset, asset);
+                        PrintOutput("Creating dummy blueprint for nativized asset: " + ARAsset.Key, "Native Asset Serializer");
+                    }
+                }
+            }
+        }
+        
+        if (method != ENativizationMethod.Disabled) // Inclusive OR exclusive
+        {
+            foreach (var ARAsset in AssetList)
+            {
+                if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedEnum)
+                    && ARAsset.Value.AssetClass == "UserDefinedEnum")
+                {
+                    AssetTotal++;
+                    AssetCount++;
+                    new RawDummy(Settings, ARAsset, ARAsset.Value.AssetName);
+                    PrintOutput("Creating dummy enum for nativized asset: " + ARAsset.Key, "Native Asset Serializer");
+                }
+
+                // Sadly we cannot dummy structs without property data because it will cause issues when being referenced,
+                // and even parsing the C++ header dump does not provide enough information (need actual values)
+                /*if (!Settings.SkipSerialization.Contains(EAssetType.UserDefinedStruct) 
+                    && ARAsset.Value.AssetClass == "UserDefinedStruct") new RawDummy(Settings, ARAsset);*/
+            }
+        }
+    }
+    
+    public void GetCookedAssets(bool copy)
+    {
+        ScanAR();
+
+        var nameType = copy ? "Copy" : "Move"; // For logging
+
+        // Get short version of types so that AR list can be used for efficiency
+        List<string> shortTypes = new List<string>();
+        foreach (var assetType in Settings.TypesToCopy)
+        {
+            shortTypes.Add(assetType.Split(".")[1]);
+        }
+        
+        var files = MakeFileList(Settings.FromDir, false);
+        AssetCount = 0;
+        AssetTotal = files.Count;
         foreach (var file in files)
         {
             AssetCount++;
             
             if (CheckPNGAsset(file)) continue;
-            
-            var uexpFile = Path.ChangeExtension(file, "uexp");
-            var ubulkFile = Path.ChangeExtension(file, "ubulk");
-            var type = GetAssetType(file, Settings.GlobalUEVersion);
-            
-            if (!Settings.TypesToCopy.Contains(type))
+
+            var type = GetAssetTypeAR(file, Settings.FromDir);
+            if (type == "null") type = GetAssetType(file, Settings.GlobalUEVersion);
+
+            if (Settings.TypesToCopy.Contains(type) || shortTypes.Contains(type) || Settings.CopyAllTypes)
             {
-                PrintOutput("Skipped operation on " + file, "GetCookedAssets");
+                var relativePath = Path.GetRelativePath(Settings.FromDir, file);
+                var newPath = Path.Combine(Settings.CookedDir, relativePath);
+    
+                PrintOutput(newPath, $"{nameType} Assets");
+    
+                Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
+            
+                if (copy) File.Copy(file, newPath, true);
+                else File.Move(file, newPath, true);
+    
+                var uexpFile = Path.ChangeExtension(file, "uexp");
+                if (File.Exists(uexpFile))
+                {
+                    if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                    else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
+                }
+            
+                var ubulkFile = Path.ChangeExtension(file, "ubulk");
+                if (File.Exists(ubulkFile))
+                {
+                    if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                    else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+                }
+            }
+            else
+            {
+                PrintOutput("Skipped operation on " + file, $"{nameType} Assets");
                 continue;
             }
+        }
 
-            var relativePath = Path.GetRelativePath(Settings.ContentDir, file);
-            var newPath = Path.Combine(Settings.CookedDir, relativePath);
-
-            PrintOutput(newPath, "GetCookedAssets");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath) ?? string.Empty);
-            if (copy) File.Copy(file, newPath, true);
-            else File.Move(file, newPath, true);
-
-            if (File.Exists(uexpFile))
-            {
-                if (copy) File.Copy(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-                else File.Move(uexpFile, Path.ChangeExtension(newPath, "uexp"), true);
-            }
-
-            if (!File.Exists(ubulkFile)) continue;
-            if (copy) File.Copy(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
-            else File.Move(ubulkFile, Path.ChangeExtension(newPath, "ubulk"), true);
+        // Delete any empty leftover directories
+        if (!copy)
+        {
+            DeleteEmptyDirectories(Settings.FromDir);
+            PrintOutput("Deleted empty directories!", $"{nameType} Assets");
         }
     }
     
     public void SerializeAssets()
     {
-        var files = Directory.GetFiles(Settings.ParseDir, "*.uasset", SearchOption.AllDirectories);
-
-        AssetTotal = files.Length;
+        var files = MakeFileList(Settings.ContentDir);
+        AssetTotal = files.Count;
         AssetCount = 0;
         foreach (var file in files)
         {
-            AssetCount++;
-            
-            if (CheckPNGAsset(file)) continue;
-            
             UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
-            
-            if (Settings.SkipSerialization.Contains(asset.assetType))
+            AssetCount++;
+
+            if (Settings.SkipSerialization.Contains(asset.assetType)) continue;
+            if (CheckPNGAsset(file))
             {
-                PrintOutput("Skipped serialization on " + file, "SerializeAssets");
+                PrintOutput("Skipped serialization on " + file, "Serialize Assets");
                 continue;
             }
             
-            PrintOutput("Serializing " + file, "SerializeAssets");
+            PrintOutput("Serializing " + file, "Serialize Assets");
 
             bool skip = false;
             string skipReason = "";
@@ -145,8 +250,8 @@ public class System
             {
                 if (Settings.DummyAssets.Contains(asset.assetType))
                 {
-                    if (Settings.DummyWithProps) skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
-                    else skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                    if (Settings.DummyWithProps) skip = new DummyWithProps(Settings, asset).IsSkipped;
+                    else skip = new DummySerializer(Settings, asset).IsSkipped;
                 }
                 else
                 {
@@ -155,84 +260,84 @@ public class System
                         case EAssetType.Blueprint:
                         case EAssetType.WidgetBlueprint:
                         case EAssetType.AnimBlueprint:
-                            skip = CheckDeleteAsset(asset, new BlueprintSerializer(Settings, asset, false).IsSkipped);
+                            skip = new BlueprintSerializer(Settings, asset, false).IsSkipped;
                             break;
                         case EAssetType.DataTable:
-                            skip = CheckDeleteAsset(asset, new DataTableSerializer(Settings, asset).IsSkipped);
+                            skip = new DataTableSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.StringTable:
-                            skip = CheckDeleteAsset(asset, new StringTableSerializer(Settings, asset).IsSkipped);
+                            skip = new StringTableSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.UserDefinedStruct:
-                            skip = CheckDeleteAsset(asset, new UserDefinedStructSerializer(Settings, asset).IsSkipped);
+                            skip = new UserDefinedStructSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.BlendSpaceBase:
-                            skip = CheckDeleteAsset(asset, new BlendSpaceSerializer(Settings, asset).IsSkipped);
+                            skip = new BlendSpaceSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.AnimSequence:
-                            skip = CheckDeleteAsset(asset, new AnimSequenceSerializer(Settings, asset).IsSkipped);
+                            skip = new AnimSequenceSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.AnimMontage:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = new DummyWithProps(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.CameraAnim:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = new DummySerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.LandscapeGrassType:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = new DummyWithProps(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.MediaPlayer:
-                            skip = CheckDeleteAsset(asset, new DummyWithProps(Settings, asset).IsSkipped);
+                            skip = new DummyWithProps(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.MediaTexture:
-                            skip = CheckDeleteAsset(asset, new DummySerializer(Settings, asset).IsSkipped);
+                            skip = new DummySerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.SubsurfaceProfile:
-                            skip = CheckDeleteAsset(asset, new SubsurfaceProfileSerializer(Settings, asset).IsSkipped);
+                            skip = new SubsurfaceProfileSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.Skeleton:
-                            skip = CheckDeleteAsset(asset, new SkeletonSerializer(Settings, asset).IsSkipped);
+                            skip = new SkeletonSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.MaterialParameterCollection:
-                            skip = CheckDeleteAsset(asset, new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped);
+                            skip = new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.PhycialMaterial:
-                            skip = CheckDeleteAsset(asset, new PhysicalMaterialSerializer(Settings, asset).IsSkipped);
+                            skip = new PhysicalMaterialSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.Material:
-                            skip = CheckDeleteAsset(asset, new MaterialSerializer(Settings, asset).IsSkipped);
+                            skip = new MaterialSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.MaterialInstanceConstant:
-                            skip = CheckDeleteAsset(asset, new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped);
+                            skip = new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.UserDefinedEnum:
-                            skip = CheckDeleteAsset(asset, new UserDefinedEnumSerializer(Settings, asset).IsSkipped);
+                            skip = new UserDefinedEnumSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.SoundCue:
-                            skip = CheckDeleteAsset(asset, new SoundCueSerializer(Settings, asset).IsSkipped);
+                            skip = new SoundCueSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.Font:
-                            skip = CheckDeleteAsset(asset, new FontSerializer(Settings, asset).IsSkipped);
+                            skip = new FontSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.FontFace:
-                            skip = CheckDeleteAsset(asset, new FontFaceSerializer(Settings, asset).IsSkipped);
+                            skip = new FontFaceSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.CurveBase:
-                            skip = CheckDeleteAsset(asset, new CurveBaseSerializer(Settings, asset).IsSkipped);
+                            skip = new CurveBaseSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.Texture2D:
-                            skip = CheckDeleteAsset(asset, new Texture2DSerializer(Settings, asset).IsSkipped);
+                            skip = new Texture2DSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.SkeletalMesh:
-                            skip = CheckDeleteAsset(asset, new SkeletalMeshSerializer(Settings, asset).IsSkipped);
+                            skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.FileMediaSource:
-                            skip = CheckDeleteAsset(asset, new FileMediaSourceSerializer(Settings, asset).IsSkipped);
+                            skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
                             break;
                         case EAssetType.StaticMesh:
                             var sm = new StaticMeshSerializer(Settings, asset);
                             if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
-                            skip = CheckDeleteAsset(asset, sm.IsSkipped);
+                            skip = sm.IsSkipped;
                             break;
                     }
                 }
@@ -241,39 +346,61 @@ public class System
             {
                 if (asset.mainExport == 0) continue;
                 if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
-                skip = CheckDeleteAsset(asset, new UncategorizedSerializer(Settings, asset).IsSkipped);
+                skip = new UncategorizedSerializer(Settings, asset).IsSkipped;
             }
 
             if (skip)
             {
-                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "SerializeAssets");
-                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "SerializeAssets");
+                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
+                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
             }
-            else PrintOutput(file, "SerializeAssets");
+            else PrintOutput(file, "Serialize Assets");
         }
     }
 
-    public bool CheckDeleteAsset(UAsset asset, bool isSkipped)
+    private List<string> MakeFileList(string fromDir, bool useParseDir = true)
     {
-        if (isSkipped && Settings.DeleteAssets.Contains(asset.assetType)) 
+        List<string> ret = new List<string>();
+        if (useParseDir)
         {
-            File.Delete(Path.Join(Settings.JSONDir, Path.Join("\\Game", 
-            Path.GetRelativePath(Settings.ContentDir, Path.GetDirectoryName(asset.FilePath)), 
-            Path.GetFileNameWithoutExtension(asset.FilePath)).Replace("\\", "/")) + ".json");
+            if (Settings.ParseDir.Count == 1 && Settings.ParseDir[0].Equals("."))
+            {
+                ret.AddRange(Directory.GetFiles(fromDir,
+                    "*.uasset", SearchOption.AllDirectories));
+            }
+            else
+            {
+                foreach (var dir in Settings.ParseDir)
+                {
+                    if (dir.EndsWith("uasset"))
+                    {
+                        ret.Add(Path.Combine(fromDir, dir));
+                    }
+                    else
+                    {
+                        ret.AddRange(Directory.GetFiles(Path.Combine(fromDir, dir),
+                            "*.uasset", SearchOption.AllDirectories));
+                    }
+                }
+            }
         }
-        return isSkipped;
+        else
+        {
+            ret.AddRange(Directory.GetFiles(fromDir, "*.uasset", SearchOption.AllDirectories));
+        }
+
+        return ret;
     }
 
-    private void PrintOutput(string output, string type = "debug")
+    private void PrintOutput(string output, string type = "debug", bool warning = false)
     {
-        //string logLine = $"[{type}] {DateTime.Now:HH:mm:ss}: {AssetCount}/{AssetTotal} {output}";
-        Log.ForContext("Context", type).Information($"{AssetCount}/{AssetTotal} {output}");
+        if (warning) Log.Warning($"[{type}]: {AssetCount}/{AssetTotal} {output}");
+        else Log.Information($"[{type}]: {AssetCount}/{AssetTotal} {output}");
     }
 
     private bool CheckPNGAsset(string file)
     {
         // If there is another file with the same name but has the .png extension, skip it
-        // TODO: Make JSON for the PNG just existing for Asset Gen (currently UAGUI does not support this uasset type)
         return File.Exists(file.Replace(".uasset", ".png"));
     }
 
@@ -311,7 +438,41 @@ public class System
         {
             return GetFullName(isasset[0].ClassIndex.Index, asset);
         }
-        Log.ForContext("Context", "AssetType").Warning("Couldn't identify asset type : " + file);
+        PrintOutput($"Couldn't identify asset type: {file}", "Get Asset Type", true);
         return "null";
+    }
+
+    private string GetAssetTypeAR(string fullAssetPath, string relativeToDir) {
+        if (AssetList.Count == 0) return "null";
+
+        var AssetPath = GetAssetPackageFromFullPath(fullAssetPath, relativeToDir);
+        if (AssetList.ContainsKey(AssetPath)) 
+        {
+            var artype = AssetList[AssetPath].AssetClass;
+            return artype;
+        }
+        PrintOutput($"Couldn't identify asset type with AR: {fullAssetPath}", "Get Asset Type", true);
+        return "null";
+    }
+
+    private string GetAssetPackageFromFullPath(string fullAssetPath, string relativeToDir)
+    {
+        var AssetName = Path.GetFileNameWithoutExtension(fullAssetPath);
+        var directory = Path.GetDirectoryName(fullAssetPath);
+        var relativeAssetPath = Path.GetRelativePath(relativeToDir, directory);
+        if (relativeAssetPath.StartsWith(".")) relativeAssetPath = "\\";
+        return Path.Join("\\Game", relativeAssetPath, AssetName).Replace("\\", "/");
+    }
+
+    private void DeleteEmptyDirectories(string location)
+    {
+        foreach (var dir in Directory.GetDirectories(location))
+        {
+            DeleteEmptyDirectories(dir);
+            if (Directory.GetFiles(dir).Length == 0 && Directory.GetDirectories(dir).Length == 0)
+            {
+                Directory.Delete(dir, false);
+            }
+        }
     }
 }

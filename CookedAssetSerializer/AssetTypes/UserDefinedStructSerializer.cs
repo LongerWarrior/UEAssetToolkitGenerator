@@ -2,7 +2,7 @@
 
 public class UserDefinedStructSerializer : Serializer<UserDefinedStructExport>
 {
-    public UserDefinedStructSerializer(Settings assetSettings, UAsset asset)
+    public UserDefinedStructSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

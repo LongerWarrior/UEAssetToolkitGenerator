@@ -2,7 +2,7 @@ namespace CookedAssetSerializer.AssetTypes;
 
 public class AnimMontageSerializer : Serializer<BlendSpaceBaseExport>
 {
-    public AnimMontageSerializer(Settings assetSettings, UAsset asset)
+    public AnimMontageSerializer(JSONSettings assetSettings, UAsset asset)
     {
         Settings = assetSettings;
         Asset = asset;

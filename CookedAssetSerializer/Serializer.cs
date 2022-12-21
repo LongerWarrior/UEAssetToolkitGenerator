@@ -4,7 +4,7 @@ namespace CookedAssetSerializer;
 
 public class Serializer<T> where T: Export
 {
-    protected Settings Settings;
+    protected JSONSettings Settings;
 
     public bool IsSkipped;
     public string SkippedCode = "";

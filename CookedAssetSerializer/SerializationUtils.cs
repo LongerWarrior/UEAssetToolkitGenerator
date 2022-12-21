@@ -902,7 +902,7 @@ public static class SerializationUtils
         return new JProperty("ObjectHierarchy", ObjHie);
     }
     
-     public static bool FindExternalProperty(UAsset asset, FName propname, out FProperty property)
+    public static bool FindExternalProperty(UAsset asset, FName propname, out FProperty property)
     {
         var export = asset.GetClassExport();
         if (export != null)
@@ -948,15 +948,14 @@ public static class SerializationUtils
     {
         prop = null;
         if (export is NormalExport exp)
-            foreach (var property in exp.Data)
-            {
-                if (property.Name.ToName() == propname)
-                {
+        {
+            foreach (var property in exp.Data) {
+                if (property.Name.ToName() == propname) {
                     prop = property;
                     return true;
                 }
             }
-
+        }
         return false;
     }
 
@@ -1001,21 +1000,13 @@ public static class SerializationUtils
 
         for (var i = 1; i <= asset.Imports.Count; i++)
         {
-            //string importname = asset.Imports[i - 1].ObjectName.Value.Value;
             dict.Add(-i, index);
             index++;
         }
 
         for (var i = 1; i <= asset.Exports.Count; i++)
         {
-            if (asset.Exports[i - 1] is FunctionExport)
-            {
-                /*if (asset.Exports[i - 1].ObjectName.ToName().StartsWith("ExecuteUbergraph_")) {
-                    dict.Add(i, index);
-                    index++;
-                }*/
-            }
-            else
+            if (asset.Exports[i - 1] is not FunctionExport)
             {
                 dict.Add(i, index);
                 index++;
@@ -1052,7 +1043,7 @@ public static class SerializationUtils
         return "";
     }
 
-    public static string GetFullName(int index, UAsset asset, bool alt = false)
+    public static string GetFullName(int index, UAsset asset)
     {
         if (index > 0)
         {
