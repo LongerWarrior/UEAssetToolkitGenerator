@@ -28,3 +28,6 @@ Release/
 
 FBXLib/bin
 FBXLib/obj
+*.pubxml
+
+*.user

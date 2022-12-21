@@ -9,6 +9,21 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Include="..\FBX-Wrapper\lib\vs2019\x64\release\libfbxsdk.dll" Link="libfbxsdk.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\FBX-Wrapper\lib\vs2019\x64\release\libfbxsdk.lib" Link="libfbxsdk.lib">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\FBX-Wrapper\Release\FBX_Wrapper.dll" Link="FBX_Wrapper.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\FBX-Wrapper\Release\FBX_Wrapper.lib" Link="FBX_Wrapper.lib">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Serilog" Version="2.12.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
       <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
