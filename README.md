@@ -1,7 +1,7 @@
 # UEAssetToolkitGenerator 
 This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://github.com/Buckminsterfullerene02/UEAssetToolkit-Fixes) compatible JSON files. You must have .NET 6 installed to use. Also known as Cooked Asset Serializer (CAS).
 
-**WARNING:** This tool combined with UEAssetToolkit is only guaranteed to work for games UE4.25-4.27! It is likely you will have to make modifications to either tools to work for earlier versions!
+**WARNING:** This tool combined with UEAssetToolkit is only guaranteed to work for games UE4.25-4.27! It is likely you will have to make modifications to either tools to work for other versions!
 
 ## Usage
 Please follow the [wiki](https://github.com/LongerWarrior/UEAssetToolkitGenerator/wiki) for detailed instructions on how to use this tool.
