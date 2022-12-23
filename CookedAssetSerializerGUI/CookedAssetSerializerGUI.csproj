@@ -8,17 +8,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
       <Content Include="..\FBX-Wrapper\lib\vs2019\x64\release\libfbxsdk.dll" Link="libfbxsdk.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Include="..\FBX-Wrapper\lib\vs2019\x64\release\libfbxsdk.lib" Link="libfbxsdk.lib">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
       <Content Include="..\FBX-Wrapper\Release\FBX_Wrapper.dll" Link="FBX_Wrapper.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\FBX-Wrapper\Release\FBX_Wrapper.lib" Link="FBX_Wrapper.lib">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
