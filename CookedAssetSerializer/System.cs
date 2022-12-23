@@ -232,18 +232,17 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
+            PrintOutput("Serializing " + file, "Serialize Assets");
             AssetCount++;
+            
+            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
 
-            if (Settings.SkipSerialization.Contains(asset.assetType)) continue;
-            if (CheckPNGAsset(file))
+            if (Settings.SkipSerialization.Contains(asset.assetType) || CheckPNGAsset(file))
             {
                 PrintOutput("Skipped serialization on " + file, "Serialize Assets");
                 continue;
             }
             
-            PrintOutput("Serializing " + file, "Serialize Assets");
-
             bool skip = false;
             string skipReason = "";
             if (asset.assetType != EAssetType.Uncategorized)
