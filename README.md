@@ -7,7 +7,7 @@ This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://git
 Please follow the [wiki](https://github.com/LongerWarrior/UEAssetToolkitGenerator/wiki) for detailed instructions on how to use this tool.
 
 ## Examples
-These two examples are for games that full modkits have already been generated for. 
+These two example videos are for games that full modkits have already been generated for (click the images): 
 [![DRG Example](https://img.youtube.com/vi/aiI_SotvoT0/0.jpg)](https://www.youtube.com/watch?v=aiI_SotvoT0)
 [![cyubeVR Example](https://img.youtube.com/vi/D3JoJlCRUEE/0.jpg)](https://youtu.be/D3JoJlCRUEE)
 
