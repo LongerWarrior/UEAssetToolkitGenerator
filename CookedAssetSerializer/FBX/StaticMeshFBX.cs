@@ -15,7 +15,18 @@ public class StaticMeshFBX
     
     public StaticMeshFBX(FStaticMeshStruct meshStruct, string path, bool bExportAsText, ref string error, ref bool tooLarge)
     {
-        string json = JsonConvert.SerializeObject(meshStruct);
+        string json = null;
+        try
+        {
+            json = JsonConvert.SerializeObject(meshStruct);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[Static Mesh FBX]: Failed to create JSON string! {e}");
+            if (e.GetType().IsAssignableFrom(typeof(OutOfMemoryException))) tooLarge = true;
+            return;
+        }
+        
         // if json string is longer than 20 million characters (roughly 3.5mins completetion time), skip it
         if (json.Length > 20000000) // TODO: Make this a setting
         {
@@ -26,19 +37,17 @@ public class StaticMeshFBX
             return;
         }
         
-        // output json as file at path
-        //File.WriteAllText(Path.ChangeExtension(path, "json"), json);
+        //File.WriteAllText(Path.ChangeExtension(path, "json"), json); // This is for debugging
+        
         try
         {
             ExportStaticMeshIntoFbxFile(json, path, bExportAsText, ref error);
         }
         catch (Exception e)
         {
-            Log.Fatal($"[Static Mesh FBX]: Failed to export SM! {e}");
+            Log.Error($"[Static Mesh FBX]: Failed to export SM! {e}");
             return;
         }
-        /*TestFBXExport exporter = new TestFBXExport();
-        exporter.ExportStaticMeshIntoFbxFile(meshStruct, bExportAsText, false, path);*/
     }
 
     public float ConvertLengthToTime(int length)
