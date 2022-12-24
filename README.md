@@ -6,6 +6,11 @@ This is a work-in-progress .NET API/GUI to generate [UEAssetToolkit](https://git
 ## Usage
 Please follow the [wiki](https://github.com/LongerWarrior/UEAssetToolkitGenerator/wiki) for detailed instructions on how to use this tool.
 
+## Examples
+These two examples are for games that full modkits have already been generated for. 
+[![DRG Example](https://img.youtube.com/vi/aiI_SotvoT0/0.jpg)](https://www.youtube.com/watch?v=aiI_SotvoT0)
+[![cyubeVR Example](https://img.youtube.com/vi/D3JoJlCRUEE/0.jpg)](https://youtu.be/D3JoJlCRUEE)
+
 ## Credits
 - LongerWarrior for almost all of the serialization code and modifying UAAPI/CUE4Parse to add new export types. 
 - Archengius for developing the UEAssetToolkit in the first place.
