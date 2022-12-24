@@ -4,7 +4,7 @@ on:
         appVersion:
           description: 'UEAssetToolkitGenerator Version And Release Tag'
           required: true
-          default: '0.0.X'
+          default: '0.1.X'
 
 jobs:
   build:
@@ -26,15 +26,15 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: .NET Restore
-        run: dotnet restore FModel
+        run: dotnet restore CookedAssetSerializerGUI
 
       - name: .NET Publish
-        run: dotnet publish CookedAssetSerializerGUI -c Release --no-self-contained -r win-x64 -f net7.0-windows -o "./CookedAssetSerializerGUI/bin/Publish/" -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:DebugType=None -p:GenerateDocumentationFile=false -p:DebugSymbols=false -p:AssemblyVersion=${{ github.event.inputs.appVersion }} -p:FileVersion=${{ github.event.inputs.appVersion }}
+        run: dotnet publish CookedAssetSerializerGUI -c Release --no-self-contained -r win-x64 -f net6.0-windows -o "./CookedAssetSerializerGUI/bin/Publish/" -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:DebugType=None -p:GenerateDocumentationFile=false -p:DebugSymbols=false -p:AssemblyVersion=${{ github.event.inputs.appVersion }} -p:FileVersion=${{ github.event.inputs.appVersion }}
 
       - name: ZIP File
         uses: papeloto/action-zip@v1
         with:
-          files: ./CookedAssetSerializerGUI/bin/Publish/*
+          files: ./CookedAssetSerializerGUI/bin/Publish/
           dest: UEAssetToolkitGeneratorv${{ github.event.inputs.appVersion }}.zip # will end up in working directory not the Publish folder
 
       - name: GIT Release
@@ -42,5 +42,6 @@ jobs:
         with:
           title: "UEAssetToolKitGenerator v${{ github.event.inputs.appVersion }}"
           automatic_release_tag: ${{ github.event.inputs.appVersion }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           files: UEAssetToolkitGeneratorv${{ github.event.inputs.appVersion }}.zip
