@@ -579,8 +579,15 @@ public static class SerializationUtils
                     var jkey = new JProperty("Key", key.Value);
                     jobj.Add(jkey);
 
-                    key = SerializePropertyData(prop.Value.Values.ElementAt(j - 1), assetInfo, ref refObjects)[0];
-                    jkey = new JProperty("Value", key.Value);
+                    if (prop.Value.Values.ElementAt((j - 1)).RawValue != null)
+                    {
+                        key = SerializePropertyData(prop.Value.Values.ElementAt(j - 1), assetInfo, ref refObjects)[0];
+                        jkey = new JProperty("Value", key.Value);
+                    }
+                    else
+                    {
+                        jkey = new JProperty("Value", "null");
+                    }
                     jobj.Add(jkey);
                     jvaluearray.Add(jobj);
                 }
