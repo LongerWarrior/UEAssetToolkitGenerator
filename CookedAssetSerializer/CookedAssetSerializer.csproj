@@ -35,4 +35,13 @@
     <EmbeddedResource Include="Textures\Resources\Detex.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\FBX-Wrapper\cmake-build-release\FBX_Wrapper.dll">
+      <Link>FBX\Resources\FBX_Wrapper.dll</Link>
+    </Content>
+    <Content Include="..\FBX-Wrapper\lib\vs2019\x64\release\libfbxsdk.dll">
+      <Link>FBX\Resources\libfbxsdk.dll</Link>
+    </Content>
+  </ItemGroup>
+
 </Project>
