@@ -57,11 +57,18 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         AssetData.Add("LodNumber", 1);
         AssetData.Add("ScreenSize", JArray.FromObject(new List<int> {1, 0, 0, 0, 0, 0, 0, 0}));
 
-        // Export raw mesh data into seperate FBX file that can be imported back into UE
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        var path2 = "";
         string error = "";
         bool tooLarge = false;
-        new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
+        if (Settings.UseSMFbx)
+        {
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+            new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
+        }
+        else
+        {
+            path2 = Path.ChangeExtension(OutPath, "pskx");
+        }
 
         if (!File.Exists(path2)) 
         {
@@ -72,7 +79,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
             }
             else
             {
-                SkippedCode = "No FBX file supplied!";
+                SkippedCode = "No model file supplied!";
             }
             return;
         }

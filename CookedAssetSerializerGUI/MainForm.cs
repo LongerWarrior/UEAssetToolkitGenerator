@@ -23,8 +23,6 @@ public partial class MainForm : Form
         SetupForm();
         SetupGlobals();
 
-        //new GenerateBPY();
-
         Task.Run(EventLoop);
     }
 

@@ -41,12 +41,19 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         }
         AssetData.Add("Materials", materials);
         
-        // Export raw mesh data into seperate FBX file that can be imported back into UE
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        var path2 = "";
         string error = "";
         bool tooLarge = false;
-        //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
-
+        if (Settings.UseSKMFbx)
+        {
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+            //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
+        }
+        else
+        {
+            path2 = Path.ChangeExtension(OutPath, "pskx");
+        }
+        
         if (!File.Exists(path2)) 
         {
             IsSkipped = true;
@@ -56,7 +63,7 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
             }
             else
             {
-                SkippedCode = "No FBX file supplied!";
+                SkippedCode = "No model file supplied!";
             }
             return;
         }
