@@ -23,4 +23,5 @@ public struct JSONSettings
     [JsonProperty] public bool UseSMActorX;
     [JsonProperty] public bool UseSKMActorX;
     [JsonProperty] public bool UseAMActorX;
+    [JsonProperty] public bool ForceOneLOD;
 }

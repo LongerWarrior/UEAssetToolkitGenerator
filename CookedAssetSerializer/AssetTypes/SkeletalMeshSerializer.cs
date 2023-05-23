@@ -40,6 +40,23 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
             }
         }
         AssetData.Add("Materials", materials);
+
+        if (Settings.ForceOneLOD)
+        {
+            foreach (var prop in properties.Properties())
+            {
+                if (prop.Name == "LODInfo")
+                {
+                    var lodInfo = (JArray)prop.Value;
+                    if (lodInfo != null)
+                    {
+                        var firstLOD = lodInfo[0];
+                        lodInfo.Clear();
+                        lodInfo.Add(firstLOD);
+                    }
+                }
+            }
+        }
         
         var path2 = "";
         string error = "";

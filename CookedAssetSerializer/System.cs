@@ -353,7 +353,6 @@ public class System
                 if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
                 else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
             }
-            else PrintOutput(file, "Serialize Assets");
         }
     }
 

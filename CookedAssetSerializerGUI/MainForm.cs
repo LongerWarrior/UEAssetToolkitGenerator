@@ -288,7 +288,8 @@ public partial class MainForm : Form
             SelectedIndex = cbUEVersion.SelectedIndex,
             UseSMActorX = chkUseSMActorX.Checked,
             UseSKMActorX = chkUseSKMActorX.Checked,
-            UseAMActorX = chkUseAnimActorX.Checked
+            UseAMActorX = chkUseAnimActorX.Checked,
+            ForceOneLOD = chkForceOneLOD.Checked
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -474,6 +475,7 @@ public partial class MainForm : Form
         chkUseSMActorX.Checked = jsonsettings.UseSMActorX;
         chkUseSKMActorX.Checked = jsonsettings.UseSKMActorX;
         chkUseAnimActorX.Checked = jsonsettings.UseAMActorX;
+        chkForceOneLOD.Checked = jsonsettings.ForceOneLOD;
     }
 
     public void SaveJSONSettings()
@@ -708,6 +710,7 @@ public partial class MainForm : Form
             }
             catch (Exception exception) 
             {
+                Log.Error($"[Scan]: Exception occured! {exception.ToString()}");
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
@@ -733,6 +736,7 @@ public partial class MainForm : Form
             }
             catch (Exception exception)
             {
+                Log.Error($"[Move]: Exception occured! {exception.ToString()}");
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
@@ -758,6 +762,7 @@ public partial class MainForm : Form
             }
             catch (Exception exception)
             {
+                Log.Error($"[Copy]: Exception occured! {exception.ToString()}");
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
@@ -782,7 +787,7 @@ public partial class MainForm : Form
                 ToggleButtons();
             }
             catch (Exception exception) {
-                Log.Error(exception.ToString());
+                Log.Error($"[Serialize]: Exception occured! {exception.ToString()}");
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
@@ -807,6 +812,7 @@ public partial class MainForm : Form
                 ToggleButtons();
             }
             catch (Exception exception) {
+                Log.Error($"[Serialize Natives]: Exception occured! {exception.ToString()}");
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
