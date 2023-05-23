@@ -286,9 +286,9 @@ public partial class MainForm : Form
             TypesToCopy = typesToCopy,
             CopyAllTypes = chkAllTypes.Checked,
             SelectedIndex = cbUEVersion.SelectedIndex,
-            UseSMActorX = chkUseSMFBX.Checked,
-            UseSKMActorX = chkUseSKMFBX.Checked,
-            UseAMActorX = chkUseAnimFBX.Checked
+            UseSMActorX = chkUseSMActorX.Checked,
+            UseSKMActorX = chkUseSKMActorX.Checked,
+            UseAMActorX = chkUseAnimActorX.Checked
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -471,9 +471,9 @@ public partial class MainForm : Form
         rtxtSimpleAssets.Lines = jsonsettings.SimpleAssets.ToArray();
         rtxtCookedAssets.Lines = jsonsettings.TypesToCopy.ToArray();
         chkAllTypes.Checked = jsonsettings.CopyAllTypes;
-        chkUseSMFBX.Checked = jsonsettings.UseSMActorX;
-        chkUseSKMFBX.Checked = jsonsettings.UseSKMActorX;
-        chkUseAnimFBX.Checked = jsonsettings.UseAMActorX;
+        chkUseSMActorX.Checked = jsonsettings.UseSMActorX;
+        chkUseSKMActorX.Checked = jsonsettings.UseSKMActorX;
+        chkUseAnimActorX.Checked = jsonsettings.UseAMActorX;
     }
 
     public void SaveJSONSettings()
