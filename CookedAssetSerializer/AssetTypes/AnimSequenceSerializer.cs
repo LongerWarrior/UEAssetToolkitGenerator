@@ -7,13 +7,22 @@ public class AnimSequenceSerializer : SimpleAssetSerializer<NormalExport>
     public AnimSequenceSerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
         if (!Setup(false)) return;
-        SerializeAsset(null, null/*GetModelHash()*/, null, 
+        SerializeAsset(null, /*null*/GetModelHash(), null, 
             null, false, false, true);
     }
     
     private JProperty GetModelHash()
     {
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        var path2 = "";
+        if (Settings.UseAMActorX)
+        {
+            path2 = Path.ChangeExtension(OutPath, "pskx");
+        }
+        else
+        {
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+        }
+        
         if (!File.Exists(path2)) 
         {
             IsSkipped = true;

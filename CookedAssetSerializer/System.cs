@@ -232,9 +232,9 @@ public class System
         AssetCount = 0;
         foreach (var file in files)
         {
-            PrintOutput("Serializing " + file, "Serialize Assets");
             AssetCount++;
-            
+            PrintOutput("Serializing " + file, "Serialize Assets");
+
             UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
 
             if (Settings.SkipSerialization.Contains(asset.assetType) || CheckPNGAsset(file))
@@ -353,7 +353,6 @@ public class System
                 if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
                 else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
             }
-            else PrintOutput(file, "Serialize Assets");
         }
     }
 

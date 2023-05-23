@@ -84,6 +84,10 @@ partial class MainForm {
             this.rtxtCircularDependancy = new System.Windows.Forms.RichTextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.tabCpyDlt = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.chkUseAnimActorX = new System.Windows.Forms.CheckBox();
+            this.chkUseSKMActorX = new System.Windows.Forms.CheckBox();
+            this.chkUseSMActorX = new System.Windows.Forms.CheckBox();
             this.chkAllTypes = new System.Windows.Forms.CheckBox();
             this.lblProgress2 = new System.Windows.Forms.Label();
             this.btnCopyAssets = new System.Windows.Forms.Button();
@@ -103,6 +107,7 @@ partial class MainForm {
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkForceOneLOD = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.cntxtMainStrip.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -768,6 +773,11 @@ partial class MainForm {
             // tabCpyDlt
             // 
             this.tabCpyDlt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tabCpyDlt.Controls.Add(this.chkForceOneLOD);
+            this.tabCpyDlt.Controls.Add(this.label2);
+            this.tabCpyDlt.Controls.Add(this.chkUseAnimActorX);
+            this.tabCpyDlt.Controls.Add(this.chkUseSKMActorX);
+            this.tabCpyDlt.Controls.Add(this.chkUseSMActorX);
             this.tabCpyDlt.Controls.Add(this.chkAllTypes);
             this.tabCpyDlt.Controls.Add(this.lblProgress2);
             this.tabCpyDlt.Controls.Add(this.btnCopyAssets);
@@ -785,6 +795,59 @@ partial class MainForm {
             this.tabCpyDlt.Size = new System.Drawing.Size(1038, 905);
             this.tabCpyDlt.TabIndex = 4;
             this.tabCpyDlt.Text = "Asset Utilities";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.label2.Location = new System.Drawing.Point(98, 618);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(174, 38);
+            this.label2.TabIndex = 50;
+            this.label2.Text = "Use ActorX?";
+            // 
+            // chkUseAnimActorX
+            // 
+            this.chkUseAnimActorX.AutoSize = true;
+            this.chkUseAnimActorX.Checked = false;
+            this.chkUseAnimActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseAnimActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseAnimActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseAnimActorX.Location = new System.Drawing.Point(98, 791);
+            this.chkUseAnimActorX.Name = "chkUseAnimActorX";
+            this.chkUseAnimActorX.Size = new System.Drawing.Size(133, 32);
+            this.chkUseAnimActorX.TabIndex = 49;
+            this.chkUseAnimActorX.Text = "Animation";
+            this.chkUseAnimActorX.UseVisualStyleBackColor = true;
+            // 
+            // chkUseSKMActorX
+            // 
+            this.chkUseSKMActorX.AutoSize = true;
+            this.chkUseSKMActorX.Checked = false;
+            this.chkUseSKMActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSKMActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseSKMActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseSKMActorX.Location = new System.Drawing.Point(98, 734);
+            this.chkUseSKMActorX.Name = "chkUseSKMActorX";
+            this.chkUseSKMActorX.Size = new System.Drawing.Size(166, 32);
+            this.chkUseSKMActorX.TabIndex = 48;
+            this.chkUseSKMActorX.Text = "Skeletal Mesh";
+            this.chkUseSKMActorX.UseVisualStyleBackColor = true;
+            // 
+            // chkUseSMActorX
+            // 
+            this.chkUseSMActorX.AutoSize = true;
+            this.chkUseSMActorX.Checked = false;
+            this.chkUseSMActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSMActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseSMActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseSMActorX.Location = new System.Drawing.Point(98, 676);
+            this.chkUseSMActorX.Name = "chkUseSMActorX";
+            this.chkUseSMActorX.Size = new System.Drawing.Size(145, 32);
+            this.chkUseSMActorX.TabIndex = 47;
+            this.chkUseSMActorX.Text = "Static Mesh";
+            this.chkUseSMActorX.UseVisualStyleBackColor = true;
             // 
             // chkAllTypes
             // 
@@ -1010,6 +1073,18 @@ partial class MainForm {
             this.refreshAllToolStripMenuItem.Text = "&Refresh";
             this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
+            // chkForceOneLOD
+            // 
+            this.chkForceOneLOD.AutoSize = true;
+            this.chkForceOneLOD.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkForceOneLOD.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkForceOneLOD.Location = new System.Drawing.Point(396, 791);
+            this.chkForceOneLOD.Name = "chkForceOneLOD";
+            this.chkForceOneLOD.Size = new System.Drawing.Size(371, 32);
+            this.chkForceOneLOD.TabIndex = 51;
+            this.chkForceOneLOD.Text = "Force mesh JSON to have one LOD?";
+            this.chkForceOneLOD.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1116,4 +1191,9 @@ partial class MainForm {
     private Button btnSerializeNatives;
     private Label lblProgress2;
     private CheckBox chkAllTypes;
+    private Label label2;
+    private CheckBox chkUseAnimActorX;
+    private CheckBox chkUseSKMActorX;
+    private CheckBox chkUseSMActorX;
+    private CheckBox chkForceOneLOD;
 }
