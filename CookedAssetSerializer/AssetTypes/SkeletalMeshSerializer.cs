@@ -44,14 +44,14 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         var path2 = "";
         string error = "";
         bool tooLarge = false;
-        if (Settings.UseSKMFbx)
+        if (Settings.UseSKMActorX)
         {
-            path2 = Path.ChangeExtension(OutPath, "fbx");
-            //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
+            path2 = Path.ChangeExtension(OutPath, "pskx");
         }
         else
         {
-            path2 = Path.ChangeExtension(OutPath, "pskx");
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+            //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
         }
         
         if (!File.Exists(path2)) 

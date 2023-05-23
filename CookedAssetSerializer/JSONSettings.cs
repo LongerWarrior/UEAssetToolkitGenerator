@@ -20,7 +20,7 @@ public struct JSONSettings
     [JsonProperty] public List<string> TypesToCopy; // Copy/move
     [JsonProperty] public bool CopyAllTypes; // Copy/move
     [JsonProperty] public int SelectedIndex;
-    [JsonProperty] public bool UseSMFbx;
-    [JsonProperty] public bool UseSKMFbx;
-    [JsonProperty] public bool UseAMFbx;
+    [JsonProperty] public bool UseSMActorX;
+    [JsonProperty] public bool UseSKMActorX;
+    [JsonProperty] public bool UseAMActorX;
 }

@@ -103,6 +103,10 @@ partial class MainForm {
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkUseSMFBX = new System.Windows.Forms.CheckBox();
+            this.chkUseSKMFBX = new System.Windows.Forms.CheckBox();
+            this.chkUseAnimFBX = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
             this.cntxtMainStrip.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -768,6 +772,10 @@ partial class MainForm {
             // tabCpyDlt
             // 
             this.tabCpyDlt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(42)))), ((int)(((byte)(54)))));
+            this.tabCpyDlt.Controls.Add(this.label2);
+            this.tabCpyDlt.Controls.Add(this.chkUseAnimFBX);
+            this.tabCpyDlt.Controls.Add(this.chkUseSKMFBX);
+            this.tabCpyDlt.Controls.Add(this.chkUseSMFBX);
             this.tabCpyDlt.Controls.Add(this.chkAllTypes);
             this.tabCpyDlt.Controls.Add(this.lblProgress2);
             this.tabCpyDlt.Controls.Add(this.btnCopyAssets);
@@ -1010,6 +1018,59 @@ partial class MainForm {
             this.refreshAllToolStripMenuItem.Text = "&Refresh";
             this.refreshAllToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
+            // chkUseSMFBX
+            // 
+            this.chkUseSMFBX.AutoSize = true;
+            this.chkUseSMFBX.Checked = false;
+            this.chkUseSMFBX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSMFBX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseSMFBX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseSMFBX.Location = new System.Drawing.Point(98, 676);
+            this.chkUseSMFBX.Name = "chkUseSMFBX";
+            this.chkUseSMFBX.Size = new System.Drawing.Size(145, 32);
+            this.chkUseSMFBX.TabIndex = 47;
+            this.chkUseSMFBX.Text = "Static Mesh";
+            this.chkUseSMFBX.UseVisualStyleBackColor = true;
+            // 
+            // chkUseSKMFBX
+            // 
+            this.chkUseSKMFBX.AutoSize = true;
+            this.chkUseSKMFBX.Checked = false;
+            this.chkUseSKMFBX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSKMFBX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseSKMFBX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseSKMFBX.Location = new System.Drawing.Point(98, 734);
+            this.chkUseSKMFBX.Name = "chkUseSKMFBX";
+            this.chkUseSKMFBX.Size = new System.Drawing.Size(166, 32);
+            this.chkUseSKMFBX.TabIndex = 48;
+            this.chkUseSKMFBX.Text = "Skeletal Mesh";
+            this.chkUseSKMFBX.UseVisualStyleBackColor = true;
+            // 
+            // chkUseAnimFBX
+            // 
+            this.chkUseAnimFBX.AutoSize = true;
+            this.chkUseAnimFBX.Checked = false;
+            this.chkUseAnimFBX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseAnimFBX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkUseAnimFBX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkUseAnimFBX.Location = new System.Drawing.Point(98, 791);
+            this.chkUseAnimFBX.Name = "chkUseAnimFBX";
+            this.chkUseAnimFBX.Size = new System.Drawing.Size(133, 32);
+            this.chkUseAnimFBX.TabIndex = 49;
+            this.chkUseAnimFBX.Text = "Animation";
+            this.chkUseAnimFBX.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.label2.Location = new System.Drawing.Point(98, 618);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(135, 38);
+            this.label2.TabIndex = 50;
+            this.label2.Text = "Use ActorX?";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1116,4 +1177,8 @@ partial class MainForm {
     private Button btnSerializeNatives;
     private Label lblProgress2;
     private CheckBox chkAllTypes;
+    private Label label2;
+    private CheckBox chkUseAnimFBX;
+    private CheckBox chkUseSKMFBX;
+    private CheckBox chkUseSMFBX;
 }

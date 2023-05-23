@@ -13,7 +13,16 @@ public class AnimSequenceSerializer : SimpleAssetSerializer<NormalExport>
     
     private JProperty GetModelHash()
     {
-        var path2 = Path.ChangeExtension(OutPath, "fbx");
+        var path2 = "";
+        if (Settings.UseAMActorX)
+        {
+            path2 = Path.ChangeExtension(OutPath, "pskx");
+        }
+        else
+        {
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+        }
+        
         if (!File.Exists(path2)) 
         {
             IsSkipped = true;

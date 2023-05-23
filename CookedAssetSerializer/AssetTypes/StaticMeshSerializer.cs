@@ -60,14 +60,14 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         var path2 = "";
         string error = "";
         bool tooLarge = false;
-        if (Settings.UseSMFbx)
+        if (Settings.UseSMActorX)
         {
-            path2 = Path.ChangeExtension(OutPath, "fbx");
-            new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
+            path2 = Path.ChangeExtension(OutPath, "pskx");
         }
         else
         {
-            path2 = Path.ChangeExtension(OutPath, "pskx");
+            path2 = Path.ChangeExtension(OutPath, "fbx");
+            new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
         }
 
         if (!File.Exists(path2)) 

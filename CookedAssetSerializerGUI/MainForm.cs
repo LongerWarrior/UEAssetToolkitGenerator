@@ -285,7 +285,10 @@ public partial class MainForm : Form
             SimpleAssets = simpleAssets,
             TypesToCopy = typesToCopy,
             CopyAllTypes = chkAllTypes.Checked,
-            SelectedIndex = cbUEVersion.SelectedIndex
+            SelectedIndex = cbUEVersion.SelectedIndex,
+            UseSMActorX = chkUseSMFBX.Checked,
+            UseSKMActorX = chkUseSKMFBX.Checked,
+            UseAMActorX = chkUseAnimFBX.Checked
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -468,6 +471,9 @@ public partial class MainForm : Form
         rtxtSimpleAssets.Lines = jsonsettings.SimpleAssets.ToArray();
         rtxtCookedAssets.Lines = jsonsettings.TypesToCopy.ToArray();
         chkAllTypes.Checked = jsonsettings.CopyAllTypes;
+        chkUseSMFBX.Checked = jsonsettings.UseSMActorX;
+        chkUseSKMFBX.Checked = jsonsettings.UseSKMActorX;
+        chkUseAnimFBX.Checked = jsonsettings.UseAMActorX;
     }
 
     public void SaveJSONSettings()
@@ -776,6 +782,7 @@ public partial class MainForm : Form
                 ToggleButtons();
             }
             catch (Exception exception) {
+                Log.Error(exception.ToString());
                 OutputText(exception.ToString(), rtxtOutput);
                 lock (boolLock) isRunning = false;
                 ToggleButtons();
