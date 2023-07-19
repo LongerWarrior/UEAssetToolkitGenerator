@@ -1,6 +1,9 @@
 ﻿using System.Text;
 using System.Diagnostics;
+using CUE4Parse.FileProvider;
+using CUE4Parse.UE4.Versions;
 using UAssetAPI.AssetRegistry;
+using static CookedAssetSerializer.UAAPI_To_CUE4_Ver;
 
 namespace CookedAssetSerializer;
 
@@ -20,6 +23,9 @@ public class System
             .WriteTo.File(Settings.InfoDir + "/output_log.txt", 
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Message}{NewLine}{Exception}")
             .CreateLogger();
+
+        var provider = new DefaultFileProvider(Settings.PakDir, SearchOption.AllDirectories, true,
+            new VersionContainer(UAAPI_To_CUE4_Ver.UToC(Settings.GlobalUEVersion)));
     }
 
     public int GetAssetTotal()

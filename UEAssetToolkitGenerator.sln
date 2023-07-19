@@ -24,6 +24,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookedAssetSerializerGUI", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBX_Wrapper", "FBX-Wrapper\FBX_Wrapper.vcxproj", "{0E59166A-68E0-350D-AFF9-E3CABE1701F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUE4Parse-Conversion", "CUE4Parse\CUE4Parse-Conversion\CUE4Parse-Conversion.csproj", "{B7F8D073-6363-4C95-A506-21B4966DC963}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUE4Parse", "CUE4Parse\CUE4Parse\CUE4Parse.csproj", "{49C8334A-2BCD-44D1-9AF8-99684C97BBF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +54,14 @@ Global
 		{0E59166A-68E0-350D-AFF9-E3CABE1701F9}.Debug|Any CPU.Build.0 = Debug|x64
 		{0E59166A-68E0-350D-AFF9-E3CABE1701F9}.Release|Any CPU.ActiveCfg = Release|x64
 		{0E59166A-68E0-350D-AFF9-E3CABE1701F9}.Release|Any CPU.Build.0 = Release|x64
+		{B7F8D073-6363-4C95-A506-21B4966DC963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F8D073-6363-4C95-A506-21B4966DC963}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F8D073-6363-4C95-A506-21B4966DC963}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F8D073-6363-4C95-A506-21B4966DC963}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49C8334A-2BCD-44D1-9AF8-99684C97BBF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49C8334A-2BCD-44D1-9AF8-99684C97BBF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49C8334A-2BCD-44D1-9AF8-99684C97BBF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49C8334A-2BCD-44D1-9AF8-99684C97BBF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

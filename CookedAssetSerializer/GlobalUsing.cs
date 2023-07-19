@@ -12,4 +12,5 @@ global using CookedAssetSerializer.AssetTypes;
 global using static CookedAssetSerializer.SerializationUtils;
 global using CookedAssetSerializer.NativizedAssets;
 global using static UAssetAPI.AssetRegistry.ARData;
-
+global using CUE4Parse;
+global using CUE4Parse_Conversion;

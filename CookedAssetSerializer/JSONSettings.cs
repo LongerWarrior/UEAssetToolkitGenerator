@@ -2,6 +2,7 @@
 
 public struct JSONSettings
 {
+    [JsonProperty] public string PakDir;
     [JsonProperty] public string ContentDir;
     [JsonProperty] public string AssetRegistry;
     [JsonProperty] public List<string> ParseDir;

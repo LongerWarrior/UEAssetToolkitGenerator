@@ -67,20 +67,12 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         else
         {
             path2 = Path.ChangeExtension(OutPath, "fbx");
-            new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
         }
 
         if (!File.Exists(path2)) 
         {
             IsSkipped = true;
-            if (error != "")
-            {
-                if (tooLarge) SkippedCode = error;
-            }
-            else
-            {
-                SkippedCode = "No model file supplied!";
-            }
+            SkippedCode = "No model file supplied!";
             return;
         }
         using (var md5 = MD5.Create()) 
