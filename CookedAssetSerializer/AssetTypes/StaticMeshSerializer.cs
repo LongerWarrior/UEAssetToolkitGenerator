@@ -67,7 +67,7 @@ public class StaticMeshSerializer : Serializer<StaticMeshExport>
         else
         {
             path2 = Path.ChangeExtension(OutPath, "fbx");
-            new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
+            //new StaticMeshFBX(BuildStaticMeshStruct(), path2, false, ref error, ref tooLarge);
         }
 
         if (!File.Exists(path2)) 

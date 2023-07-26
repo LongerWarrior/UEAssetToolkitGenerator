@@ -8,7 +8,7 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
         Asset = asset;
     }
 
-    public bool Setup(bool isInheritor = true, bool isSimple = true)
+    public bool Setup(bool isInheritor = true, bool isSimple = true, string overrideClassName = null)
     {
         if (!SetupSerialization()) return false;
 
@@ -16,6 +16,9 @@ public class SimpleAssetSerializer<T> : Serializer<T> where T : NormalExport
         
         // Case for DataTable, Uncategorized
         if (isSimple && !isInheritor) ClassName = "SimpleAsset";
+
+        // Case for AnimationSequence
+        if (overrideClassName != null) ClassName = overrideClassName;
 
         SerializeHeaders();
         

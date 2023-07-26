@@ -6,7 +6,7 @@ public class AnimSequenceSerializer : SimpleAssetSerializer<NormalExport>
 {
     public AnimSequenceSerializer(JSONSettings settings, UAsset asset) : base(settings, asset)
     {
-        if (!Setup(false)) return;
+        if (!Setup(false, true, "AnimSequence")) return;
         SerializeAsset(null, /*null*/GetModelHash(), null, 
             null, false, false, true);
     }
