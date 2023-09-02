@@ -289,7 +289,8 @@ public partial class MainForm : Form
             UseSMActorX = chkUseSMActorX.Checked,
             UseSKMActorX = chkUseSKMActorX.Checked,
             UseAMActorX = chkUseAnimActorX.Checked,
-            ForceOneLOD = chkForceOneLOD.Checked
+            ForceOneLOD = chkForceOneLOD.Checked,
+            ConcurrentSerialization = true // TODO: add checkbox to UI
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -778,6 +779,9 @@ public partial class MainForm : Form
 
         Task.Run(() =>
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
             try
             {
                 lock (boolLock) isRunning = true;
@@ -793,7 +797,8 @@ public partial class MainForm : Form
                 ToggleButtons();
                 return;
             }
-            OutputText("Serialized assets!", rtxtOutput);
+            
+            OutputText($"Serialized assets! Took {stopwatch.Elapsed}.", rtxtOutput);
         });
     }
     
