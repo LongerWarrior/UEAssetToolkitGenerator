@@ -290,7 +290,7 @@ public partial class MainForm : Form
             UseSKMActorX = chkUseSKMActorX.Checked,
             UseAMActorX = chkUseAnimActorX.Checked,
             ForceOneLOD = chkForceOneLOD.Checked,
-            ConcurrentSerialization = true // TODO: add checkbox to UI
+            ConcurrentSerialization = chkConcurrentSerialization.Checked
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -477,6 +477,7 @@ public partial class MainForm : Form
         chkUseSKMActorX.Checked = jsonsettings.UseSKMActorX;
         chkUseAnimActorX.Checked = jsonsettings.UseAMActorX;
         chkForceOneLOD.Checked = jsonsettings.ForceOneLOD;
+        chkConcurrentSerialization.Checked = jsonsettings.ConcurrentSerialization;
     }
 
     public void SaveJSONSettings()
