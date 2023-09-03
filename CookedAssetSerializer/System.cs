@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using UAssetAPI.AssetRegistry;
 
@@ -58,16 +59,16 @@ public class System
     {
         ScanAR();
         
-        Dictionary<string, List<string>> types = new();
+    ConcurrentDictionary<string, ConcurrentBag<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList(Settings.ContentDir);
         AssetCount = 0;
         AssetTotal = files.Count;
-        foreach (var file in files)
+    Parallel.ForEach(files, file =>
         {
-            AssetCount++;
+        Interlocked.Increment(ref AssetCount);
             
-            if (CheckPNGAsset(file)) continue;
+        if (CheckPNGAsset(file)) return;
 
             // Cannot use AR types because it (most of the time) does not include the /Script/<type>. data which is required
             var /*type = GetAssetTypeAR(file);
@@ -77,17 +78,21 @@ public class System
 
             PrintOutput("/Game" + path, "Scan");
             
-            if (types.ContainsKey(type)) types[type].Add(path);
-            else types[type] = new List<string> { path };
+        types.AddOrUpdate(
+            type, 
+            _ => new ConcurrentBag<string> { path }, 
+            (_, paths) => { paths.Add(path); return paths; }
+        );
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
-        }
+    });
+
         Log.Information($"[Scan]: Found {files.Count} files");
         var jTypes = new JObject();
         foreach (var entry in types)
         {
             Log.Information($"[Scan]: {entry.Key} : {entry.Value.Count}");
-            jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
+        jTypes.Add(entry.Key, JArray.FromObject(entry.Value.ToList()));
             allTypes.Add("\"" + entry.Key + "\",");
         }
         allTypes.Sort();
@@ -234,7 +239,7 @@ public class System
         if (Settings.ConcurrentSerialization)
         {
             Parallel.ForEach(files, SerializeAsset);
-            Parallel.ForEach(files, SerializeAsset); // It's stupid but it works (turn refresh off)
+            // Parallel.ForEach(files, SerializeAsset); // It's stupid but it works (turn refresh off)
         }
         else files.ForEach(SerializeAsset);
     }
