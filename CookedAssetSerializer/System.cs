@@ -236,11 +236,7 @@ public class System
         AssetTotal = files.Count;
         AssetCount = 0;
 
-        if (Settings.ConcurrentSerialization)
-        {
-            Parallel.ForEach(files, SerializeAsset);
-            // Parallel.ForEach(files, SerializeAsset); // It's stupid but it works (turn refresh off)
-        }
+        if (Settings.ConcurrentSerialization) Parallel.ForEach(files, SerializeAsset);
         else files.ForEach(SerializeAsset);
     }
 
