@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -28,16 +29,20 @@ public static class MainSerializer
     private static PropertyData lastType; // TODO: not thread safe?
 #endif
 
-    private static IDictionary<string, RegistryEntry> _propertyTypeRegistry;
+    private static object lockObj = new object();
+    private static ConcurrentDictionary<string, RegistryEntry> _propertyTypeRegistry;
 
     /// <summary>
     /// The property type registry. Maps serialized property names to their types.
     /// </summary>
-    internal static IDictionary<string, RegistryEntry> PropertyTypeRegistry
+    internal static ConcurrentDictionary<string, RegistryEntry> PropertyTypeRegistry
     {
         get
         {
-            InitializePropertyTypeRegistry();
+            lock (lockObj)
+            {
+                InitializePropertyTypeRegistry();
+            }
             return _propertyTypeRegistry;
         }
         set => _propertyTypeRegistry = value; // I hope you know what you're doing!
@@ -61,7 +66,7 @@ public static class MainSerializer
     private static void InitializePropertyTypeRegistry()
     {
         if (_propertyTypeRegistry != null) return;
-        _propertyTypeRegistry = new Dictionary<string, RegistryEntry>();
+        _propertyTypeRegistry = new ConcurrentDictionary<string, RegistryEntry>();
 
         Assembly[] allDependentAssemblies = GetDependentAssemblies(registryParentDataType.Assembly).ToArray();
         Assembly[] allAssemblies = new Assembly[allDependentAssemblies.Length + 1];
