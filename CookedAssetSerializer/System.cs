@@ -59,16 +59,17 @@ public class System
     {
         ScanAR();
         
-    ConcurrentDictionary<string, ConcurrentBag<string>> types = new();
+        ConcurrentDictionary<string, ConcurrentBag<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList(Settings.ContentDir);
         AssetCount = 0;
         AssetTotal = files.Count;
-    Parallel.ForEach(files, file =>
+        
+        Parallel.ForEach(files, file =>
         {
-        Interlocked.Increment(ref AssetCount);
+            Interlocked.Increment(ref AssetCount);
             
-        if (CheckPNGAsset(file)) return;
+            if (CheckPNGAsset(file)) return;
 
             // Cannot use AR types because it (most of the time) does not include the /Script/<type>. data which is required
             var /*type = GetAssetTypeAR(file);
@@ -78,14 +79,14 @@ public class System
 
             PrintOutput("/Game" + path, "Scan");
             
-        types.AddOrUpdate(
-            type, 
-            _ => new ConcurrentBag<string> { path }, 
-            (_, paths) => { paths.Add(path); return paths; }
-        );
+            types.AddOrUpdate(
+                type, 
+                _ => new ConcurrentBag<string> { path }, 
+                (_, paths) => { paths.Add(path); return paths; }
+            );
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
-    });
+        });
 
         Log.Information($"[Scan]: Found {files.Count} files");
         var jTypes = new JObject();
