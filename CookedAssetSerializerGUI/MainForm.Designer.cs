@@ -108,6 +108,7 @@ partial class MainForm {
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkForceOneLOD = new System.Windows.Forms.CheckBox();
+            this.chkConcurrentSerialization = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.cntxtMainStrip.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -254,6 +255,7 @@ partial class MainForm {
             this.tbRun.Controls.Add(this.label1);
             this.tbRun.Controls.Add(this.chkRefreshAssets);
             this.tbRun.Controls.Add(this.cbUEVersion);
+            this.tbRun.Controls.Add(this.chkConcurrentSerialization);
             this.tbRun.Location = new System.Drawing.Point(4, 29);
             this.tbRun.Name = "tbRun";
             this.tbRun.Padding = new System.Windows.Forms.Padding(3);
@@ -619,12 +621,24 @@ partial class MainForm {
             this.chkRefreshAssets.AutoSize = true;
             this.chkRefreshAssets.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkRefreshAssets.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
-            this.chkRefreshAssets.Location = new System.Drawing.Point(177, 301);
+            this.chkRefreshAssets.Location = new System.Drawing.Point(220, 301);
             this.chkRefreshAssets.Name = "chkRefreshAssets";
             this.chkRefreshAssets.Size = new System.Drawing.Size(172, 32);
             this.chkRefreshAssets.TabIndex = 8;
             this.chkRefreshAssets.Text = "Refresh Assets";
             this.chkRefreshAssets.UseVisualStyleBackColor = true;
+            // 
+            // chkConcurrentSerialization
+            // 
+            this.chkConcurrentSerialization.AutoSize = true;
+            this.chkConcurrentSerialization.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.chkConcurrentSerialization.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
+            this.chkConcurrentSerialization.Location = new System.Drawing.Point(20, 301);
+            this.chkConcurrentSerialization.Name = "chkConcurrentSerialization";
+            this.chkConcurrentSerialization.Size = new System.Drawing.Size(172, 32);
+            this.chkConcurrentSerialization.TabIndex = 8;
+            this.chkConcurrentSerialization.Text = "Multi-threaded";
+            this.chkConcurrentSerialization.UseVisualStyleBackColor = true;
             // 
             // cbUEVersion
             // 
@@ -1196,4 +1210,5 @@ partial class MainForm {
     private CheckBox chkUseSKMActorX;
     private CheckBox chkUseSMActorX;
     private CheckBox chkForceOneLOD;
+    private CheckBox chkConcurrentSerialization;
 }

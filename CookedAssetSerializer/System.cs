@@ -1,5 +1,6 @@
-﻿using System.Text;
-using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using UAssetAPI.AssetRegistry;
 
 namespace CookedAssetSerializer;
@@ -58,16 +59,16 @@ public class System
     {
         ScanAR();
         
-        Dictionary<string, List<string>> types = new();
+    ConcurrentDictionary<string, ConcurrentBag<string>> types = new();
         List<string> allTypes = new();
         var files = MakeFileList(Settings.ContentDir);
         AssetCount = 0;
         AssetTotal = files.Count;
-        foreach (var file in files)
+    Parallel.ForEach(files, file =>
         {
-            AssetCount++;
+        Interlocked.Increment(ref AssetCount);
             
-            if (CheckPNGAsset(file)) continue;
+        if (CheckPNGAsset(file)) return;
 
             // Cannot use AR types because it (most of the time) does not include the /Script/<type>. data which is required
             var /*type = GetAssetTypeAR(file);
@@ -77,17 +78,21 @@ public class System
 
             PrintOutput("/Game" + path, "Scan");
             
-            if (types.ContainsKey(type)) types[type].Add(path);
-            else types[type] = new List<string> { path };
+        types.AddOrUpdate(
+            type, 
+            _ => new ConcurrentBag<string> { path }, 
+            (_, paths) => { paths.Add(path); return paths; }
+        );
 
             if (type == typeToFind) PrintOutput(type + ": " + path, "Scan");
-        }
+    });
+
         Log.Information($"[Scan]: Found {files.Count} files");
         var jTypes = new JObject();
         foreach (var entry in types)
         {
             Log.Information($"[Scan]: {entry.Key} : {entry.Value.Count}");
-            jTypes.Add(entry.Key, JArray.FromObject(entry.Value));
+        jTypes.Add(entry.Key, JArray.FromObject(entry.Value.ToList()));
             allTypes.Add("\"" + entry.Key + "\",");
         }
         allTypes.Sort();
@@ -230,129 +235,134 @@ public class System
         var files = MakeFileList(Settings.ContentDir);
         AssetTotal = files.Count;
         AssetCount = 0;
-        foreach (var file in files)
+
+        if (Settings.ConcurrentSerialization) Parallel.ForEach(files, SerializeAsset);
+        else files.ForEach(SerializeAsset);
+    }
+
+    private void SerializeAsset(string file)
+    {
+        Interlocked.Increment(ref AssetCount);
+        PrintOutput("Serializing " + file, "Serialize Assets");
+
+        UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
+
+        if (Settings.SkipSerialization.Contains(asset.assetType) || CheckPNGAsset(file))
         {
-            AssetCount++;
-            PrintOutput("Serializing " + file, "Serialize Assets");
+            PrintOutput("Skipped serialization on " + file, "Serialize Assets");
+            return;
+        }
 
-            UAsset asset = new UAsset(file, Settings.GlobalUEVersion, true);
-
-            if (Settings.SkipSerialization.Contains(asset.assetType) || CheckPNGAsset(file))
+        bool skip = false;
+        string skipReason = "";
+        if (asset.assetType != EAssetType.Uncategorized)
+        {
+            if (Settings.DummyAssets.Contains(asset.assetType))
             {
-                PrintOutput("Skipped serialization on " + file, "Serialize Assets");
-                continue;
-            }
-            
-            bool skip = false;
-            string skipReason = "";
-            if (asset.assetType != EAssetType.Uncategorized)
-            {
-                if (Settings.DummyAssets.Contains(asset.assetType))
-                {
-                    if (Settings.DummyWithProps) skip = new DummyWithProps(Settings, asset).IsSkipped;
-                    else skip = new DummySerializer(Settings, asset).IsSkipped;
-                }
-                else
-                {
-                    switch (asset.assetType)
-                    {
-                        case EAssetType.Blueprint:
-                        case EAssetType.WidgetBlueprint:
-                        case EAssetType.AnimBlueprint:
-                            skip = new BlueprintSerializer(Settings, asset, false).IsSkipped;
-                            break;
-                        case EAssetType.DataTable:
-                            skip = new DataTableSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.StringTable:
-                            skip = new StringTableSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.UserDefinedStruct:
-                            skip = new UserDefinedStructSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.BlendSpaceBase:
-                            skip = new BlendSpaceSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.AnimSequence:
-                            skip = new AnimSequenceSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.AnimMontage:
-                            skip = new DummyWithProps(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.CameraAnim:
-                            skip = new DummySerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.LandscapeGrassType:
-                            skip = new DummyWithProps(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.MediaPlayer:
-                            skip = new DummyWithProps(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.MediaTexture:
-                            skip = new DummySerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.SubsurfaceProfile:
-                            skip = new SubsurfaceProfileSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.Skeleton:
-                            skip = new SkeletonSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.MaterialParameterCollection:
-                            skip = new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.PhycialMaterial:
-                            skip = new PhysicalMaterialSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.Material:
-                            skip = new MaterialSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.MaterialInstanceConstant:
-                            skip = new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.UserDefinedEnum:
-                            skip = new UserDefinedEnumSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.SoundCue:
-                            skip = new SoundCueSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.Font:
-                            skip = new FontSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.FontFace:
-                            skip = new FontFaceSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.CurveBase:
-                            skip = new CurveBaseSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.Texture2D:
-                            skip = new Texture2DSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.SkeletalMesh:
-                            skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.FileMediaSource:
-                            skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
-                            break;
-                        case EAssetType.StaticMesh:
-                            var sm = new StaticMeshSerializer(Settings, asset);
-                            if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
-                            skip = sm.IsSkipped;
-                            break;
-                    }
-                }
+                if (Settings.DummyWithProps) skip = new DummyWithProps(Settings, asset).IsSkipped;
+                else skip = new DummySerializer(Settings, asset).IsSkipped;
             }
             else
             {
-                if (asset.mainExport == 0) continue;
-                if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset))) continue;
-                skip = new UncategorizedSerializer(Settings, asset).IsSkipped;
+                switch (asset.assetType)
+                {
+                    case EAssetType.Blueprint:
+                    case EAssetType.WidgetBlueprint:
+                    case EAssetType.AnimBlueprint:
+                        skip = new BlueprintSerializer(Settings, asset, false).IsSkipped;
+                        break;
+                    case EAssetType.DataTable:
+                        skip = new DataTableSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.StringTable:
+                        skip = new StringTableSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.UserDefinedStruct:
+                        skip = new UserDefinedStructSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.BlendSpaceBase:
+                        skip = new BlendSpaceSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.AnimSequence:
+                        skip = new AnimSequenceSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.AnimMontage:
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.CameraAnim:
+                        skip = new DummySerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.LandscapeGrassType:
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.MediaPlayer:
+                        skip = new DummyWithProps(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.MediaTexture:
+                        skip = new DummySerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.SubsurfaceProfile:
+                        skip = new SubsurfaceProfileSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.Skeleton:
+                        skip = new SkeletonSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.MaterialParameterCollection:
+                        skip = new MaterialParameterCollectionSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.PhycialMaterial:
+                        skip = new PhysicalMaterialSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.Material:
+                        skip = new MaterialSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.MaterialInstanceConstant:
+                        skip = new MaterialInstanceConstantSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.UserDefinedEnum:
+                        skip = new UserDefinedEnumSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.SoundCue:
+                        skip = new SoundCueSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.Font:
+                        skip = new FontSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.FontFace:
+                        skip = new FontFaceSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.CurveBase:
+                        skip = new CurveBaseSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.Texture2D:
+                        skip = new Texture2DSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.SkeletalMesh:
+                        skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.FileMediaSource:
+                        skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.StaticMesh:
+                        var sm = new StaticMeshSerializer(Settings, asset);
+                        if (sm.SkippedCode != "") skipReason = sm.SkippedCode;
+                        skip = sm.IsSkipped;
+                        break;
+                }
             }
+        }
+        else
+        {
+            if (asset.mainExport == 0) return;
+            if (!Settings.SimpleAssets.Contains(GetFullName(asset.Exports[asset.mainExport - 1].ClassIndex.Index, asset)))
+                return;
+            skip = new UncategorizedSerializer(Settings, asset).IsSkipped;
+        }
 
-            if (skip)
-            {
-                if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
-                else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
-            }
+        if (skip)
+        {
+            if (skipReason == "") PrintOutput("Skipped serialization on " + file, "Serialize Assets");
+            else PrintOutput("Skipped serialization on " + file + " due to: " + skipReason, "Serialize Assets");
         }
     }
 

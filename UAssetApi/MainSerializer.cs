@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -25,19 +26,23 @@ internal class RegistryEntry
 public static class MainSerializer
 {
 #if DEBUG
-    private static PropertyData lastType;
+    private static PropertyData lastType; // TODO: not thread safe?
 #endif
 
-    private static IDictionary<string, RegistryEntry> _propertyTypeRegistry;
+    private static object lockObj = new object();
+    private static ConcurrentDictionary<string, RegistryEntry> _propertyTypeRegistry;
 
     /// <summary>
     /// The property type registry. Maps serialized property names to their types.
     /// </summary>
-    internal static IDictionary<string, RegistryEntry> PropertyTypeRegistry
+    internal static ConcurrentDictionary<string, RegistryEntry> PropertyTypeRegistry
     {
         get
         {
-            InitializePropertyTypeRegistry();
+            lock (lockObj)
+            {
+                InitializePropertyTypeRegistry();
+            }
             return _propertyTypeRegistry;
         }
         set => _propertyTypeRegistry = value; // I hope you know what you're doing!
@@ -61,7 +66,7 @@ public static class MainSerializer
     private static void InitializePropertyTypeRegistry()
     {
         if (_propertyTypeRegistry != null) return;
-        _propertyTypeRegistry = new Dictionary<string, RegistryEntry>();
+        _propertyTypeRegistry = new ConcurrentDictionary<string, RegistryEntry>();
 
         Assembly[] allDependentAssemblies = GetDependentAssemblies(registryParentDataType.Assembly).ToArray();
         Assembly[] allAssemblies = new Assembly[allDependentAssemblies.Length + 1];
@@ -137,23 +142,23 @@ public static class MainSerializer
 #if DEBUG
             Debug.WriteLine("-----------");
             Debug.WriteLine(asset.FilePath);
-            Debug.WriteLine("Parsing unknown type " + type.ToString());
+            Debug.WriteLine("Parsing unknown type " + type);
             Debug.WriteLine("Length: " + leng);
             if (reader != null) Debug.WriteLine("Pos: " + reader.BaseStream.Position);
-            Debug.WriteLine("Last type: " + lastType.PropertyType?.ToString());
-            if (lastType is ArrayPropertyData) Debug.WriteLine("Last array's type was " + ((ArrayPropertyData)lastType).ArrayType?.ToString());
-            if (lastType is StructPropertyData) Debug.WriteLine("Last struct's type was " + ((StructPropertyData)lastType).StructType?.ToString());
+            Debug.WriteLine("Last type: " + lastType?.PropertyType);
+            if (lastType is ArrayPropertyData) Debug.WriteLine("Last array's type was " + ((ArrayPropertyData)lastType).ArrayType);
+            if (lastType is StructPropertyData) Debug.WriteLine("Last struct's type was " + ((StructPropertyData)lastType).StructType);
             if (lastType is MapPropertyData lastTypeMap)
             {
                 if (lastTypeMap.Value.Count == 0)
                 {
-                    Debug.WriteLine("Last map's key type was " + lastTypeMap.KeyType?.ToString());
+                    Debug.WriteLine("Last map's key type was " + lastTypeMap.KeyType);
                     Debug.WriteLine("Last map's value type was " + lastTypeMap.ValueType?.ToString());
                 }
                 else
                 {
-                    Debug.WriteLine("Last map's key type was " + lastTypeMap.Value.Keys.ElementAt(0).PropertyType?.ToString());
-                    Debug.WriteLine("Last map's value type was " + lastTypeMap.Value[0].PropertyType?.ToString());
+                    Debug.WriteLine("Last map's key type was " + lastTypeMap.Value.Keys.ElementAt(0).PropertyType);
+                    Debug.WriteLine("Last map's value type was " + lastTypeMap.Value[0].PropertyType);
                 }
             }
             Debug.WriteLine("-----------");

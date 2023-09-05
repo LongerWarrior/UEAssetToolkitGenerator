@@ -289,7 +289,8 @@ public partial class MainForm : Form
             UseSMActorX = chkUseSMActorX.Checked,
             UseSKMActorX = chkUseSKMActorX.Checked,
             UseAMActorX = chkUseAnimActorX.Checked,
-            ForceOneLOD = chkForceOneLOD.Checked
+            ForceOneLOD = chkForceOneLOD.Checked,
+            ConcurrentSerialization = chkConcurrentSerialization.Checked
         };
 
         system = new CookedAssetSerializer.System(jsonsettings);
@@ -476,6 +477,7 @@ public partial class MainForm : Form
         chkUseSKMActorX.Checked = jsonsettings.UseSKMActorX;
         chkUseAnimActorX.Checked = jsonsettings.UseAMActorX;
         chkForceOneLOD.Checked = jsonsettings.ForceOneLOD;
+        chkConcurrentSerialization.Checked = jsonsettings.ConcurrentSerialization;
     }
 
     public void SaveJSONSettings()
@@ -778,6 +780,9 @@ public partial class MainForm : Form
 
         Task.Run(() =>
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
             try
             {
                 lock (boolLock) isRunning = true;
@@ -793,7 +798,8 @@ public partial class MainForm : Form
                 ToggleButtons();
                 return;
             }
-            OutputText("Serialized assets!", rtxtOutput);
+            
+            OutputText($"Serialized assets! Took {stopwatch.Elapsed}.", rtxtOutput);
         });
     }
     
