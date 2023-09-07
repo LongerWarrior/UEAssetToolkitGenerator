@@ -8,13 +8,16 @@
             ReferencePose = referencePose;
         }
 
-        public void Read(AssetBinaryReader reader) {
+        public void Read(AssetBinaryReader reader, int boneCount) {
             PoseName = reader.ReadFName();
 
             int poselength = reader.ReadInt32();
             if (poselength > 0) {
                 List<FTransform> poselist = new List<FTransform>();
-                poselist.Add(new FTransform(reader.ReadQuat(), reader.ReadVector(), reader.ReadVector()));
+                for (int i = 0; i < boneCount; i++)
+                {
+                    poselist.Add(new FTransform(reader.ReadQuat(), reader.ReadVector(), reader.ReadVector()));
+                }
                 ReferencePose = poselist.ToArray();
             } else {
                 ReferencePose = null;

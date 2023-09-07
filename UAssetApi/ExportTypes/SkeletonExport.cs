@@ -38,10 +38,10 @@ public class SkeletonExport : NormalExport {
         for (var i = 0; i < numOfRetargetSources; i++) {
             FName name = reader.ReadFName();
             FReferencePose pose = new FReferencePose();
-            pose.Read(reader);
+            pose.Read(reader, ReferenceSkeleton.FinalRefBonePose.Length);
 
             if (pose.ReferencePose != null) ReferenceSkeleton.AdjustBoneScales(pose.ReferencePose);
-            AnimRetargetSources[reader.ReadFName()] = pose;
+            AnimRetargetSources[name] = pose;
         }
 
         Guid = new Guid(reader.ReadBytes(16));
