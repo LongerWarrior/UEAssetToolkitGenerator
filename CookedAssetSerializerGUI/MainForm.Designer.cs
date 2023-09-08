@@ -825,7 +825,7 @@ partial class MainForm {
             // 
             this.chkUseAnimActorX.AutoSize = true;
             this.chkUseAnimActorX.Checked = false;
-            this.chkUseAnimActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseAnimActorX.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.chkUseAnimActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkUseAnimActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.chkUseAnimActorX.Location = new System.Drawing.Point(98, 791);
@@ -839,7 +839,7 @@ partial class MainForm {
             // 
             this.chkUseSKMActorX.AutoSize = true;
             this.chkUseSKMActorX.Checked = false;
-            this.chkUseSKMActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSKMActorX.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.chkUseSKMActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkUseSKMActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.chkUseSKMActorX.Location = new System.Drawing.Point(98, 734);
@@ -853,7 +853,7 @@ partial class MainForm {
             // 
             this.chkUseSMActorX.AutoSize = true;
             this.chkUseSMActorX.Checked = false;
-            this.chkUseSMActorX.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUseSMActorX.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.chkUseSMActorX.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkUseSMActorX.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.chkUseSMActorX.Location = new System.Drawing.Point(98, 676);
@@ -1090,6 +1090,7 @@ partial class MainForm {
             // chkForceOneLOD
             // 
             this.chkForceOneLOD.AutoSize = true;
+            this.chkForceOneLOD.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkForceOneLOD.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkForceOneLOD.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(248)))), ((int)(((byte)(242)))));
             this.chkForceOneLOD.Location = new System.Drawing.Point(396, 791);
