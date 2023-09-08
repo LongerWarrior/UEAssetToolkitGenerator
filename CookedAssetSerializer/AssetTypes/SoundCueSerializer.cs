@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using static UAssetAPI.Kismet.KismetSerializer;
+﻿using static UAssetAPI.Kismet.KismetSerializer;
 
 namespace CookedAssetSerializer.AssetTypes
 {
