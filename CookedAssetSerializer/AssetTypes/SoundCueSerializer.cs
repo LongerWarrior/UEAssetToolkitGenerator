@@ -1,4 +1,5 @@
-﻿using static UAssetAPI.Kismet.KismetSerializer;
+﻿using System.Collections.Concurrent;
+using static UAssetAPI.Kismet.KismetSerializer;
 
 namespace CookedAssetSerializer.AssetTypes
 {
@@ -8,7 +9,7 @@ namespace CookedAssetSerializer.AssetTypes
         {
             DisableGeneration.Add("FirstNode");
             if (!Setup()) return;
-            SoundGraphData = new Dictionary<int, List<int>>();
+            SoundGraphData = new ConcurrentDictionary<int, List<int>>();
             SerializeAsset(new JProperty("SoundCueGraph", string.Join(Environment.NewLine, ClassExport.GetCueGraph())));
         }
     }

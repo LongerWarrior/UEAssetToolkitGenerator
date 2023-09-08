@@ -1,15 +1,17 @@
-﻿namespace UAssetAPI.Kismet;
+﻿using System.Collections.Concurrent;
+
+namespace UAssetAPI.Kismet;
 
 public static class KismetSerializer {
 
     public static UAsset asset;
-    public static Dictionary<int, List<int>> SoundGraphData = new();
+    public static ConcurrentDictionary<int, List<int>> SoundGraphData = new();
 
     public static int GetFreePos(List<int> columns) {
         var res = 0;
         foreach (int column in columns) {
-            if (SoundGraphData.ContainsKey(column)) {
-                var firstspot = SoundGraphData[column].Max()+1;
+            if (SoundGraphData.TryGetValue(column, out List<int> columnData)) {
+                var firstspot = columnData.Max() + 1;
                 if (firstspot > res) {
                     res = firstspot;
                 }
@@ -20,11 +22,11 @@ public static class KismetSerializer {
     }
 
     public static void AddSoundGraphData((int x, int y) pos) {
-        if (SoundGraphData.ContainsKey(pos.x)) {
-            SoundGraphData[pos.x].Add(pos.y);
-        } else {
-            SoundGraphData[pos.x] = new List<int> { pos.y };
-        }
+        SoundGraphData.AddOrUpdate(pos.x, new List<int> { pos.y }, 
+            (_, existingList) => {
+                existingList.Add(pos.y);
+                return existingList;
+            });
     }
 
     public struct FSimpleMemberReference {
