@@ -347,6 +347,12 @@ public class System
                     case EAssetType.FileMediaSource:
                         skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
                         break;
+                    case EAssetType.BehaviorTree:
+                        skip = new BehaviorTreeSerializer(Settings, asset).IsSkipped;
+                        break;
+                    case EAssetType.Blackboard:
+                        skip = new BehaviorTreeSerializer(Settings, asset).IsSkipped;
+                        break;
                     case EAssetType.StaticMesh:
                         var sm = new StaticMeshSerializer(Settings, asset);
                         if (sm.SkippedCode != "") skipReason = sm.SkippedCode;

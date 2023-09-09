@@ -96,6 +96,8 @@ public enum EAssetType : sbyte {
     Material,
     Font,
     FontFace,
+    BehaviorTree,
+    Blackboard,
     BlendSpaceBase,
     CurveBase,
     AnimSequence,
@@ -165,18 +167,25 @@ public class UAsset {
                 case "StaticMesh": return EAssetType.StaticMesh;
                 case "AnimMontage": return EAssetType.AnimMontage;
                 case "CameraAnim": return EAssetType.CameraAnim;
+                
                 case "LandscapeGrassType": return EAssetType.LandscapeGrassType;
                 case "MaterialInstanceConstant": return EAssetType.MaterialInstanceConstant;
                 case "MaterialParameterCollection": return EAssetType.MaterialParameterCollection;
+                
                 case "MediaPlayer": return EAssetType.MediaPlayer;
                 case "MediaTexture": return EAssetType.MediaTexture;
+                
                 case "FileMediaSource": return EAssetType.FileMediaSource;
+                
                 case "PhycialMaterial": return EAssetType.PhycialMaterial;
+                
                 case "SubsurfaceProfile": return EAssetType.SubsurfaceProfile;
 
                 case "SoundCue": return EAssetType.SoundCue;
                 //case "MaterialFunction": return EAssetType.MaterialFunction;
-
+                
+                case "BehaviorTree": return EAssetType.BehaviorTree;
+                case "BlackboardData": return EAssetType.Blackboard;
 
                 default: return EAssetType.Uncategorized;
             }
