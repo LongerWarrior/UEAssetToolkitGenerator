@@ -1,15 +1,17 @@
-﻿namespace UAssetAPI.Kismet;
+﻿using System.Threading;
+
+namespace UAssetAPI.Kismet;
 
 public static class KismetSerializer {
 
     public static UAsset asset;
-    public static Dictionary<int, List<int>> SoundGraphData = new();
+    public static ThreadLocal<Dictionary<int, List<int>>> SoundGraphData = new();
 
     public static int GetFreePos(List<int> columns) {
         var res = 0;
         foreach (int column in columns) {
-            if (SoundGraphData.ContainsKey(column)) {
-                var firstspot = SoundGraphData[column].Max()+1;
+            if (SoundGraphData.Value.TryGetValue(column, out List<int> columnData)) {
+                var firstspot = columnData.Max() + 1;
                 if (firstspot > res) {
                     res = firstspot;
                 }
@@ -20,10 +22,10 @@ public static class KismetSerializer {
     }
 
     public static void AddSoundGraphData((int x, int y) pos) {
-        if (SoundGraphData.ContainsKey(pos.x)) {
-            SoundGraphData[pos.x].Add(pos.y);
+        if (SoundGraphData.Value.TryGetValue(pos.x, out var values)) {
+            values.Add(pos.y);
         } else {
-            SoundGraphData[pos.x] = new List<int> { pos.y };
+            SoundGraphData.Value[pos.x] = new List<int> { pos.y };
         }
     }
 
