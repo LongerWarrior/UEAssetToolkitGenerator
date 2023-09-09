@@ -68,7 +68,6 @@ public class SkeletalMeshSerializer : Serializer<SkeletalMeshExport>
         else
         {
             path2 = Path.ChangeExtension(OutPath, "fbx");
-            //new SkeletalMeshFBX(BuildSkeletonStruct(), path2, false, ref error, ref tooLarge);
         }
         
         if (!File.Exists(path2)) 
