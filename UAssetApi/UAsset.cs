@@ -101,6 +101,7 @@ public enum EAssetType : sbyte {
     AnimSequence,
     //CurveLinearColorAtlas,
     SkeletalMesh,
+    PhysicsAsset,
     Skeleton,
     StaticMesh,
     AnimMontage,
@@ -159,6 +160,7 @@ public class UAsset {
                 
                 case "AnimSequence": return EAssetType.AnimSequence;
                 case "SkeletalMesh": return EAssetType.SkeletalMesh;
+                case "PhysicsAsset": return EAssetType.PhysicsAsset;
                 case "Skeleton": return EAssetType.Skeleton;
                 case "StaticMesh": return EAssetType.StaticMesh;
                 case "AnimMontage": return EAssetType.AnimMontage;
