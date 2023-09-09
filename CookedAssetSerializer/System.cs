@@ -341,6 +341,9 @@ public class System
                     case EAssetType.SkeletalMesh:
                         skip = new SkeletalMeshSerializer(Settings, asset).IsSkipped;
                         break;
+                    case EAssetType.PhysicsAsset:
+                        skip = new PhysicsAssetSerializer(Settings, asset).IsSkipped;
+                        break;
                     case EAssetType.FileMediaSource:
                         skip = new FileMediaSourceSerializer(Settings, asset).IsSkipped;
                         break;
